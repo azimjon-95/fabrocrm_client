@@ -1,12 +1,11 @@
-import React from 'react'
+import React from "react";
 
 const Mengement = () => {
-    return (
-        <div>
+  return (
+    <div>
+      <h1>manager</h1>
+    </div>
+  );
+};
 
-        </div>
-    )
-}
-
-
-export default Mengement
+export default Mengement;

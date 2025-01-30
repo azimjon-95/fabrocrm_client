@@ -1,8 +1,8 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import PrivateRoute from './auth/PrivateRoute';
-import Layout from './components/layout/Layout';
-import { routes } from './routes/Route'
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import PrivateRoute from "./auth/PrivateRoute";
+import Layout from "./components/layout/Layout";
+import { routes } from "./routes/Route";
 
 const App = () => {
   return (
