@@ -1,64 +1,15 @@
 import React from "react";
 import "./Sidebar.css";
 import { Link, NavLink } from "react-router-dom";
-import { IoGrid } from "react-icons/io5";
 import { MdLogout } from "react-icons/md";
 import { Modal } from "antd";
 import { useNavigate } from "react-router-dom";
+import { menuItems } from "../../utils/SidebarMenu";
 const { confirm } = Modal;
 
 function Sidebar() {
   const navigate = useNavigate();
-  const sidebar_links = [
-    {
-      id: 1,
-      path: "/dashboard",
-      label: "Dashboard",
-      icon: <IoGrid />,
-    },
-    {
-      id: 2,
-      path: "/accountant",
-      label: "Buxgalter",
-      icon: <IoGrid />,
-    },
-    {
-      id: 3,
-      path: "/manager",
-      label: "Meneger",
-      icon: <IoGrid />,
-    },
-    {
-      id: 4,
-      path: "/director",
-      label: "Direktor",
-      icon: <IoGrid />,
-    },
-    {
-      id: 4,
-      path: "/director",
-      label: "Direktor",
-      icon: <IoGrid />,
-    },
-    {
-      id: 4,
-      path: "/director",
-      label: "Direktor",
-      icon: <IoGrid />,
-    },
-    {
-      id: 4,
-      path: "/director",
-      label: "Direktor",
-      icon: <IoGrid />,
-    },
-    {
-      id: 4,
-      path: "/director",
-      label: "Direktor",
-      icon: <IoGrid />,
-    },
-  ];
+  const role = localStorage.getItem("role"); // LocalStorage-dan rolni olish
 
   const logOut = () => {
     confirm({
@@ -72,7 +23,7 @@ function Sidebar() {
         localStorage.removeItem("admin");
         navigate("/login");
       },
-      onCancel() {},
+      onCancel() { },
     });
   };
 
@@ -82,8 +33,8 @@ function Sidebar() {
         <Link>MebelX</Link>
       </div>
       <div className="sidebar_links">
-        {sidebar_links.map((item) => (
-          <NavLink key={item.id} to={item.path}>
+        {menuItems[role].map((item) => (
+          <NavLink key={item.path} to={item.path}>
             {item.icon}
             <span>{item.label}</span>
           </NavLink>
