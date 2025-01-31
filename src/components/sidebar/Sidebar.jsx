@@ -69,6 +69,7 @@ function Sidebar() {
       onOk() {
         localStorage.removeItem("token");
         localStorage.removeItem("role");
+        localStorage.removeItem("admin");
         navigate("/login");
       },
       onCancel() {},
