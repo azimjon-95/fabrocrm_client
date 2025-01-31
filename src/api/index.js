@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const mainURL = axios.create({
-    baseURL: "http://localhost:5000",
+    // baseURL: "http://localhost:5000",
+    baseURL: "https://mebelx-server.vercel.app/",
 });
 
 export default mainURL;
