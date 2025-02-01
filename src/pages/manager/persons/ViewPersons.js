@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Table, Avatar, message, Input, Button } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import { UserOutlined } from '@ant-design/icons';
 import { SearchOutlined } from '@ant-design/icons';
-import axios from "axios";
+import axios from "../../../api";
 
 const WorkersTable = () => {
     const [workers, setWorkers] = useState([]);
@@ -15,8 +16,15 @@ const WorkersTable = () => {
         const fetchWorkers = async () => {
             setLoading(true);
             try {
-                const { data } = await axios.get("/worker/all");
-                setWorkers(data);
+                const token = localStorage.getItem("token"); // Tokenni localStorage'dan olish (agar token saqlangan bo'lsa)
+
+                const { data } = await axios.get("/api/worker/all", {
+                    headers: {
+                        'Authorization': `Bearer ${token}`, // Tokenni headerga qo‘shish
+                    }
+                });
+
+                setWorkers(data.innerData);
             } catch (error) {
                 message.error("Ishchilarni yuklashda xatolik yuz berdi!");
             }
@@ -24,13 +32,13 @@ const WorkersTable = () => {
         };
         fetchWorkers();
     }, []);
-
-    const filteredWorkers = workers.filter(
+    console.log(workers);
+    const filteredWorkers = workers?.filter(
         (worker) =>
-            worker.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            worker.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            worker.phone.includes(searchTerm) ||
-            (worker.passport && worker.passport.includes(searchTerm))
+            worker?.firstName.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+            worker?.lastName.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+            worker?.phone.includes(searchTerm) ||
+            (worker.idNumber && worker.idNumber.includes(searchTerm))
     );
 
     const columns = [
@@ -38,7 +46,21 @@ const WorkersTable = () => {
             title: "Rasm",
             dataIndex: "img",
             key: "img",
-            render: (img) => <Avatar shape="square" size={50} src={img} />,
+            render: (img) => (
+                img ? (
+                    <Avatar
+                        shape="square"
+                        size={50}
+                        src={img}
+                    />
+                ) : (
+                    <Avatar
+                        shape="square"
+                        size={50}
+                        icon={<UserOutlined />} // Icon ko‘rsatish
+                    />
+                )
+            ),
         },
         {
             title: "Ism",
@@ -57,8 +79,8 @@ const WorkersTable = () => {
         },
         {
             title: "Pasport",
-            dataIndex: "passport",
-            key: "passport",
+            dataIndex: "idNumber",
+            key: "idNumber",
         },
     ];
 
