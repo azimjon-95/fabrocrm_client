@@ -8,6 +8,19 @@
   margin-bottom: 10px;
 }
 
+.EyeInvisibleOutlined {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.EyeInvisibleOutlined button {
+    border: none;
+    background: transparent;
+    font-size: 17px;
+}
+
+
 .nav_add Button {
   border: none;
   position: absolute;
