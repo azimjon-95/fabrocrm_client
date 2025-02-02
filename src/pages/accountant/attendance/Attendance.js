@@ -8,6 +8,8 @@ import {
 } from "../../../context/service/attendance";
 import { useGetWorkersQuery } from "../../../context/service/worker";
 import './style.css';
+import { FaHistory } from "react-icons/fa";
+
 
 const Attendance = () => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -128,6 +130,8 @@ const Attendance = () => {
                                 <Select
                                     onChange={(value) => setSelectedOption(value)}
                                     style={{ width }}
+                                    onFocus={() => setWidth("90px")}
+                                    onBlur={() => setWidth("fit-content")}
                                 >
                                     <Select.Option value="voxa">Voxa</Select.Option>
                                     <Select.Option value="tashken">Tashken</Select.Option>
@@ -173,14 +177,19 @@ const Attendance = () => {
                         prefix={<SearchOutlined style={{ color: "#cdcdcd", marginTop: "3px" }} />}
                     />
                 </div>
-                <Button
+                <Button style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px"
+
+                }}
                     size="large"
                     type="default"
-                    icon={<DownloadOutlined />}
                     onClick={() => navigate("/attendance/story")}
                 >
-                    Excel
+                    <FaHistory /> Davomat
                 </Button>
+
             </div>
 
             <Table

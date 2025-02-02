@@ -3,6 +3,7 @@ import { Table, Spin, Alert, DatePicker, Button } from "antd";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useGetMonthlyAttendanceQuery } from "../../../context/service/attendance";
+import { FileExcelOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import * as XLSX from "xlsx";
 
@@ -48,7 +49,10 @@ const Story = () => {
         "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
         "Iyul", "Avgust", "Sentabr", "Oktyabr", "Noyabr", "Dekabr"
     ];
-    const monthName = months[selectedDate.month()];
+    // const monthName = months[selectedDate.month()];
+
+    const currentDate = dayjs().format("YYYY-MM-DD"); // Bugungi sana
+    const monthName = dayjs(`${year}-${month}-01`).format("MMMM"); // Oy nomi
 
     const columns = [
         {
@@ -61,11 +65,37 @@ const Story = () => {
             children: Array.from({ length: daysInMonth }, (_, index) => {
                 const day = index + 1;
                 const date = dayjs(`${year}-${month}-${String(day).padStart(2, "0")}`).format("YYYY-MM-DD");
+                const isFutureDate = dayjs(date).isAfter(currentDate); // Kelajakdagi sana ekanligini tekshirish
+
                 return {
                     title: `${day}`,
                     dataIndex: "dates",
                     key: date,
-                    render: (dates) => dates[date] || "-",
+                    onCell: (record) => {
+                        const value = record.dates[date];
+                        const status = record.status?.loc; // status obyektidan loc ni olish
+
+                        let backgroundColor = isFutureDate ? "transparent" : value ? "#4CAF50" : "#FF5733";
+                        let color = isFutureDate ? "inherit" : value ? "#fff" : "#fff";
+
+                        // Agar status loc "voxa" yoki "tashkent" bo'lsa, ranglarni o'zgartirish
+                        if (status === "voxa") {
+                            backgroundColor = "#FFC107"; // Misol uchun sariq rang
+                            color = "#000"; // Matn rangi
+                        } else if (status === "tashkent") {
+                            backgroundColor = "#03A9F4"; // Misol uchun ko'k rang
+                            color = "#fff"; // Matn rangi
+                        }
+
+                        const style = {
+                            backgroundColor,
+                            color,
+                            textAlign: "center",
+                            fontWeight: "bold",
+                        };
+                        return { style };
+                    },
+                    render: (dates) => dates[date] || "-", // Qiymatni ko'rsatish
                 };
             }),
         },
@@ -151,7 +181,9 @@ const Story = () => {
                         value={selectedDate}
                         onChange={(date) => setSelectedDate(dayjs(date))}
                     />
-                    <Button onClick={exportToExcel}>Excel</Button>
+                    <Button onClick={exportToExcel} icon={<FileExcelOutlined />}>
+                        Excel
+                    </Button>
                 </div>
             </div>
             <Table
