@@ -33,7 +33,7 @@ function Sidebar() {
         <Link>MebelX</Link>
       </div>
       <div className="sidebar_links">
-        {menuItems[role].map((item) => (
+        {menuItems[role]?.map((item) => (
           <NavLink key={item.path} to={item.path}>
             {item.icon}
             <span>{item.label}</span>

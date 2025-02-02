@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import PrivateRoute from "./auth/PrivateRoute";
 import Layout from "./components/layout/Layout";
 import { routes } from "./routes/Route";
+import Login from "./components/login/Login";
 
 const App = () => {
   return (
@@ -23,6 +24,7 @@ const App = () => {
         ))}
       </Route>
       <Route path="*" element={<Navigate to="/login" />} />
+      <Route path="/login" element={<Login />} />
     </Routes>
   );
 };
