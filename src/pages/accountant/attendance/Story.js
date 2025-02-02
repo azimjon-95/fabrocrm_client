@@ -91,7 +91,7 @@ const Story = () => {
                             backgroundColor,
                             color,
                             textAlign: "center",
-                            fontWeight: "bold",
+                            fontWeight: "normal",
                         };
                         return { style };
                     },
