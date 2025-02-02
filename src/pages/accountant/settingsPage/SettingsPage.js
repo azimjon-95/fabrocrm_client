@@ -9,8 +9,6 @@ const SettingsPage = () => {
     const [updateWorkingHours] = useUpdateWorkingHoursMutation();
     const [deleteWorkingHours] = useDeleteWorkingHoursMutation();
 
-    console.log(data);
-
     const [editingId, setEditingId] = useState(null); // Store the ID of the item being edited
     const [form] = Form.useForm();
 
