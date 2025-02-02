@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { Form, Input, InputNumber, Button, Table, message, Space } from 'antd';
+import { Form, Input, InputNumber, Button, Table, message, Space, Row, Col } from 'antd';
 import { useCreateWorkingHoursMutation, useGetAllWorkingHoursQuery, useUpdateWorkingHoursMutation, useDeleteWorkingHoursMutation } from '../../../context/service/workingHours';
 
 const SettingsPage = () => {
     // Hooks for CRUD operations
     const { data, isLoading, error } = useGetAllWorkingHoursQuery();
-    console.log(data);
     const [createWorkingHours] = useCreateWorkingHoursMutation();
     const [updateWorkingHours] = useUpdateWorkingHoursMutation();
     const [deleteWorkingHours] = useDeleteWorkingHoursMutation();
+
+    console.log(data);
 
     const [editingId, setEditingId] = useState(null); // Store the ID of the item being edited
     const [form] = Form.useForm();
@@ -34,7 +35,15 @@ const SettingsPage = () => {
 
     // Handle editing an existing item
     const handleEdit = (record) => {
-        form.setFieldsValue({ wages: record.wages, workingHours: record.workingHours });
+        form.setFieldsValue({
+            wages: record.wages,
+            workingHours: record.workingHours,
+            overtimeWages: record.overtimeWages,
+            commanderLocation: record.commanderLocation,
+            voxa: record.voxa,
+            toshkent: record.toshkent,
+            vodiy: record.vodiy,
+        });
         setEditingId(record.id);
     };
 
@@ -57,9 +66,33 @@ const SettingsPage = () => {
             render: (text) => new Intl.NumberFormat('uz-UZ').format(text) + ' Sum',
         },
         {
+            title: 'Oshiqcha Soat Uchun:  Ish Haqqi',
+            dataIndex: 'overtimeWages',
+            key: 'overtimeWages',
+            render: (text) => new Intl.NumberFormat('uz-UZ').format(text) + ' Sum',
+        },
+        {
             title: 'Ish Vaqti',
             dataIndex: 'workingHours',
             key: 'workingHours',
+        },
+        {
+            title: 'Voxa',
+            dataIndex: 'voxa',
+            key: 'voxa',
+            render: (text) => `${text}%`,
+        },
+        {
+            title: 'Toshkent',
+            dataIndex: 'toshkent',
+            key: 'toshkent',
+            render: (text) => `${text}%`,
+        },
+        {
+            title: 'Vodiy',
+            dataIndex: 'vodiy',
+            key: 'vodiy',
+            render: (text) => `${text}%`,
         },
         {
             title: 'Amallar',
@@ -90,28 +123,94 @@ const SettingsPage = () => {
                 form={form}
                 layout="vertical"
                 onFinish={onFinish}
-                initialValues={{ wages: 0, workingHours: '09:00 - 18:00' }} // Default values
+                initialValues={{
+                    wages: 0,
+                    workingHours: '09:00 - 18:00',
+                    commanderLocation: { voxa: 0, toshkent: 0, vodiy: 0 }
+                }} // Default values
             >
-                <Form.Item
-                    name="wages"
-                    label="Ish Haqqi (soatda)"
-                    rules={[{ required: true, message: 'Ish haqini kiriting!' }]}
-                >
-                    <InputNumber
-                        style={{ width: '100%' }}
-                        min={0}
-                        placeholder="Masalan: 15,000"
-                        addonAfter="UZS"
-                    />
-                </Form.Item>
+                <Row gutter={16}>
+                    <Col span={8}>
+                        <Form.Item
+                            name="wages"
+                            label="Ish Haqqi (soatda)"
+                            rules={[{ required: true, message: 'Ish haqini kiriting!' }]}
+                        >
+                            <InputNumber
+                                style={{ width: '100%' }}
+                                min={0}
+                                placeholder="Masalan: 15,000"
+                                addonAfter="UZS"
+                            />
+                        </Form.Item>
+                    </Col>
 
-                <Form.Item
-                    name="workingHours"
-                    label="Ish Vaqti"
-                    rules={[{ required: true, message: 'Ish vaqtini kiriting!' }]}
-                >
-                    <Input placeholder="Masalan: 09:00 - 18:00" />
-                </Form.Item>
+                    <Col span={8}>
+                        <Form.Item
+                            name="overtimeWages"
+                            label="Oshiqcha Soat Uchun:  Ish Haqqi"
+                            rules={[{ required: true, message: 'Overtime haqqini kiriting!' }]}
+                        >
+                            <InputNumber
+                                style={{ width: '100%' }}
+                                min={0}
+                                placeholder="Masalan: 20,000"
+                                addonAfter="UZS"
+                            />
+                        </Form.Item>
+                    </Col>
+
+                    <Col span={8}>
+                        <Form.Item
+                            name="workingHours"
+                            label="Ish Vaqti"
+                            rules={[{ required: true, message: 'Ish vaqtini kiriting!' }]}
+                        >
+                            <Input placeholder="Masalan: 09:00 - 18:00" />
+                        </Form.Item>
+                    </Col>
+                </Row>
+
+                <Row gutter={16}>
+                    <Col span={8}>
+                        <Form.Item
+                            name="voxa"
+                            label="Voxa (Latitude)"
+                            rules={[{ required: true, message: 'Voxa joylashuvini kiriting!' }]}
+                        >
+                            <InputNumber
+                                style={{ width: '100%' }}
+                                placeholder="Masalan: 20%"
+                            />
+                        </Form.Item>
+                    </Col>
+
+                    <Col span={8}>
+                        <Form.Item
+                            name="toshkent"
+                            label="Toshkent (Longitude)"
+                            rules={[{ required: true, message: 'Toshkent joylashuvini kiriting!' }]}
+                        >
+                            <InputNumber
+                                style={{ width: '100%' }}
+                                placeholder="Masalan: 15%"
+                            />
+                        </Form.Item>
+                    </Col>
+
+                    <Col span={8}>
+                        <Form.Item
+                            name="vodiy"
+                            label="Vodiy (Altitude)"
+                            rules={[{ required: true, message: 'Vodiy joylashuvini kiriting!' }]}
+                        >
+                            <InputNumber
+                                style={{ width: '100%' }}
+                                placeholder="Masalan: 0%"
+                            />
+                        </Form.Item>
+                    </Col>
+                </Row>
 
                 <Form.Item style={{ textAlign: 'center' }}>
                     <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
@@ -133,3 +232,5 @@ const SettingsPage = () => {
 };
 
 export default SettingsPage;
+
+

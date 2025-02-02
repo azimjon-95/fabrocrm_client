@@ -1,0 +1,14 @@
+.Salary_nav {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  margin-bottom: 8px;
+}
+
+.Salary_nav div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
