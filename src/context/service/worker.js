@@ -10,10 +10,10 @@ export const worker = api.injectEndpoints({
 
     // POST || CREATE WORKER
     createWorker: builder.mutation({
-      query: (body) => ({
+      query: (formData) => ({
         url: "worker/create",
         method: "POST",
-        body,
+        body: formData,
       }),
       invalidatesTags: ["Workers"],
     }),

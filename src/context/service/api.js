@@ -2,6 +2,8 @@ import { createApi, fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: "http://localhost:5000/api",
+  // baseURL: "https://mebelx-server.vercel.app/api",
+
   prepareHeaders: (headers) => {
     const token = localStorage.getItem("token");
     if (token) {
