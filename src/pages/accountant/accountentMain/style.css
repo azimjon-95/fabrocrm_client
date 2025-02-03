@@ -1,0 +1,117 @@
+/* General Container Styling */
+.accountent-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+/* Cards Section Styling */
+.cards-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.card {
+    flex: 1;
+    padding: 20px;
+    margin: 0 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    color: white;
+}
+
+.card h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.card p {
+    margin: 10px 0 0;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* Individual Card Colors */
+.income {
+    background-color: #4CAF50;
+    /* Green */
+}
+
+.expense {
+    background-color: #F44336;
+    /* Red */
+}
+
+.balance {
+    background-color: #2196F3;
+    /* Blue */
+}
+
+.debt {
+    background-color: #FF9800;
+    /* Orange */
+}
+
+/* Boxes Section Styling */
+.boxes-container {
+    display: flex;
+    gap: 20px;
+}
+
+.box {
+    flex: 1;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.box h3 {
+    margin-top: 0;
+    font-size: 20px;
+}
+
+/* Expense Register Form Styling */
+.expense-register form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.expense-register input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.expense-register button {
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.expense-register button:hover {
+    background-color: #45a049;
+}
+
+/* New Orders List Styling */
+.new-orders ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.new-orders li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    font-size: 16px;
+}
+
+.new-orders li:last-child {
+    border-bottom: none;
+}
