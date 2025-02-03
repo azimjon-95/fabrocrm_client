@@ -49,7 +49,7 @@ const Attendance = () => {
 
     const handleEdit = async (user) => {
         const payload = {
-            workerName: user?.lastName + " " + user?.firstName + " " + user?.middleName,
+            workerName: user?.firstName + " " + user?.lastName,
             workerId: user?._id,
             inTime: attendanceTime,
             workingHours,
