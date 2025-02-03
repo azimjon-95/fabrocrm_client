@@ -16,6 +16,7 @@ const RegisterWorker = () => {
   const [createWorker, { isLoading }] = useCreateWorkerMutation();
   const { control, handleSubmit, reset } = useForm();
   const [imageUrl, setImageUrl] = useState(null);
+  const [img, setImg] = useState(null);
 
   const onSubmit = async (data) => {
     try {
@@ -28,8 +29,8 @@ const RegisterWorker = () => {
       formData.append("phone", data.phone);
       formData.append("idNumber", data.idNumber);
 
-      if (imageUrl) {
-        formData.append("image", imageUrl);
+      if (img) {
+        formData.append("image", img);
       }
 
       const response = await createWorker(formData).unwrap();
@@ -44,6 +45,7 @@ const RegisterWorker = () => {
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
+      setImg(file);
       const reader = new FileReader();
       reader.onloadend = () => setImageUrl(reader.result);
       reader.readAsDataURL(file);
@@ -198,6 +200,7 @@ const RegisterWorker = () => {
                   )}
                   <input
                     type="file"
+                    // only image
                     accept="image/*"
                     onChange={handleFileChange}
                     style={{ display: "none" }}
