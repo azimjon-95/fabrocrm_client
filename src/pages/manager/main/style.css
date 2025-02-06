@@ -1,0 +1,332 @@
+.order-form {
+    width: 100%;
+}
+
+.order-form h2 {
+    text-align: center;
+}
+
+
+.input-row {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.input-item {
+    flex: 1;
+    min-width: 200px;
+}
+
+.full-width {
+    width: 100%;
+    height: 30px;
+}
+
+.material-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f7f7f7;
+    padding: 4px 10px;
+    border-radius: 5px;
+    margin-bottom: 8px;
+    width: 100%;
+}
+
+.material-item>div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.material-item>div>p {
+    width: 50%;
+}
+
+.material-item>div>p:last-child {
+    width: 50%;
+}
+
+.submit-button {
+    width: 100%;
+    height: 40px;
+    font-size: 16px;
+    font-weight: bold;
+    background: #1890ff;
+    border-color: #1890ff;
+}
+
+.submit-button:hover {
+    background: #40a9ff;
+    border-color: #40a9ff;
+}
+
+/* Form elementlarining o‘lchamlarini yaxshilash */
+.ant-form-item {
+    margin-bottom: 15px;
+}
+
+.ant-input,
+.ant-input-number,
+.ant-select-selector,
+.ant-picker {
+    height: 40px;
+    border-radius: 5px;
+}
+
+/* Rasm yuklash tugmasi uchun */
+.ant-upload {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed #d9d9d9;
+    border-radius: 5px;
+    padding: 10px;
+    transition: all 0.3s;
+}
+
+.ant-upload:hover {
+    border-color: #1890ff;
+}
+
+@media (max-width: 600px) {
+    .input-row {
+        flex-direction: column;
+    }
+}
+
+:where(.css-dev-only-do-not-override-1drr2mu).ant-form-vertical .ant-form-item-label,
+:where(.css-dev-only-do-not-override-1drr2mu).ant-col-24.ant-form-item-label,
+:where(.css-dev-only-do-not-override-1drr2mu).ant-col-xl-24.ant-form-item-label {
+    padding: 7px 0 3px 0;
+    margin: 0;
+    white-space: initial;
+    text-align: start;
+}
+
+.ant-radio-group-large :where(.css-dev-only-do-not-override-1drr2mu).ant-radio-button-wrapper {
+    height: 40px;
+    font-size: 14px;
+    line-height: 38px;
+}
+
+.customerType {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.customerType>div {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.create_order {
+    width: 100%;
+    display: flex;
+    align-items: start;
+    gap: 10px;
+}
+
+.create_order_left {
+    width: 60%;
+}
+
+.create_order_right {
+    width: 50%;
+
+}
+
+.create_order_right h3 {
+    text-align: center;
+    margin-bottom: 6px;
+}
+
+/* =============================== */
+
+.form-data-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    height: 45px;
+
+}
+
+.inp_add_pro_box .ant-col {
+    padding: 1px !important;
+    margin: 1px !important;
+}
+
+.form-data-container>div {
+    display: flex;
+    gap: 3px;
+    color: #fff;
+    text-align: center;
+}
+
+.order-form-main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.inp_add_pro_cont {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-top: 1px solid #8080803f;
+    padding-top: 5px;
+    position: relative;
+}
+
+.inp_add_pro_btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    border-top: 1px solid #8080803f;
+    padding-top: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 0;
+    height: 32px;
+    width: 32px;
+    font-size: 22px;
+}
+
+.inp_add_pro_box {
+    width: 100%;
+    display: flex;
+    gap: 4px;
+}
+
+.inp_add_pro_box_right {
+    width: 100%;
+    display: flex;
+    gap: 4px;
+    justify-content: space-between;
+}
+
+.create_order_main {
+    width: 50%;
+    height: calc(100vh - 168px);
+    position: relative;
+}
+
+.create_order_main h3 {
+    text-align: center;
+}
+
+.inp_add_pro_myorder {
+    width: 100%;
+    overflow: auto;
+    height: 440px;
+}
+
+/* Chrome, Edge va Safari uchun */
+.inp_add_pro_myorder::-webkit-scrollbar {
+    width: 3px;
+}
+
+.inp_add_pro_myorder::-webkit-scrollbar-thumb {
+    background: #88888862;
+    border-radius: 4px;
+}
+
+.create_order_right-box {
+    width: 100%;
+    height: 530px;
+    overflow: auto;
+}
+
+/* Chrome, Edge va Safari uchun */
+.create_order_right-box::-webkit-scrollbar {
+    width: 3px;
+}
+
+.inp_add_pro_boxnewForm {
+    width: 100%;
+    display: flex;
+}
+
+.create_order_right-box::-webkit-scrollbar-thumb {
+    background: #88888862;
+    border-radius: 4px;
+}
+
+.create_order_right {
+    width: 50%;
+    min-width: 500px;
+}
+
+.inp_add_pro {
+    width: 160px;
+}
+
+.inp_add_pro_in {
+    width: 100px;
+}
+
+.create_order_box {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+}
+
+/* =============================== */
+
+.selected-material-item {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 12px;
+    border-bottom: 2px solid rgba(128, 128, 128, 0.251);
+
+}
+
+.selected-material-item p {
+    width: 28%;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+}
+
+.selected-material-item p:first-child {
+    width: 40%;
+    font-size: 18px;
+    font-weight: 600;
+    color: #4caf50;
+    /* A color that distinguishes the index number */
+}
+
+.selected-material-item p:nth-child(2) {
+    color: #2196f3;
+}
+
+.selected-material-item p:last-child {
+    color: #9e9e9e;
+    /* Subtle color for quantity and unit */
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #ff4d4f;
+    /* Red color */
+    font-size: 18px;
+}
+
+.delete-btn:hover {
+    color: #ff0000;
+}

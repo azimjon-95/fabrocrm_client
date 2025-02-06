@@ -1,0 +1,27 @@
+.warehouse-navbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 0 0 15px;
+}
+
+.warehouse-navbar_inp {
+    width: 50%;
+    height: 40px;
+    padding: 0 10px;
+}
+
+
+.radio_Group_inp {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.radio_Group_inp .ant-radio-wrapper {
+    width: 240px;
+    display: flex;
+    align-items: center;
+    height: 35px;
+}

@@ -6,8 +6,11 @@ import ViewPersons from "../pages/accountant/persons/ViewPersons";
 import Attendance from "../pages/accountant/attendance/Attendance";
 import SettingsPage from "../pages/accountant/settingsPage/SettingsPage";
 import Story from "../pages/accountant/attendance/Story";
-import Mengement from "../pages/manager/Mengement";
+import Mengement from "../pages/manager/main/Mengement";
 import Salary from "../pages/accountant/salary/Salary";
+import OrderDetails from "../pages/accountant/accountentMain/OrderDetails";
+import WarehouseForm from "../pages/store/WarehouseForm";
+import OrderMengement from "../pages/manager/main/OrderMengement";
 
 export const routes = [
 
@@ -22,6 +25,9 @@ export const routes = [
   { path: "/attendance/story", element: <Story />, private: true, role: "accountant" },
   { path: "/setting", element: <SettingsPage />, private: true, role: "accountant" },
   { path: "/salary", element: <Salary />, private: true, role: "accountant" },
+  { path: "/order/:id", element: <OrderDetails />, private: true, role: "accountant" },
+  { path: "/warehouse", element: <WarehouseForm />, private: true, role: "manager" },
+  { path: "/order/mengement", element: <OrderMengement />, private: true, role: "manager" },
   {
     path: "/accountant",
     element: <Accountant />,

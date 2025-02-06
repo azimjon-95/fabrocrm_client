@@ -4,6 +4,8 @@ import { AppstoreAddOutlined } from '@ant-design/icons';
 import { MdChecklist } from "react-icons/md";
 import { MoneyCollectOutlined } from '@ant-design/icons';
 import { AiOutlineLineChart } from "react-icons/ai";
+import { MdOutlineWarehouse } from "react-icons/md";
+
 
 export const menuItems = {
     accountant: [
@@ -14,7 +16,9 @@ export const menuItems = {
         { icon: <AppstoreAddOutlined size={20} />, path: "/setting", label: "Sozlama" },
     ],
     manager: [
-        { icon: <MdDomain />, path: "/manager", label: "Boshqaruv" },
+        { icon: <MdDomain size={20} />, path: "/manager", label: "Boshqaruv" },
+        { icon: <MdOutlineWarehouse size={20} />, path: "/warehouse", label: "Omborxona" }
+
     ],
     director: [{ path: "/director", label: "Direktor" }],
 };
