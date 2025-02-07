@@ -12,17 +12,18 @@ export const storeApi = api.injectEndpoints({
                 body: newStore,
             }),
         }),
-        deleteStore: builder.mutation({
-            query: (id) => ({
-                url: `/store/delete/${id}`,
-                method: "DELETE",
-            }),
-        }),
         updateStore: builder.mutation({
             query: ({ id, updatedData }) => ({
                 url: `/store/update/${id}`,
                 method: "PUT",
                 body: updatedData,
+            }),
+        }),
+
+        deleteStore: builder.mutation({
+            query: (id) => ({
+                url: `/store/delete/${id}`,
+                method: "DELETE",
             }),
         }),
         getStoreByCategory: builder.query({
@@ -34,6 +35,9 @@ export const storeApi = api.injectEndpoints({
                 method: "PUT",
             }),
         }),
+        getStockHistory: builder.query({
+            query: () => "/store/history", // Ombor tarixi
+        }),
     }),
 });
 
@@ -44,4 +48,10 @@ export const {
     useGetStoreByCategoryQuery,
     useDecrementQuantityMutation,
     useCreateStoreMutation,
+    useGetStockHistoryQuery
 } = storeApi;
+
+
+
+
+
