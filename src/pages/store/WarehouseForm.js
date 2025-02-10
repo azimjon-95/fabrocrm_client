@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Table, Button, Form, Input, InputNumber, Select, Col, Row, Radio, message } from "antd";
 import { SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { useLocation } from "react-router-dom";
 import {
     useCreateStoreMutation,
     useGetAllStoresQuery,
@@ -78,13 +79,16 @@ const Warehouse = () => {
 
     const filteredData = stores?.innerData?.filter(store => store?.name?.toLowerCase().includes(searchQuery.toLowerCase()));
 
+
+    const location = useLocation();
+    const isHidden = location.pathname === "/manag/warehouse";
     const columns = [
         { title: "Mahsulot nomi", dataIndex: "name", key: "name" },
         { title: "Kategoriya", dataIndex: "category", key: "category" },
         { title: "Miqdor", key: "quantity", render: ({ quantity, unit }) => `${quantity} ${unit}` },
         { title: "Birlik narxi", dataIndex: "pricePerUnit", key: "pricePerUnit", render: (price) => `${price.toLocaleString("uz-UZ")} so‘m` },
         { title: "Jami narx", key: "totalPrice", render: ({ quantity, pricePerUnit }) => `${(quantity * pricePerUnit).toLocaleString("uz-UZ")} so‘m` },
-        {
+        !isHidden && { // isHidden true bo‘lsa, ustun qo‘shilmaydi
             title: "Harakatlar",
             key: "actions",
             render: (_, record) => (
@@ -94,7 +98,7 @@ const Warehouse = () => {
                 </div>
             )
         }
-    ];
+    ].filter(Boolean); // undefined elementlarni olib tashlash
 
     return (
         <>
@@ -102,8 +106,10 @@ const Warehouse = () => {
                 <Select placeholder="Kategoriya tanlang" allowClear style={{ width: 230 }} onChange={setSelectedCategory} size="large">
                     {categoryOptions.map(option => <Option key={option.value} value={option.value}>{option.label}</Option>)}
                 </Select>
-                <Input placeholder="Mahsulotlarni qidiring..." onChange={(e) => setSearchQuery(e.target.value)} prefix={<SearchOutlined />} className="warehouse-navbar_inp" />
-                <Button style={{ background: "#0A3D3A" }} size="large" type="primary" onClick={() => openModal()} icon={<PlusOutlined />}>Mahsulot qo‘shish</Button>
+                <Input style={{ width: "100%" }} placeholder="Mahsulotlarni qidiring..." onChange={(e) => setSearchQuery(e.target.value)} prefix={<SearchOutlined />} className="warehouse-navbar_inp" />
+                {!isHidden &&
+                    <Button style={{ background: "#0A3D3A" }} size="large" type="primary" onClick={() => openModal()} icon={<PlusOutlined />}>Mahsulot qo‘shish</Button>
+                }
             </div>
 
             <Table

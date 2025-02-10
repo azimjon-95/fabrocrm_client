@@ -1,0 +1,217 @@
+.stor_container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.stor_container.custom-table {
+    user-select: none;
+}
+
+
+.stor_container .custom-table {
+    overflow-y: auto;
+    max-height: 605px;
+    scrollbar-width: thin;
+    scrollbar-color: #0A3D3A #f1f1f100;
+}
+
+/* Chrome, Edge, Safari */
+.stor_container .custom-table::-webkit-scrollbar {
+    width: 3px !important;
+    /* Scrollbar eni */
+}
+
+.stor_container .custom-table::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    /* Orqa fon */
+    border-radius: 5px;
+}
+
+.stor_container .custom-table::-webkit-scrollbar-thumb {
+    background: #888;
+    /* Scrollbar rangi */
+    border-radius: 5px;
+}
+
+.stor_container .custom-table::-webkit-scrollbar-thumb:hover {
+    background: #555;
+    /* Hover effekti */
+}
+
+.stor_todolist-one {
+    display: flex;
+    flex-direction: column;
+    width: 45%;
+    height: calc(100vh - 67px);
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+
+.stor_container .stor_todolist {
+    width: 55%;
+    position: relative;
+}
+
+.customer-navbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+    padding: 0;
+    margin-bottom: 8px;
+}
+
+
+.stor_todolist {
+    width: 50%;
+    height: 91vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: column;
+}
+
+
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: white;
+    border-radius: 5px;
+}
+
+.input-container .ant-input {
+    flex: 1;
+}
+
+.input-container .ant-btn {
+    white-space: nowrap;
+}
+
+.VscGitPullRequestGoToChanges {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.VscGitPullRequestGoToChanges-btns {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+
+.list-container {
+    width: 100%;
+    min-height: 520px;
+    max-height: 520px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #ddd;
+    transition: background-color 0.3s;
+}
+
+.list-item:hover {
+    background-color: #f9f9f9;
+}
+
+.item-info {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    width: 100%;
+}
+
+
+.item-name {
+    color: #0A3D3A;
+    font-weight: bold;
+    width: 26%;
+}
+
+.item-category {
+    color: #555;
+    width: 12%;
+}
+
+.stor_todolist-one .list-container .ant-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 8px !important;
+    transition: background-color 0.3s;
+}
+
+.item-price {
+    color: #ff5722;
+    width: 21%;
+    font-weight: bold;
+}
+
+.item-quantity {
+    width: 12%;
+    color: #673ab7;
+}
+
+.item-supplier {
+    color: #4caf50;
+}
+
+.delete-btn {
+    color: red;
+    font-weight: bold;
+    transition: color 0.3s;
+    width: 30px;
+    padding: 0;
+}
+
+.delete-btn:hover {
+    color: darkred;
+}
+
+.list-container .ant-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    transition: background-color 0.3s;
+}
+
+.list-container .ant-list-item:hover {
+    background-color: #f5f5f5;
+}
+
+.list-container .delete-btn {
+    color: red;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.list-container .delete-btn:hover {
+    color: darkred;
+}
+
+.list-container-nav {
+    width: 100%;
+    height: 40px;
+    background: #000;
+}

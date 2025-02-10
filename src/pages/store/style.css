@@ -65,3 +65,10 @@
 
     overflow: hidden;
 }
+
+:where(.css-dev-only-do-not-override-1drr2mu).ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+    z-index: 1;
+    color: #ffffff !important;
+    background: #ffffff;
+    border-color: #0A3D3A !important;
+}

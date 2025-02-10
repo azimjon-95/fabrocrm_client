@@ -23,10 +23,10 @@ export const orderApi = api.injectEndpoints({
 
         // Update an existing order
         updateOrder: builder.mutation({
-            query: ({ id, updatedOrder }) => ({
+            query: ({ id, updates }) => ({
                 url: `/order/${id}`,
                 method: "PUT",
-                body: updatedOrder,
+                body: updates,
             }),
         }),
 
@@ -37,6 +37,38 @@ export const orderApi = api.injectEndpoints({
                 method: "DELETE",
             }),
         }),
+
+        // Give material to an order
+        giveMaterial: builder.mutation({
+            query: (data) => ({
+                url: "/order/giveMaterial",
+                method: "POST",
+                body: data,
+            }),
+        }),
+
+        // Get order progress
+        orderProgress: builder.query({
+            query: (orderId) => `/order/progress/${orderId}`,
+        }),
+
+        ///order/get-material/:orderId/:materialId
+        getMaterialById: builder.query({
+            query: ({ orderId, materialId }) => (console.log(orderId, materialId), {
+                url: `/order/get-material/${orderId}/${materialId}`,
+                method: "GET",
+            }),
+        }),
+
+        ///order/get-all-material/:orderId
+        getAllMaterialById: builder.query({
+            query: (orderId) => ({
+                url: `/order/get-all-material/${orderId}`,
+                method: "GET",
+            }),
+        }),
+
+
     }),
 });
 
@@ -46,4 +78,9 @@ export const {
     useUpdateOrderMutation,
     useDeleteOrderMutation,
     useCreateOrderMutation,
+    useGiveMaterialMutation,
+    useOrderProgressQuery,
+    useGetMaterialByIdQuery,
+    useGetAllMaterialByIdQuery
+
 } = orderApi;

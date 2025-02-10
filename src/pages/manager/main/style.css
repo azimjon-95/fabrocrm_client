@@ -229,7 +229,7 @@
 .inp_add_pro_myorder {
     width: 100%;
     overflow: auto;
-    height: 440px;
+    height: 480px;
 }
 
 /* Chrome, Edge va Safari uchun */
@@ -244,7 +244,7 @@
 
 .create_order_right-box {
     width: 100%;
-    height: 530px;
+    height: 570px;
     overflow: auto;
 }
 

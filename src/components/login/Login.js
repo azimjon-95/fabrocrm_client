@@ -17,8 +17,8 @@ const Login = () => {
 
     try {
       const res = await axios.post("/admin/login", data);
-      console.log(res);
       message.success(res.data.message);
+      console.log(res.data);
       localStorage.setItem("admin", JSON.stringify(res.data?.innerData?.admin));
       localStorage.setItem("token", res.data?.innerData?.token);
       localStorage.setItem("role", res.data?.innerData?.admin?.role);

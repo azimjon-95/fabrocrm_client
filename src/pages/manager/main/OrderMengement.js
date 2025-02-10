@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Input, Select, Button, Form } from "antd";
+import { Input, Select, Button, Form, message } from "antd";
 import {
   SearchOutlined,
   ArrowLeftOutlined,
@@ -28,6 +28,7 @@ const OrderMengement = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [budget, setBudget] = useState("");
   const [selectedMaterials, setSelectedMaterials] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [openBudget, setOpenBudget] = useState(true);
 
   useEffect(() => {
@@ -54,9 +55,8 @@ const OrderMengement = () => {
 
   const handleAddMaterialNew = () => {
     // Generate a unique ID using random string + length
-    const uniqueId = `67d${Math.random().toString(36).substr(2, 9)}new${
-      selectedMaterials.length + 1
-    }`;
+    const uniqueId = `67d${Math.random().toString(36).substr(2, 9)}new${selectedMaterials.length + 1
+      }`;
 
     const newMaterial = {
       id: uniqueId,
@@ -97,7 +97,7 @@ const OrderMengement = () => {
 
   // Tanlangan materialni qo'shish
   const handleAddMaterial = (mat) => {
-    console.log(mat);
+
     setSelectedMaterials((prevState) => {
       const existingMaterial = prevState.find((item) => item.id === mat._id);
       const quantity = inputValues[mat._id] || 1; // Agar input bo'sh bo'lsa, 1 qiymatini oladi
@@ -131,6 +131,7 @@ const OrderMengement = () => {
     0
   );
 
+
   const createNewOrder = () => {
     let newOrder = {
       name: data.name,
@@ -152,11 +153,17 @@ const OrderMengement = () => {
         companyName: data.companyName,
         director: data.director,
         inn: +data.inn,
-        address: data.address,
         paymentType: data.paymentType,
       },
+      address: {
+        region: data.address.region,
+        district: data.address.district,
+        street: data.address.street,
+        location: data.address.location,
+      }
     };
 
+    setLoading(true);
     const formData = new FormData();
 
     // Soddalashtirilgan maydonlarni qo'shish
@@ -182,15 +189,21 @@ const OrderMengement = () => {
     formData.append("customer[companyName]", newOrder.customer.companyName);
     formData.append("customer[director]", newOrder.customer.director);
     formData.append("customer[inn]", newOrder.customer.inn);
-    formData.append("customer[address]", newOrder.customer.address);
+    // Manzilni optimallashtirib qo'shish
+    Object.entries(newOrder.address).forEach(([key, value]) => {
+      formData.append(`address[${key}]`, value);
+    });
+
     formData.append("paymentType", newOrder.customer.paymentType);
 
     createOrder(formData)
       .then((res) => {
-        console.log(res);
+        message.success("Buyurtma muvaffaqiyatli yaratildi!");
+        navigate("/main/orders"); // Yangi sahifaga yo'naltirish
+        setLoading(false);
       })
       .catch((err) => {
-        console.log(err);
+        message.error("Xatolik yuz berdi! Iltimos, qaytadan urinib ko'ring.");
       });
   };
 
@@ -203,6 +216,8 @@ const OrderMengement = () => {
             type="primary"
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate(-1)}
+            style={{ width: "30px", background: "#0A3D3A" }}
+            size="large"
           />
         </div>
         <Input
@@ -376,32 +391,35 @@ const OrderMengement = () => {
                 </div>
               ) : (
                 <div className="inp_add_pro_box_right">
-                  <Form.Item label=" ">
-                    <p>{totalPrice.toLocaleString()} so'm</p>
+                  <Form.Item label=" " style={{ width: "200px" }}>
+                    <p style={{ fontSize: "17px", fontWeight: "bold", color: "#0A3D3A" }}>{totalPrice.toLocaleString()} so'm</p>
                   </Form.Item>
                   <Form.Item label="Buyurtma budjeti (so'm)">
                     <Input
-                      style={{ width: "250px" }}
+                      style={{ width: "200px" }}
                       value={budget}
                       onChange={(e) => setBudget(e.target.value)}
                       placeholder="Бюджет заказа"
                     />
+                  </Form.Item>
+                  <Form.Item label=" ">
+                    <Button
+                      onClick={() => createNewOrder()}
+                      style={{ width: "200px", height: "40px", background: "#0A3D3A" }}
+                      type="primary"
+                      htmlType="button"
+                      loading={loading}
+                    >
+                      Buyurtmani yaratish
+                    </Button>
+
                   </Form.Item>
                 </div>
               )}
             </div>
           </div>
         </div>
-        <Form.Item>
-          <Button
-            onClick={() => createNewOrder()}
-            style={{ width: "100%", height: "40px" }}
-            type="primary"
-            htmlType="button"
-          >
-            Buyurtmani yaratish
-          </Button>
-        </Form.Item>
+
       </Form>
     </>
   );

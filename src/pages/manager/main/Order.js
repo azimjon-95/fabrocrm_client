@@ -1,14 +1,19 @@
 import React, { useState, useCallback } from "react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
-import { Input, Button, message, Row, Col, Radio, Form, Upload } from "antd";
+import { Input, Button, message, Row, Col, Radio, Select, Form, Upload } from "antd";
 import { useNavigate } from "react-router-dom";
 import { UploadOutlined } from "@ant-design/icons";
+import { HiArrowSmRight } from "react-icons/hi";
+import { regions } from "../../../utils/regions";
 import moment from "moment";
 import "./style.css";
 
-const OrderForm = () => {
+
+const { Option } = Select;
+const Order = () => {
   const [fileList, setFileList] = useState([]);
-  const [imageUrl, setImageUrl] = useState(null);
+  const [selectedRegion, setSelectedRegion] = useState(null);
+  const navigate = useNavigate();
   const { control, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
       paymentType: "Naqd",
@@ -17,18 +22,25 @@ const OrderForm = () => {
     },
   });
 
-  const navigate = useNavigate();
-  const customerType = watch("customerType");
+  const handleRegionChange = (value) => {
+    const foundRegion = regions[value]; // value ni regions dan to'g'ridan-to'g'ri olish
+    if (foundRegion) {
+      sessionStorage.setItem('location', foundRegion.location)
+    } else {
+      message.warning("Region topilmadi");
+    }
+  };
 
+  const customerType = watch("customerType");
   const { fields } = useFieldArray({ control, name: "dimensions" });
 
   const onSubmit = useCallback(
     (data) => {
-      // Agar barcha majburiy maydonlar to'ldirilmagan bo'lsa, funksiyani to'xtatish
-      // if (!data.name || !data.customerType || !data.paymentType || !data.fullName || !data.phone || !data.address) {
-      //   message.warning("Iltimos, barcha majburiy maydonlarni to'ldiring!");
-      //   return;
-      // }
+      // // Agar barcha majburiy maydonlar to'ldirilmagan bo'lsa, funksiyani to'xtatish
+      if (!data.name || !data.customerType || !data.paymentType || !data.fullName || !data.phone || !data.address) {
+        message.warning("Iltimos, barcha majburiy maydonlarni to'ldiring!");
+        return;
+      }
 
       const formData = {
         name: data.name,
@@ -36,7 +48,12 @@ const OrderForm = () => {
         paymentType: data.paymentType,
         fullName: data.fullName,
         phone: data.phone,
-        address: data.address,
+        address: {
+          region: data.address.region,
+          district: data.address.district,
+          street: data.address.street,
+          location: sessionStorage.getItem('location'),
+        },
         date: moment(data.date).toISOString(),
         companyName:
           data.customerType === "Yuridik shaxs" ? data.companyName : undefined,
@@ -46,21 +63,15 @@ const OrderForm = () => {
         images: fileList[0],
         dimensions: data.dimensions,
         estimatedDays: data.estimatedDays,
+
       };
 
+      // return
       navigate("/order/mengement", { state: formData });
+      // reset inputs
     },
     [customerType, fileList, navigate]
   );
-
-  // const uploadProps = {
-  //   fileList,
-  //   beforeUpload: (file) => {
-  //     setFileList(file);
-  //     return false;
-  //   },
-  //   onRemove: () => setFileList(null),
-  // };
 
   const uploadProps = {
     fileList,
@@ -88,8 +99,8 @@ const OrderForm = () => {
         layout="vertical"
         className="order-form"
       >
-        <h2>Buyurtma qabul qilish</h2>
-        <Row gutter={16}>
+        <h2 style={{ color: "#0A3D3A" }}>Buyurtma qabul qilish</h2>
+        <Row gutter={12}>
           <Col span={12}>
             <Form.Item label="Buyurtmaning nomi">
               <Controller
@@ -101,20 +112,7 @@ const OrderForm = () => {
               />
             </Form.Item>
           </Col>
-          <Col span={12}>
-            <Form.Item label="Masul Shaxs Ism Familyasi">
-              <Controller
-                name="fullName"
-                control={control}
-                render={({ field }) => (
-                  <Input {...field} placeholder="Введите Имя" />
-                )}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
 
-        <Row gutter={12}>
           <Col span={6}>
             <Form.Item label="Mijoz turi:">
               <Controller
@@ -150,7 +148,32 @@ const OrderForm = () => {
             </Form.Item>
           </Col>
 
+        </Row>
+
+        <Row gutter={12}>
           <Col span={6}>
+            <Form.Item label="Masul Shaxs Ism Familyasi">
+              <Controller
+                name="fullName"
+                control={control}
+                render={({ field }) => (
+                  <Input {...field} placeholder="Введите Имя" />
+                )}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={6}>
+            <Form.Item label="Taxminiy tayyor bolish vaqt">
+              <Controller
+                name="estimatedDays"
+                control={control}
+                render={({ field }) => (
+                  <Input {...field} placeholder="Примерное время готовности" />
+                )}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
             <Form.Item label="Telefon raqami">
               <Controller
                 name="phone"
@@ -161,22 +184,12 @@ const OrderForm = () => {
               />
             </Form.Item>
           </Col>
-          <Col span={6}>
-            <Form.Item label="Manzil">
-              <Controller
-                name="address"
-                control={control}
-                render={({ field }) => (
-                  <Input {...field} placeholder="Введите адрес" />
-                )}
-              />
-            </Form.Item>
-          </Col>
+
         </Row>
 
         {customerType === "Yuridik shaxs" && (
           <>
-            <Row gutter={16}>
+            <Row gutter={12}>
               <Col span={6}>
                 <Form.Item label="Kompaniya nomi">
                   <Controller
@@ -210,17 +223,84 @@ const OrderForm = () => {
                   />
                 </Form.Item>
               </Col>
+
             </Row>
           </>
         )}
 
         <Row gutter={12}>
+          <Col span={selectedRegion ? 6 : 12}>
+            <Form.Item label="Viloyat">
+              <Controller
+                name="address.region"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    size="large"
+                    showSearch
+                    onChange={(value) => {
+                      field.onChange(value);
+                      handleRegionChange(value);
+                      setSelectedRegion(value)
+                    }}
+                    placeholder="Выберите область"
+                    filterOption={(input, option) =>
+                      option.children.toLowerCase().includes(input.toLowerCase())
+                    }
+                  >
+                    {Object.keys(regions).map((region) => (
+                      <Option key={region} value={region}>
+                        {region}
+                      </Option>
+                    ))}
+                  </Select>
+                )}
+              />
+            </Form.Item>
+          </Col>
+          {selectedRegion && (
+            <Col span={6}>
+              <Form.Item label="Tuman">
+                <Controller
+                  name="address.district"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      size="large"
+                      showSearch
+                      placeholder="Выберите район"
+                      filterOption={(input, option) =>
+                        option.children.toLowerCase().includes(input.toLowerCase())
+                      }
+                    >
+                      {regions[selectedRegion]?.districts?.map((district) => (
+                        <Option key={district} value={district}>
+                          {district}
+                        </Option>
+                      ))}
+                    </Select>
+                  )}
+                />
+              </Form.Item>
+            </Col>
+          )}
           <Col span={12}>
-            {/* <Form.Item label="Rasm yuklash">
-              <Upload accept="image/*" {...uploadProps} listType="picture">
-                <Button icon={<UploadOutlined />}>Fayl tanlash</Button>
-              </Upload>
-            </Form.Item> */}
+            <Form.Item label="Manzil">
+              <Controller
+                name="address.street"
+                control={control}
+                render={({ field }) => (
+                  <Input {...field} placeholder="Введите адрес" />
+                )}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={12}>
+          <Col span={12}>
             <Form.Item label="Rasm yuklash">
               <Upload accept="image/*" {...uploadProps} listType="picture">
                 {fileList.length === 0 && ( // Agar fayl tanlanmagan bo'lsa, tugmani ko'rsatish
@@ -228,7 +308,7 @@ const OrderForm = () => {
                 )}
               </Upload>
             </Form.Item>
-            ;
+
           </Col>
           <Col span={4}>
             <Form.Item label="Razmerlar: Uzunligi (sm)">
@@ -263,30 +343,45 @@ const OrderForm = () => {
               />
             </Form.Item>
           </Col>
-          <Col span={4}>
-            <Form.Item label="Taxminiy vaqt">
-              <Controller
-                name="estimatedDays"
-                control={control}
-                render={({ field }) => (
-                  <Input {...field} placeholder="Введите высоту (см)" />
-                )}
-              />
-            </Form.Item>
-          </Col>
+
         </Row>
 
         <Button
-          style={{ width: "100%", marginTop: "15px" }}
+          style={{ width: "200px", background: "#0A3D3A", marginTop: "15px", display: "flex", alignItems: "center", justifyContent: "center" }}
           size="large"
           type="primary"
           htmlType="submit"
         >
-          Omborga o'tish
+          Omborga o'tish <HiArrowSmRight style={{ marginTop: "4px", fontSize: "22px", marginLeft: "15px" }} />
         </Button>
       </Form>
     </>
   );
 };
 
-export default React.memo(OrderForm);
+export default React.memo(Order);
+
+
+
+
+
+
+
+
+
+
+// import React, { useState } from "react";
+// import { Select } from "antd";
+
+// const { Option } = Select;
+
+
+// const RegionSelect = () => {
+//
+
+//   return (
+
+//   );
+// };
+
+// export default RegionSelect;

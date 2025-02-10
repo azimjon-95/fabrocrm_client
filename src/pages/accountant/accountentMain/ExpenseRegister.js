@@ -30,13 +30,8 @@ const ExpenseRegister = () => {
         },
         { skip: !selectedDates.length } // Agar sanalar yo'q bo'lsa, so‘rov yuborilmaydi
     );
-    console.log({
-        startDate: moment(selectedDates[0]).format("YYYY-MM-DD"),
-        endDate: moment(selectedDates[1]).format("YYYY-MM-DD")
-    },);
 
     const handleChange = (values) => {
-        console.log(values);
         if (values) {
             setSelectedDates(values);
         }

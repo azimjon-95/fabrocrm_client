@@ -80,7 +80,7 @@ const RegisterWorker = () => {
     return (
         <div>
             <div className="nav_add">
-                <button className="back-btn" onClick={() => navigate(-1)}>
+                <button style={{ background: "#0A3D3A", marginTop: "10px" }} className="back-btn" onClick={() => navigate(-1)}>
                     <ArrowLeftOutlined />
                     Orqaga qaytish
                 </button>
@@ -234,6 +234,7 @@ const RegisterWorker = () => {
                         type="primary"
                         htmlType="submit"
                         loading={isCreateLoading || isUpdateLoading}
+                        style={{ width: "200px", background: "#0A3D3A", marginTop: "20px" }}
                         block
                     >
                         {userData ? "Yangilash" : "Ro‘yxatdan o‘tkazish"}

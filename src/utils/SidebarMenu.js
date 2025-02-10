@@ -1,10 +1,10 @@
 import { RiUserAddFill } from "react-icons/ri";
-import { MdDomain } from "react-icons/md";
 import { AppstoreAddOutlined } from '@ant-design/icons';
 import { MdChecklist } from "react-icons/md";
 import { MoneyCollectOutlined } from '@ant-design/icons';
 import { AiOutlineLineChart } from "react-icons/ai";
 import { MdOutlineWarehouse } from "react-icons/md";
+import { DashboardOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 
 
 export const menuItems = {
@@ -16,9 +16,21 @@ export const menuItems = {
         { icon: <AppstoreAddOutlined size={20} />, path: "/setting", label: "Sozlama" },
     ],
     manager: [
-        { icon: <MdDomain size={20} />, path: "/manager", label: "Boshqaruv" },
-        { icon: <MdOutlineWarehouse size={20} />, path: "/warehouse", label: "Omborxona" }
+        { icon: <DashboardOutlined size={20} />, path: "/main/orders", label: "Buyurtmalar boshqaruvi" },
+        { icon: <ShoppingCartOutlined size={23} />, path: "/manager", label: "Buyurtma qabul qilish" },
+        { icon: <MdOutlineWarehouse size={20} />, path: "/manag/warehouse", label: "Omborxona" },
+    ],
+    director: [
+        { path: "/director", label: "Direktor" },
+    ],
+
+    deputy_director: [
+        { icon: <RiUserAddFill size={20} />, path: "/director/all/worker", label: "Hodimlar" },
 
     ],
-    director: [{ path: "/director", label: "Direktor" }],
+
+    warehouseman: [
+        { icon: <DashboardOutlined size={20} />, path: "/store/orders", label: "Buyurtmalar" },
+        { icon: <MdOutlineWarehouse size={20} />, path: "/warehouseman", label: "Omborxona" },
+    ]
 };

@@ -1,0 +1,91 @@
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper .ant-table-cell,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper .ant-table-thead>tr>th,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper .ant-table-tbody>tr>th,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper .ant-table-tbody>tr>td,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper tfoot>tr>th,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper tfoot>tr>td {
+    position: relative;
+    padding: 6px 16px;
+    overflow-wrap: break-word;
+}
+
+.text-green-500 {
+    display: flex;
+    flex-direction: column;
+}
+
+.customer-navbar .ant-input {
+    height: 40px;
+}
+
+.customer-info-modal ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.customer-info-modal li {
+    background: #f9f9f9;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+}
+
+.customer-info-modal li strong {
+    color: #0A3D3A;
+    font-weight: 600;
+}
+
+.customer-info-modal {
+    padding: 20px;
+}
+
+.customer-info-modal ul li:nth-child(even) {
+    background: #eef5f4;
+}
+
+.customer-navbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 20px;
+}
+
+.custom-table {
+    user-select: none;
+}
+
+
+.custom-table {
+    overflow-y: auto;
+    max-height: 605px;
+    scrollbar-width: thin;
+    scrollbar-color: #0A3D3A #f1f1f100;
+}
+
+/* Chrome, Edge, Safari */
+.custom-table::-webkit-scrollbar {
+    width: 3px !important;
+    /* Scrollbar eni */
+}
+
+.custom-table::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    /* Orqa fon */
+    border-radius: 5px;
+}
+
+.custom-table::-webkit-scrollbar-thumb {
+    background: #888;
+    /* Scrollbar rangi */
+    border-radius: 5px;
+}
+
+.custom-table::-webkit-scrollbar-thumb:hover {
+    background: #555;
+    /* Hover effekti */
+}

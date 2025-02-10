@@ -51,11 +51,7 @@ const Salary = () => {
           amount,
           workerId: record.workerId,
         });
-        console.log("Ma'lumot yuborildi:", {
-          paymentType,
-          amount,
-          workerId: record.workerId,
-        });
+
 
         // Create the salary entry using your schema data
         const salaryData = {

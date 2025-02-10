@@ -1,0 +1,86 @@
+.nav_add {
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.EyeInvisibleOutlined {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.EyeInvisibleOutlined button {
+    border: none;
+    background: transparent;
+    font-size: 17px;
+}
+
+
+.nav_add Button {
+  border: none;
+  position: absolute;
+  left: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.navbar_search {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.back-btn {
+  position: absolute;
+  top: 0px;
+  left: 20px;
+  width: 140px !important;
+  height: 30px !important;
+  background-color: #ddd;
+  border-radius: 5px;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease-in-out;
+
+  &:hover {
+    background-color: var(--main-color);
+    color: white;
+    cursor: pointer;
+  }
+}
+
+.create-worker-title {
+  text-align: center;
+  margin: 30px 0;
+  font-weight: normal;
+}
+
+.create-avatar {
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid #444;
+  transition: transform 0.3s ease-in-out;
+}
+
+.avatar-close-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  background-color: #07000060;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

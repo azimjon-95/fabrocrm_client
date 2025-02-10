@@ -62,7 +62,6 @@ const Attendance = () => {
 
         try {
             let res = await createAttendance(payload).unwrap();
-            console.log(res);
             message.success("Davomat muvaffaqiyatli qo'shildi!");
             setSelectedOption(null);
         } catch (error) {
