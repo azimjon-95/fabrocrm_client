@@ -2,8 +2,8 @@ import { api } from "./api";
 
 export const listApi = api.injectEndpoints({
     endpoints: (builder) => ({
-        createOrder: builder.mutation({
-            query: (orderData) => ({
+        createOrderList: builder.mutation({
+            query: (orderData) => (console.log(orderData), {
                 url: "/list",
                 method: "POST",
                 body: orderData,
@@ -19,7 +19,7 @@ export const listApi = api.injectEndpoints({
             invalidatesTags: ["Order"],
         }),
 
-        getOrders: builder.query({
+        getOrderLists: builder.query({
             query: () => "/list",
         }),
 
@@ -27,7 +27,7 @@ export const listApi = api.injectEndpoints({
             query: (id) => `/list/${id}`,
         }),
 
-        updateOrder: builder.mutation({
+        updateOrderList: builder.mutation({
             query: ({ id, orderData }) => ({
                 url: `/list/${id}`,
                 method: "PUT",
@@ -35,7 +35,7 @@ export const listApi = api.injectEndpoints({
             }),
         }),
 
-        deleteOrder: builder.mutation({
+        deleteOrderList: builder.mutation({
             query: (id) => ({
                 url: `/list/${id}`,
                 method: "DELETE",
@@ -59,11 +59,11 @@ export const listApi = api.injectEndpoints({
 });
 
 export const {
-    useCreateOrderMutation,
-    useGetOrdersQuery,
+    useCreateOrderListMutation,
+    useGetOrderListsQuery,
     useGetOrderByIdQuery,
-    useUpdateOrderMutation,
-    useDeleteOrderMutation,
+    useUpdateOrderListMutation,
+    useDeleteOrderListMutation,
     useDeleteMaterialByIdMutation,
     useDeleteAllMaterialsMutation,
     useCreateMaterialMutation,

@@ -5,7 +5,7 @@ import { MoneyCollectOutlined } from '@ant-design/icons';
 import { AiOutlineLineChart } from "react-icons/ai";
 import { MdOutlineWarehouse } from "react-icons/md";
 import { DashboardOutlined, ShoppingCartOutlined } from "@ant-design/icons";
-
+import { FileTextOutlined } from "@ant-design/icons";
 
 export const menuItems = {
     accountant: [
@@ -30,7 +30,12 @@ export const menuItems = {
     ],
 
     warehouseman: [
-        { icon: <DashboardOutlined size={20} />, path: "/store/orders", label: "Buyurtmalar" },
+        { icon: <DashboardOutlined size={20} />, path: "/store/orders", label: "Boshqaruv" },
         { icon: <MdOutlineWarehouse size={20} />, path: "/warehouseman", label: "Omborxona" },
+        {
+            icon: <FileTextOutlined style={{ fontSize: 20 }} />,
+            path: "/new/order/lists",
+            label: "Buyurtmalar",
+        },
     ]
 };

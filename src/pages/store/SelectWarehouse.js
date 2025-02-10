@@ -16,7 +16,7 @@ const categoryOptions = [
     "Qoplamali Materiallar", "Qoplamalar va Bezaklar", "Kraska va Yelim Mahsulotlari"
 ].map(label => ({ label, value: label }));
 
-const SelectWarehouse = ({ handleInputChange, inputValues, handleAdd }) => {
+const SelectWarehouse = ({ isCreating, handleInputChange, inputValues, handleAdd }) => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -49,8 +49,10 @@ const SelectWarehouse = ({ handleInputChange, inputValues, handleAdd }) => {
                             style={{ background: "#0A3D3A", width: "30px", height: "30px", padding: "0" }}
                             type="primary"
                             onClick={() => handleAdd(record)}
+                            disabled={isCreating[record?._id]}
+                            loading={isCreating[record?._id]}
                         >
-                            <IoMdCheckmarkCircleOutline style={{ fontSize: "20px", marginTop: "4px" }} />
+                            {!isCreating[record?._id] && <IoMdCheckmarkCircleOutline style={{ fontSize: "20px", marginTop: "4px" }} />}
                         </Button>
                     </div>
                 );

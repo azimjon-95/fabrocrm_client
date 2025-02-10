@@ -20,6 +20,7 @@ import OrderMengement from "../pages/manager/main/OrderMengement";
 import NewOrder from "../pages/store/List/NewOrder";
 import Material from "../pages/store/List/Material";
 import GivnMaterial from "../pages/store/List/GivnMaterial";
+import NewOrderLists from "../pages/store/NewOrderLists";
 
 export const routes = [
 
@@ -34,6 +35,7 @@ export const routes = [
 
   // Store
   { path: "/warehouseman", element: <WarehouseForm />, private: true, role: "warehouseman" },
+  { path: "/new/order/lists", element: <NewOrderLists />, private: true, role: "warehouseman" },
   { path: "/store/orders", element: <NewOrder />, private: true, role: "warehouseman" },
   { path: "/store/materials/:id", element: <Material />, private: true, role: "warehouseman" },
   { path: "/store/givn/material/:id", element: <GivnMaterial />, private: true, role: "warehouseman" },

@@ -1,14 +1,27 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useGetOrdersQuery } from "../../../context/service/orderApi";
 import { VscGitPullRequestGoToChanges } from "react-icons/vsc";
 import { LuNewspaper } from "react-icons/lu";
-import { Select, Table, Spin, Form, Input, Alert, Image, Button, List } from "antd";
+import { Select, Table, Spin, Form, Popover, Switch, Input, Alert, Image, Button, List, message } from "antd";
 import { IoMdCheckmarkCircleOutline } from "react-icons/io";
 import { Link } from "react-router-dom";
+import { GiTakeMyMoney } from "react-icons/gi";
+import { MdOutlineMenu } from "react-icons/md";
+import { FiSend } from "react-icons/fi";
+import { AiOutlinePlusSquare, AiOutlineDelete } from "react-icons/ai";
 import { DeleteOutlined } from "@ant-design/icons";
 import { SearchOutlined } from "@ant-design/icons";
+import {
+  useCreateMaterialMutation,
+  useCreateOrderListMutation,
+  useGetOrderListsQuery,
+  useDeleteMaterialByIdMutation,
+  useUpdateOrderListMutation,
+  useDeleteOrderListMutation
+} from "../../../context/service/listApi";
 import "./style.css";
 import SelectWarehouse from "../SelectWarehouse";
+import { MdOutlineCreateNewFolder } from "react-icons/md";
 
 const { Option } = Select;
 
@@ -18,10 +31,38 @@ const NewOrder = () => {
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [openOrderList, setOpenOrderList] = useState(false);
   const [items, setItems] = useState([]);
+  const [checked, setChecked] = useState(true);
   const [form] = Form.useForm();
   const [isDisabled, setIsDisabled] = useState(true);
   const [inputValues, setInputValues] = useState({});
   const newOrders = orders?.innerData?.filter((order) => order.isType === true);
+  const [createMaterial, { isLoading: isCreating }] = useCreateMaterialMutation();
+  const [createOrderList, { isLoading: isCreatingOrder }] = useCreateOrderListMutation();
+  const [deleteMaterialById] = useDeleteMaterialByIdMutation();
+  const { data: lists = [] } = useGetOrderListsQuery();
+  const [deleteOrderList] = useDeleteOrderListMutation();
+  const [updateOrderList] = useUpdateOrderListMutation();
+
+  // `isNew: true` bo'lgan birinchi buyurtmani olish
+  const newLists = lists?.innerData?.find(order => order.isNew === true) || null;
+
+  const handleCreateOrder = async () => {
+    try {
+      const mewLists = {
+        isNew: true,
+        materials: [],
+        sentToAccountant: false,
+        approvedByAccountant: false,
+        addedToData: false,
+        isPaid: false
+      }
+      const newOrder = await createOrderList(mewLists).unwrap();
+      console.log(newOrder);
+      message.success("Yangi buyurtma yaratildi!");
+    } catch (error) {
+      message.warning(error.message || "Buyurtma yaratishda xatolik yuz berdi.");
+    }
+  };
 
   const uniqueRegions = useMemo(() => {
     return [...new Set(newOrders?.map((order) => order?.address?.region).filter(Boolean))];
@@ -42,9 +83,6 @@ const NewOrder = () => {
     });
   }, [newOrders, searchTerm, selectedRegion]);
 
-  if (isLoading) return <Spin size="large" className="loading-spinner" />;
-  if (error) return <Alert message="Xatolik yuz berdi" type="error" showIcon />;
-
   const formatDateUzbek = (date) => {
     const months = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"];
     const d = new Date(date);
@@ -55,7 +93,7 @@ const NewOrder = () => {
     setInputValues(prev => ({ ...prev, [record?._id]: value }));
   };
 
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
     const uniqueId = `67dl${Math.random().toString(36).substr(2, 9)}new${items?.length + 1}`;
     const myNewOrder = {
       productId: uniqueId,
@@ -67,10 +105,13 @@ const NewOrder = () => {
       supplier: values.supplier,
     }
     setItems(prevItems => [...prevItems, myNewOrder]);
+    await createMaterial({ orderId: newLists?._id, material: myNewOrder }).unwrap();
+    message.success("Material qo‘shildi!");
     form.resetFields();
     setIsDisabled(true);
   };
-  const handleAdd = (record) => {
+
+  const handleAdd = async (record) => {
     const quantityToAdd = inputValues[record?._id] || 0;
 
     setItems(prevItems => {
@@ -84,8 +125,7 @@ const NewOrder = () => {
             : item
         );
       } else {
-        // Agar mahsulot mavjud bo‘lmasa, yangi qo‘shamiz
-        return [...prevItems, {
+        const newItem = {
           productId: record._id,
           name: record.name,
           category: record.category,
@@ -93,11 +133,14 @@ const NewOrder = () => {
           quantity: quantityToAdd,
           unit: record.unit,
           supplier: record.supplier,
-        }];
+        };
+        createMaterial({ orderId: newLists?._id, material: newItem }).unwrap();
+        message.success("Material qo‘shildi!");
+        return [...prevItems, newItem];
       }
     });
+    setInputValues({})
   };
-
 
   const columns = [
     {
@@ -121,25 +164,118 @@ const NewOrder = () => {
     },
   ];
 
-
   const handleDelete = (id) => {
-    setItems(items.filter((item) => item.id !== id));
+    deleteMaterialById({ orderId: newLists?._id, materialId: id }).unwrap();
+    message.success("Material o‘chirildi!");
   };
 
   const handleValuesChange = (_, allValues) => {
     const allFieldsFilled = Object.values(allValues).every(value => value !== undefined && value !== "");
     setIsDisabled(!allFieldsFilled);
   };
+
+  const handleDeleteList = async (id) => {
+    try {
+      await deleteOrderList(id).unwrap();
+      message.success("Buyurtma muvaffaqiyatli o‘chirildi!");
+    } catch (error) {
+      message.error(error.message || "O‘chirishda xatolik yuz berdi.");
+    }
+  }
+
+  const handleUpdateAccountantList = async (id) => {
+    try {
+      await updateOrderList(id, { sentToAccountant: true }).unwrap();
+      message.success("Buyurtma muvaffaqiyatli yuborildi!");
+    } catch (error) {
+      message.error(error.message || "O‘chirishda xatolik yuz berdi.");
+    }
+  }
+
+
+  const handleUpdateAddedToDataList = async (id) => {
+    try {
+      await updateOrderList(id, { addedToData: true }).unwrap();
+      message.success("Buyurtma muvaffaqiyatli omborga qo'shildi!");
+    } catch (error) {
+      message.error(error.message || "O‘chirishda xatolik yuz berdi.");
+    }
+  }
+
+  useEffect(() => {
+    if (newLists?.isPaid !== undefined) {
+      setChecked(newLists.isPaid);
+    }
+  }, [newLists?.isPaid]);
+
+  const handleUpdateIsPaid = async (id, checked) => {
+    setChecked(checked);
+    try {
+      await updateOrderList(id, { isPaid: checked }).unwrap();
+      message.success(checked ? "Qarzdorlik olindi" : "Qarzdorlik olinmadi");
+    } catch (error) {
+      message.error(error.message || "O‘zgartirishda xatolik yuz berdi.");
+      setChecked(!checked); // Xatolik bo‘lsa, eski holatga qaytarish
+    }
+  };
+
+  const popoverContent = (
+    <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+      <Button onClick={() => handleUpdateAccountantList(newLists?._id)} className="list-container-btn-add" icon={<FiSend />}>
+        Buhgalterga yuborish
+      </Button>
+      <Button onClick={() => handleUpdateAddedToDataList(newLists?._id)} className="list-container-btn-add" icon={<AiOutlinePlusSquare />}>
+        Omborga qo‘shish
+      </Button>
+      <Button onClick={() => handleDeleteList(newLists?._id)} className="list-container-btn-add" danger icon={<AiOutlineDelete />}>
+        O‘chirish
+      </Button>
+    </div>
+  );
+
+  if (isLoading) return <Spin size="large" className="loading-spinner" />;
+  if (error) return <Alert message="Xatolik yuz berdi" type="error" showIcon />;
+
   return (
     <div className="stor_container">
       <div className="stor_todolist-one">
-        <div className="list-container-nav"></div>
+        <div className="list-container-nav">
+          <Button
+            className="list-container-btn"
+            onClick={handleCreateOrder}
+            loading={isCreatingOrder}
+            disabled={isCreatingOrder || newLists?.isNew}
+          >
+            <MdOutlineCreateNewFolder />
+          </Button>
+
+          {
+            newLists?.totalPrice > 0 ?
+              <div className="list-outlineMenu-box" style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                <GiTakeMyMoney size={20} color="#28a745" />
+                <span>{newLists?.totalPrice?.toLocaleString("uz-UZ")} so‘m</span>
+              </div> : ""
+          }
+
+          <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <Switch style={{
+              backgroundColor: checked ? "#0A3D3A" : "#ff4d4f", // Yashil yoki qizil rang
+            }}
+              defaultChecked
+              checked={checked}
+              onChange={(ch) => handleUpdateIsPaid(newLists?._id, ch)}
+            />
+            <Popover content={popoverContent} title={<div style={{ textAlign: "center", width: "100%" }}>Harakatlar</div>} trigger="click">
+              <Button className="list-outlineMenu" type="primary"><MdOutlineMenu /></Button>
+            </Popover>
+          </div>
+        </div>
         <List
           bordered
           className="list-container"
-          dataSource={items}
+          dataSource={newLists?.materials}
           renderItem={(item) => (
-            <List.Item key={item.id} className="list-item">
+            <List.Item key={item.productId} className="list-item">
               <div className="item-info">
                 <span className="item-name">{item.name}</span>
                 <span className="item-quantity">{item.quantity} {item.unit}</span>
@@ -154,7 +290,7 @@ const NewOrder = () => {
                   {(item.pricePerUnit * item.quantity).toLocaleString('uz-UZ')} so‘m
                 </span>
               </div>
-              <Button type="text" danger className="delete-btn" onClick={() => handleDelete(item.id)}>
+              <Button type="text" danger className="delete-btn" onClick={() => handleDelete(item.productId)}>
                 <DeleteOutlined />
               </Button>
             </List.Item>
@@ -222,6 +358,7 @@ const NewOrder = () => {
                 type="primary"
                 htmlType="submit"
                 disabled={isDisabled}
+                loading={isCreating}
               >
                 <IoMdCheckmarkCircleOutline style={{ fontSize: "20px", marginTop: "2px" }} />
               </Button>
@@ -238,7 +375,7 @@ const NewOrder = () => {
       {
         openOrderList ?
           <div className="stor_todolist">
-            <SelectWarehouse inputValues={inputValues} handleAdd={handleAdd} handleInputChange={handleInputChange} />
+            <SelectWarehouse isCreating={isCreating} inputValues={inputValues} handleAdd={handleAdd} handleInputChange={handleInputChange} />
           </div>
           :
           <div className="stor_todolist">
