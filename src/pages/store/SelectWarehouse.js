@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, Button, Input, Select } from "antd";
+import { Table, Tooltip, Button, Input, Select } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { IoMdCheckmarkCircleOutline } from "react-icons/io";
 import {
@@ -16,7 +16,16 @@ const categoryOptions = [
     "Qoplamali Materiallar", "Qoplamalar va Bezaklar", "Kraska va Yelim Mahsulotlari"
 ].map(label => ({ label, value: label }));
 
-const SelectWarehouse = ({ isCreating, handleInputChange, inputValues, handleAdd }) => {
+const SelectWarehouse = (
+    {
+        isCreating,
+        handleInputChange,
+        inputValues,
+        handleAdd,
+        sentAccountant,
+        addedToData
+    }
+) => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -45,15 +54,26 @@ const SelectWarehouse = ({ isCreating, handleInputChange, inputValues, handleAdd
                             value={inputValues[record?._id]}
                             onChange={(e) => handleInputChange(record, e.target.value)}
                         />
-                        <Button
-                            style={{ background: "#0A3D3A", width: "30px", height: "30px", padding: "0" }}
-                            type="primary"
-                            onClick={() => handleAdd(record)}
-                            disabled={isCreating[record?._id]}
-                            loading={isCreating[record?._id]}
-                        >
-                            {!isCreating[record?._id] && <IoMdCheckmarkCircleOutline style={{ fontSize: "20px", marginTop: "4px" }} />}
-                        </Button>
+                        {
+                            sentAccountant && addedToData ?
+                                <Tooltip title="Yangi mahsulot qo‘shib bo‘lmaydi (Ro‘yxat omborga yoki buxgalteriyaga yuborilgan)">
+                                    <Button
+                                        style={{ background: "transparent", color: "#ddd", width: "30px", height: "30px", padding: "0", cursor: "no-drop" }}
+                                    >
+                                        <IoMdCheckmarkCircleOutline style={{ fontSize: "20px", marginTop: "4px" }} />
+                                    </Button>
+                                </Tooltip>
+                                :
+                                <Button
+                                    style={{ background: "#0A3D3A", width: "30px", height: "30px", padding: "0" }}
+                                    type="primary"
+                                    onClick={() => handleAdd(record)}
+                                    disabled={isCreating[record?._id]}
+                                    loading={isCreating[record?._id]}
+                                >
+                                    {!isCreating[record?._id] && <IoMdCheckmarkCircleOutline style={{ fontSize: "20px", marginTop: "4px" }} />}
+                                </Button>
+                        }
                     </div>
                 );
             }

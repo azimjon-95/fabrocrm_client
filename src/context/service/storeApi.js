@@ -38,6 +38,15 @@ export const storeApi = api.injectEndpoints({
         getStockHistory: builder.query({
             query: () => "/store/history", // Ombor tarixi
         }),
+
+        updateManyStores: builder.mutation({
+            query: (updates) => ({
+                url: "/store/update-many",
+                method: "POST",
+                body: updates,
+            }),
+            invalidatesTags: ["Store"], // Ma'lumot yangilanganidan keyin cache ni tozalash
+        }),
     }),
 });
 
@@ -48,10 +57,9 @@ export const {
     useGetStoreByCategoryQuery,
     useDecrementQuantityMutation,
     useCreateStoreMutation,
-    useGetStockHistoryQuery
+    useGetStockHistoryQuery,
+    useUpdateManyStoresMutation
 } = storeApi;
-
-
 
 
 

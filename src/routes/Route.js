@@ -17,7 +17,7 @@ import Salary from "../pages/accountant/salary/Salary";
 import OrderDetails from "../pages/accountant/accountentMain/OrderDetails";
 import WarehouseForm from "../pages/store/WarehouseForm";
 import OrderMengement from "../pages/manager/main/OrderMengement";
-import NewOrder from "../pages/store/List/NewOrder";
+import MainOrder from "../pages/store/List/Main";
 import Material from "../pages/store/List/Material";
 import GivnMaterial from "../pages/store/List/GivnMaterial";
 import NewOrderLists from "../pages/store/NewOrderLists";
@@ -36,7 +36,7 @@ export const routes = [
   // Store
   { path: "/warehouseman", element: <WarehouseForm />, private: true, role: "warehouseman" },
   { path: "/new/order/lists", element: <NewOrderLists />, private: true, role: "warehouseman" },
-  { path: "/store/orders", element: <NewOrder />, private: true, role: "warehouseman" },
+  { path: "/store/orders", element: <MainOrder />, private: true, role: "warehouseman" },
   { path: "/store/materials/:id", element: <Material />, private: true, role: "warehouseman" },
   { path: "/store/givn/material/:id", element: <GivnMaterial />, private: true, role: "warehouseman" },
 

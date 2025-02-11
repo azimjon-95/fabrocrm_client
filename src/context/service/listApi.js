@@ -27,11 +27,15 @@ export const listApi = api.injectEndpoints({
             query: (id) => `/list/${id}`,
         }),
 
+
         updateOrderList: builder.mutation({
-            query: ({ id, orderData }) => ({
+            query: ({ id, updateData }) => (console.log(id, updateData), {
                 url: `/list/${id}`,
-                method: "PUT",
-                body: orderData,
+                method: "PATCH",
+                body: updateData, // Faqat kerakli maydonlarni yuboring
+                headers: {
+                    "Content-Type": "application/json",
+                },
             }),
         }),
 
