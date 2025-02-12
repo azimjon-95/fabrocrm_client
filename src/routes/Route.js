@@ -32,6 +32,8 @@ export const routes = [
   { path: "/orders/update/:id", element: <UpdateOrderForm />, private: true, role: "manager" },
   { path: "/manag/warehouse", element: <WarehouseForm />, private: true, role: "manager" },
   { path: "/order/mengement", element: <OrderMengement />, private: true, role: "manager" },
+  { path: "/order/givn/material/:id", element: <GivnMaterial />, private: true, role: "manager" },
+
 
   // Store
   { path: "/warehouseman", element: <WarehouseForm />, private: true, role: "warehouseman" },

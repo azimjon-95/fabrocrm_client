@@ -55,7 +55,7 @@ const SelectWarehouse = (
                             onChange={(e) => handleInputChange(record, e.target.value)}
                         />
                         {
-                            sentAccountant && addedToData ?
+                            sentAccountant || addedToData ?
                                 <Tooltip title="Yangi mahsulot qo‘shib bo‘lmaydi (Ro‘yxat omborga yoki buxgalteriyaga yuborilgan)">
                                     <Button
                                         style={{ background: "transparent", color: "#ddd", width: "30px", height: "30px", padding: "0", cursor: "no-drop" }}

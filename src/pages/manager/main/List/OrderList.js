@@ -6,7 +6,7 @@ import { BookOutlined } from "@ant-design/icons";
 import { EyeOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { SearchOutlined } from "@ant-design/icons";
-import "./style.css";
+import "./style.css"; import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom"; // Sahifaga yo‘naltirish uchun
 
 const { Search } = Input;
@@ -70,15 +70,17 @@ const OrderList = () => {
 
   const OrderProgress = ({ record }) => {
     const { data: progressData, isLoading: progressLoading } = useOrderProgressQuery(record._id);
+    console.log(progressData);
 
     return progressLoading ? (
       <Spin size="small" />
     ) : (
-      <Progress style={{ width: "100px" }} percent={progressData?.percentage || 0} />
+      <Progress style={{ width: "130px" }} percent={progressData?.innerData?.percentage || 0} />
     );
   };
 
   const formatDateUzbek = (date) => {
+    console.log(date);
     const months = [
       "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
       "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"
@@ -177,17 +179,32 @@ const OrderList = () => {
       render: (paid) => `${paid.toLocaleString()} so‘m`,
     },
     {
-      title: "Foiz",
+      title: "Tayyorlik darajasi",
       key: "percentage",
       render: (_, record) => <OrderProgress record={record} />,
     },
     {
-      title: "Sanasi",
+      title: "Buyurtma va qolgan kunlar",
       dataIndex: "date",
       key: "date",
-      render: (date) => formatDateUzbek(date),
+      render: (date, record) => {
+        const orderDate = dayjs(date).format("YYYY-MM-DD"); // Buyurtma sanasi
+        const today = dayjs(); // Bugungi sana
+        const daysLeft = record.estimatedDays - today.diff(dayjs(date), "day"); // Qolgan kunlar
+
+        let color = "black"; // Standart rang
+        if (daysLeft <= 3) color = "orange";
+        if (daysLeft <= 2) color = "red"; // 2 yoki undan kam bo‘lsa qizil tusga o‘tadi
+
+        return (
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div>{formatDateUzbek(orderDate)}</div> {/* Sanani ko‘rsatish */}
+            /
+            <div style={{ color }}>{daysLeft} kun</div> {/* Qolgan kunlar */}
+          </div>
+        );
+      },
     },
-    { title: "Taxminiy kunlar", dataIndex: "estimatedDays", key: "estimatedDays" },
     {
       title: "Mijoz turi",
       render: (paid) => (

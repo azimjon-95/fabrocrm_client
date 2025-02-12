@@ -346,3 +346,19 @@
 :where(.css-dev-only-do-not-override-1drr2mu).ant-card-bordered {
     border: 1px solid #0A3D3A;
 }
+
+.popoverContent {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.popoverContent Button {
+    position: relative;
+}
+
+.popoverContent Button svg {
+    position: absolute;
+    left: 4px;
+    top: 8px;
+}

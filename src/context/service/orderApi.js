@@ -21,6 +21,8 @@ export const orderApi = api.injectEndpoints({
             }),
         }),
 
+
+
         // Update an existing order
         updateOrder: builder.mutation({
             query: ({ id, updates }) => ({
@@ -54,7 +56,7 @@ export const orderApi = api.injectEndpoints({
 
         ///order/get-material/:orderId/:materialId
         getMaterialById: builder.query({
-            query: ({ orderId, materialId }) => (console.log(orderId, materialId), {
+            query: ({ orderId, materialId }) => ({
                 url: `/order/get-material/${orderId}/${materialId}`,
                 method: "GET",
             }),
@@ -81,6 +83,5 @@ export const {
     useGiveMaterialMutation,
     useOrderProgressQuery,
     useGetMaterialByIdQuery,
-    useGetAllMaterialByIdQuery
-
+    useGetAllMaterialByIdQuery,
 } = orderApi;

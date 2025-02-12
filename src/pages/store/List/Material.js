@@ -11,9 +11,8 @@ const MaterialItem = ({ material, orderId, inputValues, loadingStates, handleInp
         orderId,
         materialId: material._id,
     });
-    console.log(materialData);
 
-    if (isMaterialLoading) return <Spin tip="Yuklanmoqda..." />;
+    if (isMaterialLoading) return <List.Item><Card style={{ height: "140px" }}><Spin tip="Yuklanmoqda..." /></Card></List.Item>;
 
     return (
         <List.Item key={material._id}>

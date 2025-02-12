@@ -108,12 +108,12 @@ const AddItems = (
 
         <div className="VscGitPullRequestGoToChanges-btns">
           {
-            sentAccountant && addedToData ?
+            sentAccountant || addedToData ?
               <Tooltip title="Yangi mahsulot qo‘shib bo‘lmaydi (Ro‘yxat omborga yoki buxgalteriyaga yuborilgan)">
                 <Button
                   size="large"
                   type="primary"
-                  disabled={sentAccountant && addedToData}
+                  disabled={sentAccountant || addedToData}
                 >
                   <IoMdCheckmarkCircleOutline style={{ fontSize: "20px", marginTop: "2px" }} />
                 </Button>

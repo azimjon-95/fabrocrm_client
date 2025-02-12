@@ -148,16 +148,16 @@ const Main = () => {
   };
 
   const popoverContent = (
-    <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+    <div className="popoverContent" >
       <Button disabled={newLists?.sentToAccountant} onClick={() => handleUpdateAccountantList(newLists?._id)} className="list-container-btn-add">
-        <FiSend /> {newLists?.sentToAccountant ? "Buhgalterga yuborilgan" : "Buhgalterga yuborish"}
+        <FiSend style={{ fontSize: "15px", marginTop: "1px" }} /> {newLists?.sentToAccountant ? "Buhgalterga yuborilgan" : "Buhgalterga yuborish"}
       </Button>
-      {/* //disabled={newLists?.addedToData} */}
-      <Button onClick={() => handleUpdateAddedToDataList(newLists?._id)} className="list-container-btn-add">
-        <AiOutlinePlusSquare />  {newLists?.addedToData ? "Omborga qo‘shilgan" : "Omborga qo‘shish"}
+
+      <Button disabled={newLists?.addedToData} onClick={() => handleUpdateAddedToDataList(newLists?._id)} className="list-container-btn-add">
+        <AiOutlinePlusSquare style={{ fontSize: "17px" }} />  {newLists?.addedToData ? "Omborga qo‘shilgan" : "Omborga qo‘shish"}
       </Button>
-      <Button onClick={() => handleDeleteList(newLists?._id)} className="list-container-btn-add" danger icon={<AiOutlineDelete />}>
-        O‘chirish
+      <Button onClick={() => handleDeleteList(newLists?._id)} className="list-container-btn-add" danger >
+        <AiOutlineDelete style={{ fontSize: "17px" }} /> O‘chirish
       </Button>
     </div>
   );
@@ -170,7 +170,7 @@ const Main = () => {
             className="list-container-btn-list"
             onClick={() => handleCloseOrder(newLists?._id)}
             loading={isCreatingOrder}
-          // disabled={newLists.materials?.length > 0}
+            disabled={newLists?.materials?.length <= 1} // Agar newLists null bo‘lsa, materials tekshirilmaydi
           >
             <TbClipboardList /> Yangi list
           </Button>

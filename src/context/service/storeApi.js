@@ -26,15 +26,22 @@ export const storeApi = api.injectEndpoints({
                 method: "DELETE",
             }),
         }),
+        // get by id
+        getStoreByCustomerId: builder.query({
+            query: (id) => `/store/byId/${id}`, // Endpoint to'g'ri tuzatildi
+        }),
+
         getStoreByCategory: builder.query({
             query: (category) => `/store/category/${category}`,
         }),
+
         decrementQuantity: builder.mutation({
             query: (id) => ({
                 url: `/store/decrement/${id}`,
                 method: "PUT",
             }),
         }),
+
         getStockHistory: builder.query({
             query: () => "/store/history", // Ombor tarixi
         }),
@@ -57,6 +64,7 @@ export const {
     useGetStoreByCategoryQuery,
     useDecrementQuantityMutation,
     useCreateStoreMutation,
+    useGetStoreByCustomerIdQuery,
     useGetStockHistoryQuery,
     useUpdateManyStoresMutation
 } = storeApi;

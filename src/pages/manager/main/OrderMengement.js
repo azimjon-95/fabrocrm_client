@@ -115,6 +115,7 @@ const OrderMengement = () => {
             quantity: Number(quantity),
             unit: mat.unit,
             price: mat.pricePerUnit,
+            materialID: mat._id
           },
         ];
       }
