@@ -2,6 +2,7 @@
   width: 100%;
   height: 100vh;
   display: flex;
+  overflow: hidden;
   background-color: #0a3d3a;
 }
 
@@ -12,13 +13,15 @@
 
 .layout_right {
   width: 83%;
-  height: 100%;
+  height: 100vh;
   background-color: rgb(231, 231, 243);
+  overflow: hidden;
 }
 
 .main-content {
   width: 100%;
-  height: calc(100% - 45px);
+  height: calc(100% - 50px);
+  overflow: hidden;
   padding: 15px;
-  background-color: #fff;
+  background: #fff;
 }

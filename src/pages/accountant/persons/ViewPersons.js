@@ -251,8 +251,8 @@ const WorkersTable = () => {
                         placeholder="Qidirish..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ width: 600 }}
-                        size="large"
+                        style={{ width: 600, height: "39px" }}
+                        size="small"
                         prefix={
                             <SearchOutlined style={{ color: "#cdcdcd", marginTop: "3px" }} />
                         }

@@ -137,7 +137,6 @@ const Main = () => {
 
   const handleUpdateIsPaid = async (id, checked) => {
     setChecked(checked);
-    console.log(id, { $set: { isPaid: checked } });
     try {
       await updateOrderList({ id, updateData: { isPaid: checked } }).unwrap();
       message.success(checked ? "Qarzdorlik olindi" : "Qarzdorlik olinmadi");

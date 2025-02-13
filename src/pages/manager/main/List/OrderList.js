@@ -70,7 +70,6 @@ const OrderList = () => {
 
   const OrderProgress = ({ record }) => {
     const { data: progressData, isLoading: progressLoading } = useOrderProgressQuery(record._id);
-    console.log(progressData);
 
     return progressLoading ? (
       <Spin size="small" />
@@ -80,7 +79,6 @@ const OrderList = () => {
   };
 
   const formatDateUzbek = (date) => {
-    console.log(date);
     const months = [
       "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
       "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"

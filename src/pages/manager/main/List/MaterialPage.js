@@ -3,22 +3,29 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useGetOrderByIdQuery, useGetMaterialByIdQuery } from "../../../../context/service/orderApi";
 import { useGetStoreByCustomerIdQuery } from "../../../../context/service/storeApi";
 import { Card, List, Spin, Button } from "antd";
+import { BsExclamationLg } from "react-icons/bs";
 import { FiBox } from "react-icons/fi";
 
 const MaterialItem = ({ material, orderId }) => {
     const { data: storeByCustomer, isLoading: isStoreLoading } = useGetStoreByCustomerIdQuery(material?.materialID);
     const { data: materialData, isLoading: isMaterialLoading } = useGetMaterialByIdQuery({ orderId, materialId: material._id });
-    console.log(storeByCustomer.innerData.quantity);
     return (
         <List.Item key={material._id}>
-            <Card title={material.name} style={{ minHeight: 120 }}>
+            <Card title={
+                <div className="storeByCustomer">
+                    <p>{material.name}</p>
+                    {
+                        material.quantity > storeByCustomer?.innerData?.quantity &&
+                        <p> <BsExclamationLg />Omborda: {storeByCustomer?.innerData?.quantity || 0} {material.unit} mavjud</p>
+                    }
+                </div>
+            } style={{ minHeight: 120 }}>
                 {(isMaterialLoading || isStoreLoading) ? (
                     <Spin tip="Yuklanmoqda..." />
                 ) : (
                     <div className="material-stor-select">
                         <div>
                             <p>Miqdori: {material.quantity} {material.unit}</p>
-                            <p>Omborda: {storeByCustomer?.innerData?.quantity || 0} {material.unit}</p>
                             <p>Jami: {materialData?.totalQuantity || 0} {material.unit}</p>
                         </div>
                         <div>
@@ -27,8 +34,8 @@ const MaterialItem = ({ material, orderId }) => {
                         </div>
                     </div>
                 )}
-            </Card>
-        </List.Item>
+            </Card >
+        </List.Item >
     );
 };
 

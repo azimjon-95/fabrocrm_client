@@ -3,7 +3,7 @@ import { api } from "./api";
 export const listApi = api.injectEndpoints({
     endpoints: (builder) => ({
         createOrderList: builder.mutation({
-            query: (orderData) => (console.log(orderData), {
+            query: (orderData) => ({
                 url: "/list",
                 method: "POST",
                 body: orderData,
@@ -29,7 +29,7 @@ export const listApi = api.injectEndpoints({
 
 
         updateOrderList: builder.mutation({
-            query: ({ id, updateData }) => (console.log(id, updateData), {
+            query: ({ id, updateData }) => ({
                 url: `/list/${id}`,
                 method: "PATCH",
                 body: updateData, // Faqat kerakli maydonlarni yuboring

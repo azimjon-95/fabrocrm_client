@@ -23,46 +23,35 @@ import GivnMaterial from "../pages/store/List/GivnMaterial";
 import NewOrderLists from "../pages/store/NewOrderLists";
 
 export const routes = [
-
-  // Manager
-  { path: "/manager", element: <Order />, private: true, role: "manager" },
-  { path: "/main/orders", element: <OrderList />, private: true, role: "manager" },
-  { path: "/orders/story", element: <OrderStory />, private: true, role: "manager" },
-  { path: "/orders/materials/:id", element: <MaterialPage />, private: true, role: "manager" },
-  { path: "/orders/update/:id", element: <UpdateOrderForm />, private: true, role: "manager" },
-  { path: "/manag/warehouse", element: <WarehouseForm />, private: true, role: "manager" },
-  { path: "/order/mengement", element: <OrderMengement />, private: true, role: "manager" },
-  { path: "/order/givn/material/:id", element: <GivnMaterial />, private: true, role: "manager" },
-
-
-  // Store
-  { path: "/warehouseman", element: <WarehouseForm />, private: true, role: "warehouseman" },
-  { path: "/new/order/lists", element: <NewOrderLists />, private: true, role: "warehouseman" },
-  { path: "/store/orders", element: <MainOrder />, private: true, role: "warehouseman" },
-  { path: "/store/materials/:id", element: <Material />, private: true, role: "warehouseman" },
-  { path: "/store/givn/material/:id", element: <GivnMaterial />, private: true, role: "warehouseman" },
-
-  // Accountant
-  { path: "/persons/add", element: <RegisterWorker />, private: true, role: "accountant" },
-  { path: "/persons", element: <ViewPersons />, private: true, role: "accountant" },
-  { path: "/attendance", element: <Attendance />, private: true, role: "accountant" },
-  { path: "/attendance/story", element: <Story />, private: true, role: "accountant" },
-  { path: "/setting", element: <SettingsPage />, private: true, role: "accountant" },
-  { path: "/salary", element: <Salary />, private: true, role: "accountant" },
-  { path: "/order/:id", element: <OrderDetails />, private: true, role: "accountant" },
-  {
-    path: "/accountant",
-    element: <Accountant />,
-    private: true,
-    role: "accountant",
-  },
-
-  // director
-  { path: "/director", element: <Director />, private: true, role: "director" },
-
-  // deputy_directorr
-  { path: "/deputy/warehouse", element: <WarehouseForm />, private: true, role: "deputy_directorr" },
-  { path: "/worker/add", element: <RegisterWorker />, private: true, role: "deputy_directorr" },
-  { path: "/director/all/worker", element: <Persons />, private: true, role: "deputy_directorr" },
-  { path: "/director/add/worker", element: <AddPersons />, private: true, role: "deputy_directorr" },
+  { path: "/manager", element: <Order />, private: true, role: ["manager", "deputy"] },
+  { path: "/main/orders", element: <OrderList />, private: true, role: ["manager", "deputy"] },
+  { path: "/orders/story", element: <OrderStory />, private: true, role: ["manager", "deputy"] },
+  { path: "/orders/materials/:id", element: <MaterialPage />, private: true, role: ["manager", "deputy"] },
+  { path: "/orders/update/:id", element: <UpdateOrderForm />, private: true, role: ["manager", "deputy"] },
+  { path: "/manag/warehouse", element: <WarehouseForm />, private: true, role: ["manager", "deputy"] },
+  { path: "/order/mengement", element: <OrderMengement />, private: true, role: ["manager", "deputy"] },
+  { path: "/order/givn/material/:id", element: <GivnMaterial />, private: true, role: ["manager", "deputy"] },
+  // ==========================================================================================
+  { path: "/warehouseman", element: <WarehouseForm />, private: true, role: ["warehouseman", "deputy"] },
+  { path: "/new/order/lists", element: <NewOrderLists />, private: true, role: ["warehouseman", "deputy"] },
+  { path: "/store/orders", element: <MainOrder />, private: true, role: ["warehouseman", "deputy"] },
+  { path: "/store/materials/:id", element: <Material />, private: true, role: ["warehouseman", "deputy"] },
+  { path: "/store/givn/material/:id", element: <GivnMaterial />, private: true, role: ["warehouseman", "deputy"] },
+  // ==========================================================================================
+  { path: "/persons/add", element: <RegisterWorker />, private: true, role: ["accountant", "deputy"] },
+  { path: "/persons", element: <ViewPersons />, private: true, role: ["accountant", "deputy"] },
+  { path: "/attendance", element: <Attendance />, private: true, role: ["accountant", "deputy"] },
+  { path: "/attendance/story", element: <Story />, private: true, role: ["accountant", "deputy"] },
+  { path: "/setting", element: <SettingsPage />, private: true, role: ["accountant", "deputy"] },
+  { path: "/salary", element: <Salary />, private: true, role: ["accountant", "deputy"] },
+  { path: "/order/:id", element: <OrderDetails />, private: true, role: ["accountant", "deputy"] },
+  { path: "/accountant", element: <Accountant />, private: true, role: ["accountant", "deputy"] },
+  // ==========================================================================================
+  { path: "/deputy", element: <Persons />, private: true, role: "deputy" },
+  { path: "/worker/add", element: <RegisterWorker />, private: true, role: "deputy" },
+  { path: "/deputy/warehouse", element: <WarehouseForm />, private: true, role: "deputy" },
+  { path: "/director/add/worker", element: <AddPersons />, private: true, role: "deputy" },
+  { path: "/deput/warehouse", element: <WarehouseForm />, private: true, role: "deputy" },
+  // ==========================================================================================
+  { path: "/director", element: <Director />, private: true, role: ["director", "deputy"] },
 ];

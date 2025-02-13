@@ -98,9 +98,38 @@
 .material-stor-select div {
     width: 100%;
     display: flex;
-    padding: 5px 0;
+    padding: 2px 0;
+    position: relative;
 }
 
 .material-stor-select div p {
     width: 45%;
+}
+
+.storeByCustomer {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+
+.storeByCustomer p:nth-child(1) {
+    width: 45%;
+}
+
+.storeByCustomer p:nth-child(2) {
+    padding: 2px 8px;
+    text-align: right;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    border-radius: 6px;
+    margin-top: 2px;
+    color: red;
+    border: 1px dashed rgba(255, 0, 0, 0.635);
+}
+
+.storeByCustomer p:nth-child(2) svg {
+    font-size: 19px;
 }

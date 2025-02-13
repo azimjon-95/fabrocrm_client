@@ -47,7 +47,6 @@ const ViewPersons = () => {
 
 
     const handleUpdateAdmin = (record) => {
-        console.log(record);
         navigate("/director/add/worker", { state: { userData: record } });
     };
     const [deleteAdmin] = useDeleteAdminMutation();
@@ -162,7 +161,7 @@ const ViewPersons = () => {
                     director: 'Direktor',
                     accountant: 'Buxgalter',
                     warehouseman: 'Omborchi',
-                    deputy_director: 'Direktor o‘rinbosari',
+                    deputy: 'Direktor o‘rinbosari',
                 };
                 return roleMap[role] || 'Noma’lum';
             }
@@ -233,8 +232,8 @@ const ViewPersons = () => {
                         }}
                     >
                         <Input
-                            placeholder="Search..."
-                            prefix={<SearchOutlined />}
+                            placeholder="Qidirish..."
+                            prefix={<SearchOutlined style={{ color: "#cdcdcd", marginTop: "3px" }} />}
                             onChange={(e) => handleSearch(e.target.value)}
                             style={{ width: "100%" }}
                             size="small"
