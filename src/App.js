@@ -15,7 +15,7 @@ const App = () => {
       const maxW = window.innerWidth;
       const maxH = window.innerHeight;
 
-      if (role !== "director" && (maxW < maxH)) {
+      if (role !== "director" && maxW < maxH) {
         setShowMessage(true);
       }
     };
@@ -29,8 +29,7 @@ const App = () => {
   return (
     <>
       {showMessage ? (
-        <div className="checkScreenSize"
-        >
+        <div className="checkScreenSize">
           <p>Sizga ushbu dasturga faqat kompyuterdan kirish ruxsat etilgan!</p>
         </div>
       ) : (
