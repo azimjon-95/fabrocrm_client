@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Table, Avatar, message, Input, Button, Popconfirm } from "antd";
 import { useNavigate } from "react-router-dom";
 import {
@@ -18,7 +18,6 @@ import {
   useGetWorkersQuery,
   useDeleteWorkerMutation,
 } from "../../../context/service/worker";
-import socket from "../../../socket";
 
 const WorkersTable = () => {
   const navigate = useNavigate();
@@ -28,16 +27,6 @@ const WorkersTable = () => {
   const [deleteWorker] = useDeleteWorkerMutation();
   const { data: workersData, isLoading } = useGetWorkersQuery();
   const workers = workersData?.innerData || [];
-
-  useEffect(() => {
-    socket.on("all_worker", (user) => {
-      console.log("ok");
-      console.log(user);
-    });
-    return () => {
-      socket.off("all_worker");
-    };
-  }, [socket]);
 
   const handleDelete = async (id) => {
     try {
@@ -271,8 +260,8 @@ const WorkersTable = () => {
             placeholder="Qidirish..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ width: 600 }}
-            size="large"
+            style={{ width: 600, height: "39px" }}
+            size="small"
             prefix={
               <SearchOutlined style={{ color: "#cdcdcd", marginTop: "3px" }} />
             }

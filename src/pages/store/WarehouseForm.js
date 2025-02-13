@@ -81,7 +81,7 @@ const Warehouse = () => {
 
 
     const location = useLocation();
-    const isHidden = location.pathname === "/manag/warehouse";
+    const isHidden = location.pathname === "/manag/warehouse" || location.pathname === "/deput/warehouse";
     const columns = [
         { title: "Mahsulot nomi", dataIndex: "name", key: "name" },
         { title: "Kategoriya", dataIndex: "category", key: "category" },
@@ -107,9 +107,6 @@ const Warehouse = () => {
                     {categoryOptions.map(option => <Option key={option.value} value={option.value}>{option.label}</Option>)}
                 </Select>
                 <Input style={{ width: "100%" }} placeholder="Mahsulotlarni qidiring..." onChange={(e) => setSearchQuery(e.target.value)} prefix={<SearchOutlined />} className="warehouse-navbar_inp" />
-                {!isHidden &&
-                    <Button style={{ background: "#0A3D3A" }} size="large" type="primary" onClick={() => openModal()} icon={<PlusOutlined />}>Mahsulot qo‘shish</Button>
-                }
             </div>
 
             <Table

@@ -113,7 +113,7 @@ const Attendance = () => {
                         ) : (
                             <>
                                 <Button
-                                    type="primary"
+                                    type="primary" style={{ background: "#0A3D3A" }}
                                     icon={attendanceStatus[record._id]?.isCheckedIn ? null : <CheckOutlined />}
                                     onClick={() => handleAttendance(record._id)}
                                 >
@@ -125,6 +125,7 @@ const Attendance = () => {
                                     onChange={(e) => setWorkingHours(e.target.value)}
                                     placeholder="Soati..."
                                     style={{ width: 80 }}
+
                                 />
                                 <Select
                                     onChange={(value) => setSelectedOption(value)}
@@ -138,6 +139,7 @@ const Attendance = () => {
                                 </Select>
                                 <Button
                                     icon={<CheckCircleOutlined />}
+
                                     size="middle"
                                     onClick={() => handleEdit(record)}
                                     disabled={!attendanceStatus[record._id] || !workingHours}
@@ -171,8 +173,8 @@ const Attendance = () => {
                         placeholder="Qidirish..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ width: 600 }}
-                        size="large"
+                        style={{ width: "100%", height: "40px" }}
+                        size="small"
                         prefix={<SearchOutlined style={{ color: "#cdcdcd", marginTop: "3px" }} />}
                     />
                 </div>
@@ -192,15 +194,17 @@ const Attendance = () => {
             </div>
 
             <Table
+                className="custom-tableAtt"
                 columns={columns}
                 dataSource={filteredWorkers}
                 rowKey="_id"
                 loading={workersLoading || attendanceLoading}
                 pagination={false}
-                style={{ marginTop: 20 }}
                 size="small"
                 bordered
+                scroll={{ x: "max-content", y: 560 }}
             />
+
         </div>
     );
 };

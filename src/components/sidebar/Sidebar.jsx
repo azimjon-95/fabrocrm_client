@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import "./Sidebar.css";
 import { Link, NavLink } from "react-router-dom";
-import { MdLogout } from "react-icons/md";
+import { MdLogout, MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 import { Modal } from "antd";
 import { useNavigate } from "react-router-dom";
 import { menuItems } from "../../utils/SidebarMenu";
+import mebelxLogo from "../../assets/mbx.png";
+
 const { confirm } = Modal;
 
 function Sidebar() {
@@ -18,30 +20,48 @@ function Sidebar() {
       okType: "danger",
       cancelText: "Yo'q",
       onOk() {
-        localStorage.removeItem("token");
-        localStorage.removeItem("role");
-        localStorage.removeItem("admin");
+        ["token", "role", "admin"].forEach(item => localStorage.removeItem(item));
         navigate("/login");
       },
-      onCancel() { },
     });
   };
+
+  const [openMenus, setOpenMenus] = useState({});
+  const toggleMenu = (label) => setOpenMenus((prev) => ({ ...prev, [label]: !prev[label] }));
 
   return (
     <aside>
       <div className="sidebar_logo">
-        <Link>MebelX</Link>
+        <img src={mebelxLogo} alt="" />
+        <i>Avtomatlashtirish - kelajak bugun</i>
       </div>
       <div className="sidebar_links">
         {menuItems[role]?.map((item) => (
-          <NavLink key={item.path} to={item.path}>
-            {item.icon}
-            <span>{item.label}</span>
-          </NavLink>
+          item.children ? (
+            <div key={item.label} className="sidebar_menu">
+              <button onClick={() => toggleMenu(item.label)} className="sidebar_menu_button">
+                <span>{item.icon} {item.label}</span>
+                {openMenus[item.label] ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
+              </button>
+              {openMenus[item.label] && (
+                <div className="sidebar_submenu">
+                  {item.children.map((subItem) => (
+                    <NavLink key={subItem.path} to={subItem.path} className="sidebar_submenu_item">
+                      {subItem.icon} <span>{subItem.label}</span>
+                    </NavLink>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <NavLink key={item.path} to={item.path} className="sidebar_menu_item">
+              {item.icon} <span>{item.label}</span>
+            </NavLink>
+          )
         ))}
         <div className="sidebar_logout_container">
-          <button onClick={() => logOut()}>
-            Tizimdan chiqish <MdLogout />{" "}
+          <button onClick={logOut}>
+            Tizimdan chiqish <MdLogout />
           </button>
         </div>
       </div>

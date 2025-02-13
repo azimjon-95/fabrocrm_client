@@ -42,7 +42,6 @@ const Persons = () => {
             };
 
             let response;
-            console.log(formData);
             if (userData) {
                 response = await updateAdmin({ id: userData._id, data: formData }).unwrap();
                 message.success("Foydalanuvchi yangilandi");

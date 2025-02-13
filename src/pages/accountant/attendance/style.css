@@ -126,3 +126,24 @@
   align-items: center;
   gap: 10px;
 }
+
+
+.custom-tableAtt .ant-table-body {
+  scrollbar-width: thin;
+  /* Firefox */
+  scrollbar-color: #ccc #f0f0f0;
+}
+
+.custom-tableAtt .ant-table-body::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-tableAtt .ant-table-body::-webkit-scrollbar-thumb {
+  background-color: #bfbfbf;
+  border-radius: 4px;
+}
+
+.custom-tableAtt .ant-table-body::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
