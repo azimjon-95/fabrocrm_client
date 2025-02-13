@@ -4,7 +4,7 @@ export const worker = api.injectEndpoints({
   endpoints: (builder) => ({
     // GET WORKERS
     getWorkers: builder.query({
-      query: () => "/worker/all",
+      query: () => "worker/all",
       providesTags: ["Workers"],
     }),
 
