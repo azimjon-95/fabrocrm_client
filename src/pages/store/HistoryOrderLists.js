@@ -1,10 +1,11 @@
 import React from "react";
-import { Table, Button, message } from "antd";
-import { useGetOrderListsQuery, useUpdateOrderListMutation } from '../../context/service/listApi';
+import { Table, Button } from "antd";
+import { useGetOrderHistoryQuery } from '../../context/service/listApi';
 import { FileExcelOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import "dayjs/locale/uz";
 import * as XLSX from "xlsx";
+import { useNavigate } from "react-router-dom";
 
 dayjs.locale("uz");
 
@@ -13,36 +14,9 @@ const uzMonths = [
     "iyul", "avgust", "sentyabr", "oktyabr", "noyabr", "dekabr"
 ];
 
-
-const NewOrderList = ({ filteredLists, list }) => {
-    const [updateOrderList] = useUpdateOrderListMutation();
-    const { data, isLoading } = useGetOrderListsQuery();
-
-    const handlePayment = async (record) => {
-        try {
-            const response = await updateOrderList({ id: record._id, updateData: { isPaid: true, approvedByAccountant: false } })
-            if (response) {
-                message.success("To‘lov muvaffaqiyatli bajarildi!");
-            } else {
-                throw new Error("To‘lov amalga oshirilmadi.");
-            }
-        } catch (error) {
-            message.error(error.message);
-        }
-    };
-
-    const handleDebtPayment = async (record) => {
-        try {
-            const response = await updateOrderList({ id: record._id, updateData: { approvedByAccountant: true } })
-            if (response) {
-                message.success("To‘lov muvaffaqiyatli bajarildi!");
-            } else {
-                throw new Error("To‘lov amalga oshirilmadi.");
-            }
-        } catch (error) {
-            message.error(error.message);
-        }
-    };
+const HistoryOrderLists = ({ list }) => {
+    const navigator = useNavigate();
+    const { data, isLoading } = useGetOrderHistoryQuery();
 
     const columns = [
         {
@@ -51,29 +25,13 @@ const NewOrderList = ({ filteredLists, list }) => {
             key: "totalPrice",
             render: (price) => `${price.toLocaleString()} so'm`,
         },
-        ...(!list
-            ? [
-                {
-                    title: "Holat",
-                    key: "status",
-                    render: (_, record) => (
-                        record.isPaid ? "To'langan" : "To'lanmagan"
-                    ),
-                }]
-            : [{
-                title: "To‘lovni kechiktirish",
-                key: "pay",
-                render: (record) => (
-                    record.approvedByAccountant ?
-                        <span style={{ color: "red", fontWeight: "bold" }}>Qarz</span>
-                        :
-                        <Button type="primary" onClick={() => handleDebtPayment(record)} style={{ background: "#0A3D3A" }}>
-                            Qarzga olish
-                        </Button>
-                ),
-            }
-
-            ]),
+        {
+            title: "Holat",
+            key: "status",
+            render: (_, record) => (
+                record.isPaid ? "To'langan" : "To'lanmagan"
+            ),
+        },
         ...(!list
             ? [
                 {
@@ -93,22 +51,12 @@ const NewOrderList = ({ filteredLists, list }) => {
                 }]
             : []),
 
-        ...(list
-            ? [{
-                title: "To‘lov amali",
-                key: "pay",
-                render: (record) => (
-                    <Button type="primary" onClick={() => handlePayment(record)} style={{ background: "#0A3D3A" }}>
-                        To‘lash
-                    </Button>
-                ),
-            }]
-            : [{
-                title: "Buxgalter tasdiqladi",
-                dataIndex: "approvedByAccountant",
-                key: "approvedByAccountant",
-                render: (approvedByAccountant) => (approvedByAccountant ? "Ha" : "Yo'q"),
-            }]),
+        {
+            title: "Buxgalter tasdiqladi",
+            dataIndex: "approvedByAccountant",
+            key: "approvedByAccountant",
+            render: (approvedByAccountant) => (approvedByAccountant ? "Ha" : "Yo'q"),
+        },
 
 
         ...(!list
@@ -129,7 +77,6 @@ const NewOrderList = ({ filteredLists, list }) => {
                 return `${d.date()}-${uzMonths[d.month()]} / ${d.format("HH:mm")}`;
             },
         },
-        // Agar `list` true bo'lsa, ushbu ustunni qo'shmaymiz
         ...(!list
             ? [{
                 title: "Yuklab olish",
@@ -252,12 +199,15 @@ const NewOrderList = ({ filteredLists, list }) => {
 
     return (
         <div>
-            {!list &&
-                <h2 style={{ color: "#0A3D3A", textAlign: "center", marginBottom: "10px" }}>Buyurtmalar Ro'yxati</h2>
-            }
+
+            <div className="stororderhistory">
+                <Button style={{ background: "#0A3D3A", color: "#fff" }} onClick={() => navigator(-1)}>⬅ Orqaga</Button>
+                <h2 style={{ color: "#0A3D3A", textAlign: "center", marginBottom: "10px" }}>Ombor buyurtmalar tarixi</h2>
+            </div>
+
             <Table
                 columns={columns}
-                dataSource={filteredLists || data?.innerData}
+                dataSource={data?.innerData}
                 rowKey="_id"
                 pagination={false}
                 loading={isLoading}
@@ -268,7 +218,7 @@ const NewOrderList = ({ filteredLists, list }) => {
     );
 };
 
-export default NewOrderList;
+export default HistoryOrderLists;
 
 
 

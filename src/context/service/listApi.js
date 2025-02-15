@@ -45,6 +45,10 @@ export const listApi = api.injectEndpoints({
                 method: "DELETE",
             }),
         }),
+        // /list/history
+        getOrderHistory: builder.query({
+            query: () => "/list-history",
+        }),
 
         deleteMaterialById: builder.mutation({
             query: ({ orderId, materialId }) => ({
@@ -71,4 +75,5 @@ export const {
     useDeleteMaterialByIdMutation,
     useDeleteAllMaterialsMutation,
     useCreateMaterialMutation,
+    useGetOrderHistoryQuery,
 } = listApi;

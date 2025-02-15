@@ -1,166 +1,251 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "./style.css";
 import { RiFileList3Line } from "react-icons/ri";
 import { HiOutlinePencilSquare } from "react-icons/hi2";
 import { BellOutlined } from "@ant-design/icons";
-import moment from 'moment'; // For handling date formatting
-import { DatePicker, Badge, Checkbox, Table, message, Button, Input } from "antd";
-import { useGetExpensesByPeriodQuery, useCreateExpenseMutation } from '../../../context/service/expensesApi';
-const { RangePicker } = DatePicker;
+import moment from "moment"; // For handling date formatting
+import { Badge, Checkbox, Table, message, Button, Input } from "antd";
+import AsyncSelect from "react-select/async"; // Yangi import
+import { useGetExpensesByPeriodQuery, useCreateExpenseMutation } from "../../../context/service/expensesApi";
+import { useGetOrderListsQuery } from "../../../context/service/listApi";
+import NewOrderList from "../../store/NewOrderLists";
+import soundFile from "../../../assets/sound.mp3";
+import { BsArrowLeftRight } from "react-icons/bs";
+import { MdHistory } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
+
+const formatDate = (date) => {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`;
+};
+
+// { selectedDates, setSelectedDates, expenses }
+
 const ExpenseRegister = () => {
+    const navigate = useNavigate();
+    const modalRef = useRef(null);
     const [expenseName, setExpenseName] = useState("");
     const [expenseAmount, setExpenseAmount] = useState("");
     const [expenseDescription, setExpenseDescription] = useState("");
     const [isIncome, setIsIncome] = useState(false);
+    const [open, setOpen] = useState(false);
     const [isExpense, setIsExpense] = useState(true);
     const [activeBox, setActiveBox] = useState("expenses");
-    const [notificationCount, setNotificationCount] = useState(5);
     const [createExpense] = useCreateExpenseMutation();
-    // Default state
-    const startOfMonth = moment().startOf("month");
-    const endOfMonth = moment().endOf("month");
+    const { data: orderLists } = useGetOrderListsQuery();
+    const filteredLists =
+        orderLists?.innerData?.filter((i) => i.sentToAccountant && !i.isPaid) || [];
+
+    const today = new Date();
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
     const [selectedDates, setSelectedDates] = useState([startOfMonth, endOfMonth]);
-
-
-
-    const { data: expenses, refetch } = useGetExpensesByPeriodQuery(
+    const { data: expenses } = useGetExpensesByPeriodQuery(
         {
-            startDate: moment(selectedDates[0]).format("YYYY-MM-DD"),
-            endDate: moment(selectedDates[1]).format("YYYY-MM-DD"),
+            startDate: selectedDates.length
+                ? moment(selectedDates[0]).format("YYYYMMDD")
+                : undefined,
+            endDate: selectedDates.length
+                ? moment(selectedDates[1]).format("YYYYMMDD")
+                : undefined,
         },
-        { skip: !selectedDates.length } // Agar sanalar yo'q bo'lsa, so‘rov yuborilmaydi
+        { skip: !selectedDates.length }
     );
 
-    const handleChange = (values) => {
-        if (values) {
-            setSelectedDates(values);
-        }
+    const handleDateChange = (e, index) => {
+        const newDates = [...selectedDates];
+        newDates[index] = new Date(e.target.value);
+        setSelectedDates(newDates);
     };
 
+    const [prevIds, setPrevIds] = useState(() => {
+        const storedIds = localStorage.getItem("prevIds");
+        return storedIds ? JSON.parse(storedIds) : [];
+    });
+    const [expensePaymentType, setExpensePaymentType] = useState("");
+    const [notificationCount, setNotificationCount] = useState(0);
 
     useEffect(() => {
-        if (selectedDates.length === 2) {
-            refetch();
+        if (filteredLists.length > 0) {
+            const newIds = filteredLists.map((item) => item._id);
+            const newNotifications = newIds.filter((id) => !prevIds.includes(id));
+
+            if (newNotifications.length > 0) {
+                newNotifications.forEach((id) => {
+                    playNotificationSound();
+                    setTimeout(playNotificationSound, 500); // 500ms kechikish bilan 2-marta chalish
+                });
+
+                setNotificationCount(newNotifications.length);
+                setPrevIds(newIds);
+                localStorage.setItem("prevIds", JSON.stringify(newIds));
+            }
         }
-    }, [selectedDates, refetch]);
+    }, [filteredLists]);
+
+    const playNotificationSound = () => {
+        const audio = new Audio(soundFile);
+        audio.play().catch((err) => console.error("Audio playback error:", err));
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (modalRef.current && !modalRef.current.contains(event.target)) {
+                setOpen(false);
+            }
+        };
+
+        if (open) {
+            document.addEventListener("mousedown", handleClickOutside);
+        } else {
+            document.removeEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [open]);
+
+    // Expense category state (string)
+    const [expenseCategory, setExpenseCategory] = useState("");
+
+    // Daromad va xarajat kategoriyalari (expenseSchema dagi enum ga mos)
+    const incomeCategories = [
+        "Mijoz to‘lovlari",
+        "Investor sarmoyasi",
+        "Qaytgan mablag‘",
+        "Davlat subsidiyasi",
+        "Boshqa daromadlar",
+    ];
+
+    const expenseCategories = [
+        "Ish haqi",
+        "Avans",
+        "Ijara",
+        "Mebel",
+        "Kantselyariya",
+        "Xomashyo",
+        "Transport",
+        "Kommunal to‘lovlar",
+        "Reklama va marketing",
+        "Texnika ta’miri",
+        "Solqlar",
+        "Boshqa chiqimlar",
+    ];
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = {
             name: expenseName,
-            amount: expenseAmount,
-            amountType: isIncome ? "Kirim" : (isExpense ? "Chiqim" : ""),
+            amount: parseFloat(expenseAmount),
+            type: isIncome ? "Kirim" : "Chiqim",
+            category: expenseCategory,
             description: expenseDescription,
+            paymentType: expensePaymentType
         };
 
         try {
             await createExpense(formData).unwrap();
-
-            // Show success message
             message.success("Xarajat muvaffaqiyatli qo'shildi!");
-
-            // Clear input fields after successful submission
             setExpenseName("");
             setExpenseAmount("");
             setExpenseDescription("");
             setIsIncome(false);
             setIsExpense(true);
+            setExpenseCategory("");
         } catch (err) {
-            // Show error message
             message.error("Xarajatni qo'shishda xatolik yuz berdi.");
         }
     };
 
-    const handleIncomeChange = (e) => {
-        setIsIncome(e.target.checked);
-        if (e.target.checked) {
-            setIsExpense(false);
+    // Type (Kirim/Chiqim) o'zgarganda kategoriya tanlovini tozalash
+    const handleTypeChange = (checked, type) => {
+        if (type === "income") {
+            setIsIncome(checked);
+            setIsExpense(!checked);
+        } else {
+            setIsExpense(checked);
+            setIsIncome(!checked);
         }
+        setExpenseCategory("");
     };
 
-    const handleExpenseChange = (e) => {
-        setIsExpense(e.target.checked);
-        if (e.target.checked) {
-            setIsIncome(false);
-        }
+    // AsyncSelect loadOptions funksiyasi
+    const loadCategoryOptions = (inputValue, callback) => {
+        const options = (isIncome ? incomeCategories : expenseCategories)
+            .filter((cat) =>
+                cat.toLowerCase().includes(inputValue.toLowerCase())
+            )
+            .map((cat) => ({ value: cat, label: cat }));
+        setTimeout(() => {
+            callback(options);
+        }, 300);
     };
 
-    const toggleBox = (box) => {
-        setActiveBox(box);
-    };
+    // Default options uchun
+    const defaultCategoryOptions = (isIncome ? incomeCategories : expenseCategories).map(
+        (cat) => ({ value: cat, label: cat })
+    );
 
-    const getBoxTitle = () => {
-        switch (activeBox) {
-            case "notifications":
-                return "Bildirishnomalar";
-            case "info":
-                return "Xarajatlar Ro'yxati";
-            default:
-                return "Xarajatlar Qo'shish";
-        }
-    };
-
-
-
-    const columns = [
-        {
-            title: 'Xarajat Nomi',
-            dataIndex: 'name',
-            key: 'name',
-        },
-        {
-            title: 'Miqdor',
-            dataIndex: 'amount',
-            key: 'amount',
-            render: (text) => {
-                return `${new Intl.NumberFormat('uz-UZ').format(text)} so'm`;
-            },
-        },
-        {
-            title: 'Tavsif',
-            dataIndex: 'description',
-            key: 'description',
-        },
-        {
-            title: 'Sanasi',
-            dataIndex: 'date',
-            key: 'date',
-            render: (text) => {
-                const date = new Date(text);
-                const day = date.getDate();
-
-                // Month names in Uzbek
-                const months = [
-                    'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun',
-                    'Iyul', 'Avgust', 'Sentabr', 'Oktyabr', 'Noyabr', 'Dekabr'
-                ];
-                const month = months[date.getMonth()]; // Get the month in Uzbek
-
-                const year = date.getFullYear().toString().slice(-2); // Get last 2 digits of the year
-                const hours = date.getHours();
-                const minutes = date.getMinutes();
-
-                // Time in Uzbek format: "PM" -> "Kechqurun", "AM" -> "Tong"
-                const time = (hours >= 12)
-                    ? `${hours - 12}:${minutes < 10 ? '0' + minutes : minutes}`
-                    : `${hours === 0 ? 12 : hours}:${minutes < 10 ? '0' + minutes : minutes}`;
-
-                return `${day}-${month}/${year} | ${time}`;
-            }
-        }
-
-
+    const paymentTypeControl = [
+        { label: "Naqd", value: "Naqd" },
+        { label: "Karta orqali", value: "Karta orqali" },
+        { label: "Bank orqali", value: "Bank orqali" },
     ];
-    // Calculate total amount for the footer
-    const totalAmount = expenses?.innerData?.reduce((acc, expense) => acc + expense.amount, 0);
 
+    const loadPaymentTypeOptions = (inputValue, callback) => {
+        const options = paymentTypeControl.filter((option) =>
+            option.label.toLowerCase().includes(inputValue.toLowerCase())
+        );
+        setTimeout(() => {
+            callback(options);
+        }, 300);
+    };
 
     return (
         <div className="box_expense-register">
+            {activeBox === "info" && (
+                <div className="rangePicker" ref={modalRef}>
+                    <button onClick={() => setOpen(!open)} className="toggle-btn">
+                        {formatDate(selectedDates[0])} <BsArrowLeftRight />{" "}
+                        {formatDate(selectedDates[1])}
+                    </button>
+                    {open && (
+                        <div className="dropdown-modal">
+                            <input
+                                type="date"
+                                value={formatDate(selectedDates[0])}
+                                onChange={(e) => handleDateChange(e, 0)}
+                            />
+                            <span>
+                                {" "}
+                                <BsArrowLeftRight />{" "}
+                            </span>
+                            <input
+                                type="date"
+                                value={formatDate(selectedDates[1])}
+                                onChange={(e) => handleDateChange(e, 1)}
+                            />
+                        </div>
+                    )}
+                </div>
+            )}
+            {activeBox === "notifications" && (
+                <button
+                    onClick={() => navigate("/order/history/lists")}
+                    className="notifications-story"
+                >
+                    <MdHistory size={20} />
+                </button>
+            )}
             <div className="box_expense-register_menu">
                 <button
-                    onClick={() => toggleBox("notifications")}
-                    className={`box_expense-register_btn ${activeBox === "notifications" ? "active" : ""}`}
+                    onClick={() => setActiveBox("notifications")}
+                    className={`box_expense-register_btn ${activeBox === "notifications" ? "active" : ""
+                        }`}
                 >
                     <BellOutlined />
                     <Badge
@@ -172,33 +257,33 @@ const ExpenseRegister = () => {
                 </button>
 
                 <button
-                    onClick={() => toggleBox("info")}
-                    className={`box_expense-register_btn ${activeBox === "info" ? "active" : ""}`}
+                    onClick={() => setActiveBox("info")}
+                    className={`box_expense-register_btn ${activeBox === "info" ? "active" : ""
+                        }`}
                 >
                     <RiFileList3Line size={20} />
                 </button>
 
                 <button
-                    onClick={() => toggleBox("expenses")}
-                    className={`box_expense-register_btn ${activeBox === "expenses" ? "active" : ""}`}
+                    onClick={() => setActiveBox("expenses")}
+                    className={`box_expense-register_btn ${activeBox === "expenses" ? "active" : ""
+                        }`}
                 >
                     <HiOutlinePencilSquare size={20} />
                 </button>
             </div>
-            {
-                activeBox === "info" && (
-                    <br />
-                )
-            }
 
-            <h3>{getBoxTitle()}</h3>
+            <h3>
+                {activeBox === "notifications"
+                    ? "Bildirishnomalar"
+                    : activeBox === "info"
+                        ? "Xarajatlar Ro'yxati"
+                        : "Xarajatlar Qo'shish"}
+            </h3>
 
             <div className="box_expense-content">
                 {activeBox === "notifications" && (
-                    <div className="additional-box">
-                        <h4>Bildirishnomalar</h4>
-                        <p>Bu yerda bildirishnomalar bo'lishi mumkin.</p>
-                    </div>
+                    <NewOrderList list={true} filteredLists={filteredLists} />
                 )}
 
                 {activeBox === "expenses" && (
@@ -209,6 +294,7 @@ const ExpenseRegister = () => {
                             value={expenseName}
                             onChange={(e) => setExpenseName(e.target.value)}
                         />
+
                         <Input
                             type="number"
                             placeholder="Miqdori"
@@ -216,14 +302,112 @@ const ExpenseRegister = () => {
                             onChange={(e) => setExpenseAmount(e.target.value)}
                         />
 
-                        <Checkbox checked={isIncome} onChange={handleIncomeChange}>
-                            Kirm
+                        <Checkbox
+                            className="custom-checkbox"
+                            checked={isIncome}
+                            onChange={(e) => handleTypeChange(e.target.checked, "income")}
+                        >
+                            Kirim
                         </Checkbox>
 
-                        <Checkbox checked={isExpense} onChange={handleExpenseChange}>
+                        <Checkbox
+                            className="custom-checkbox"
+                            checked={isExpense}
+                            onChange={(e) => handleTypeChange(e.target.checked, "expense")}
+                        >
                             Chiqim
                         </Checkbox>
 
+                        {/* React-select asinxron dropdown */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                            <AsyncSelect
+                                cacheOptions
+                                defaultOptions={defaultCategoryOptions}
+                                loadOptions={loadCategoryOptions}
+                                value={
+                                    expenseCategory
+                                        ? { value: expenseCategory, label: expenseCategory }
+                                        : null
+                                }
+                                onChange={(selectedOption) =>
+                                    setExpenseCategory(selectedOption ? selectedOption.value : "")
+                                }
+                                placeholder="Kategoriya tanlang"
+                                menuPlacement="top"
+                                classNamePrefix="custom-select"
+                                styles={{
+                                    container: (provided) => ({
+                                        ...provided,
+                                        width: "100%",
+                                        marginBottom: "1rem",
+                                    }),
+                                    // Ochilgan menyu konteyneri uchun uslublar
+                                    menu: (provided) => ({
+                                        ...provided,
+                                        height: "0px", // Menyu balandligini belgilash
+                                        backgroundColor: "#fff",
+                                        borderRadius: "5px",
+                                        marginTop: "0",
+                                        boxShadow: "0 0 8px rgba(0, 0, 0, 0.1)",
+                                    }),
+                                    // Har bir option uchun uslublar
+                                    option: (provided, state) => ({
+                                        ...provided,
+                                        backgroundColor: state.isFocused ? "#f0f0f0" : "#fff",
+                                        color: state.isFocused ? "#000" : "#333",
+                                        cursor: "pointer",
+                                        padding: "5px 12px",
+                                    }),
+                                    // Menyu ro'yxati uchun qo'shimcha uslub (paddingni olib tashlash)
+                                    menuList: (provided) => ({
+                                        ...provided,
+                                        padding: "0",
+                                    }),
+                                }}
+                            />
+                            <AsyncSelect
+                                cacheOptions
+                                defaultOptions={paymentTypeControl}
+                                loadOptions={loadPaymentTypeOptions}
+                                value={
+                                    expensePaymentType
+                                        ? { value: expensePaymentType, label: expensePaymentType }
+                                        : null
+                                }
+                                onChange={(selectedOption) =>
+                                    setExpensePaymentType(selectedOption ? selectedOption.value : "")
+                                }
+                                placeholder="Tulov turi tanlang"
+                                menuPlacement="top"
+                                classNamePrefix="custom-select"
+                                styles={{
+                                    container: (provided) => ({
+                                        ...provided,
+                                        width: "100%",
+                                        marginBottom: "1rem",
+                                    }),
+                                    menu: (provided) => ({
+                                        ...provided,
+                                        maxHeight: "150px", // Menyu maksimal balandligi, scroll qo'llanadi
+                                        backgroundColor: "#fff",
+                                        borderRadius: "5px",
+                                        marginTop: "0",
+                                        boxShadow: "0 0 8px rgba(0, 0, 0, 0.1)",
+                                    }),
+                                    option: (provided, state) => ({
+                                        ...provided,
+                                        backgroundColor: state.isFocused ? "#f0f0f0" : "#fff",
+                                        color: state.isFocused ? "#000" : "#333",
+                                        cursor: "pointer",
+                                        padding: "5px 12px",
+                                    }),
+                                    menuList: (provided) => ({
+                                        ...provided,
+                                        padding: "0",
+                                    }),
+                                }}
+                            />
+                        </div>
                         <Input.TextArea
                             placeholder="Qo‘shimcha Ma'lumot"
                             value={expenseDescription}
@@ -231,43 +415,37 @@ const ExpenseRegister = () => {
                             rows={4}
                         />
 
-                        <Button type="primary" htmlType="submit">
-                            Xarajat Qo'shish
+                        <Button
+                            style={{ background: "#0A3D3A" }}
+                            type="primary"
+                            htmlType="submit"
+                        >
+                            {isIncome ? "Kirim Qo'shish" : "Chiqim Qo'shish"}
                         </Button>
                     </form>
                 )}
 
-                {activeBox === "info" && (
+                {activeBox === "info" && expenses?.innerData?.length > 0 && (
                     <div className="additional-box">
-
-                        <RangePicker
-                            open={false}
-                            onChange={handleChange}
-                            defaultValue={[startOfMonth, endOfMonth]}
-                            allowClear
-
-                            className="rangePicker"
+                        <Table
+                            dataSource={expenses?.innerData}
+                            columns={[
+                                { title: "Xarajat Nomi", dataIndex: "name", key: "name" },
+                                {
+                                    title: "Miqdor",
+                                    dataIndex: "amount",
+                                    key: "amount",
+                                    render: (text) =>
+                                        `${new Intl.NumberFormat("uz-UZ").format(text)} so'm`,
+                                },
+                                { title: "Tavsif", dataIndex: "description", key: "description" },
+                            ]}
+                            rowKey="_id"
+                            pagination={false}
+                            size="small"
+                            bordered
+                            scroll={{ x: "max-content" }}
                         />
-                        {activeBox === "info" && expenses?.innerData?.length > 0 && (
-
-
-                            <Table
-                                dataSource={expenses?.innerData}
-                                columns={columns}
-                                rowKey="_id"
-                                pagination={false} // You can turn this on if you need pagination
-                                size="small" // Set table size to small
-                                bordered // Add border around the table
-                                scroll={{ x: 'max-content' }}
-                                footer={() => (
-                                    <div className="table-footer">
-                                        <strong>Jami Xarajatlar: </strong>
-                                        <span>{new Intl.NumberFormat('uz-UZ').format(totalAmount)}  So'm</span>
-                                    </div>
-                                )}
-                            />
-
-                        )}
                     </div>
                 )}
             </div>
@@ -276,6 +454,3 @@ const ExpenseRegister = () => {
 };
 
 export default ExpenseRegister;
-
-
-

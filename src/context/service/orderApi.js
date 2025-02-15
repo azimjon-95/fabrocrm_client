@@ -23,9 +23,10 @@ export const orderApi = api.injectEndpoints({
 
 
 
+
         // Update an existing order
         updateOrder: builder.mutation({
-            query: ({ id, updates }) => ({
+            query: ({ id, updates }) => (console.log(id, updates), {
                 url: `/order/${id}`,
                 method: "PUT",
                 body: updates,
@@ -70,7 +71,10 @@ export const orderApi = api.injectEndpoints({
             }),
         }),
 
-
+        // /order/debt
+        getDebt: builder.query({
+            query: () => "/order-debt",
+        }),
     }),
 });
 
@@ -84,4 +88,5 @@ export const {
     useOrderProgressQuery,
     useGetMaterialByIdQuery,
     useGetAllMaterialByIdQuery,
+    useGetDebtQuery
 } = orderApi;

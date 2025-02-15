@@ -21,6 +21,7 @@ import MainOrder from "../pages/store/List/Main";
 import Material from "../pages/store/List/Material";
 import GivnMaterial from "../pages/store/List/GivnMaterial";
 import NewOrderLists from "../pages/store/NewOrderLists";
+import HistoryOrderLists from "../pages/store/HistoryOrderLists";
 
 export const routes = [
   { path: "/manager", element: <Order />, private: true, role: ["manager", "deputy"] },
@@ -43,6 +44,7 @@ export const routes = [
   { path: "/attendance", element: <Attendance />, private: true, role: ["accountant", "deputy"] },
   { path: "/attendance/story", element: <Story />, private: true, role: ["accountant", "deputy"] },
   { path: "/setting", element: <SettingsPage />, private: true, role: ["accountant", "deputy"] },
+  { path: "/order/history/lists", element: <HistoryOrderLists />, private: true, role: ["warehouseman", "accountant", "deputy"] },
   { path: "/salary", element: <Salary />, private: true, role: ["accountant", "deputy"] },
   { path: "/order/:id", element: <OrderDetails />, private: true, role: ["accountant", "deputy"] },
   { path: "/accountant", element: <Accountant />, private: true, role: ["accountant", "deputy"] },
