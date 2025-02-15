@@ -35,8 +35,7 @@ const Warehouse = () => {
 
     const { data: allStores = [], refetch: refetchAll } = useGetAllStoresQuery();
     const { data: filteredStores = [], refetch: refetchFiltered } = useGetStoreByCategoryQuery(selectedCategory, { skip: !selectedCategory });
-    const [createStore, { isLoading: isCreating }] = useCreateStoreMutation();
-    const [updateStore, { isLoading: isUpdating }] = useUpdateStoreMutation();
+    const [updateStore, { isLoading: isCreating }] = useUpdateStoreMutation();
     const [deleteStore] = useDeleteStoreMutation();
 
     const stores = selectedCategory ? filteredStores : allStores;
@@ -50,26 +49,22 @@ const Warehouse = () => {
 
     const onFinish = async (values) => {
         try {
-            const res = isEditMode
-                ? await updateStore({ id: selectedProduct?._id, updatedData: values })
-                : await createStore(values);
+            const res = await updateStore({ id: selectedProduct?._id, updatedData: values })
 
-            if (res.error) throw res.error;
-
-            message.success(isEditMode ? "Mahsulot muvaffaqiyatli yangilandi!" : "Mahsulot muvaffaqiyatli qo‘shildi!");
+            message.success(res?.data?.message);
             form.resetFields();
             setIsModalOpen(false);
             refetchAll();
             refetchFiltered();
         } catch (error) {
-            message.error(error?.data?.message);
+            message.error(error?.response?.data?.message);
         }
     };
 
     const handleDelete = async (data) => {
         try {
-            await deleteStore(data?._id);
-            message.success("Mahsulot muvaffaqiyatli o‘chirildi!");
+            const res = await deleteStore(data?._id);
+            message.success(res?.data?.message || "Mahsulot muvaffaqiyatli o‘chirildi!");
             refetchAll();
             refetchFiltered();
         } catch {
@@ -146,7 +141,7 @@ const Warehouse = () => {
                         <Input style={{ width: "100%" }} placeholder="Введите название поставщика" />
                     </Form.Item>
 
-                    <Button style={{ width: "100%", marginTop: "20px" }} type="primary" htmlType="submit" loading={isCreating || isUpdating}>
+                    <Button style={{ width: "100%", marginTop: "20px" }} type="primary" htmlType="submit" loading={isCreating}>
                         {isEditMode ? "Yangilash" : "Saqlash"}
                     </Button>
                 </Form>

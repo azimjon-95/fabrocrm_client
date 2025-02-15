@@ -45,7 +45,6 @@ const Order = () => {
       const formData = {
         name: data.name,
         customerType: data.customerType,
-        paymentType: data.paymentType,
         fullName: data.fullName,
         phone: data.phone,
         address: {
@@ -87,11 +86,6 @@ const Order = () => {
     { label: "Yuridik shaxs", value: "Yuridik shaxs" },
   ];
 
-  const paymentTypeControl = [
-    { label: "Naqd", value: "Naqd" },
-    { label: "Karta orqali", value: "Karta orqali" },
-    { label: "Bank orqali", value: "Bank orqali" },
-  ];
   return (
     <>
       <Form
@@ -130,7 +124,7 @@ const Order = () => {
               />
             </Form.Item>
           </Col>
-          <Col span={6}>
+          {/* <Col span={6}>
             <Form.Item label="Tulov turi:">
               <Controller
                 name="paymentType"
@@ -146,7 +140,7 @@ const Order = () => {
                 )}
               />
             </Form.Item>
-          </Col>
+          </Col> */}
 
         </Row>
 

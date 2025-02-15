@@ -72,3 +72,23 @@
     background: #ffffff;
     border-color: #0A3D3A !important;
 }
+
+.stororderhistory {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+}
+
+.stororderhistory Button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 90px;
+    height: 35px;
+}
