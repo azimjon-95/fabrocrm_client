@@ -112,7 +112,7 @@ const Warehouse = () => {
             <Table
                 dataSource={filteredData}
                 columns={columns}
-                rowKey="id"
+                rowKey="_id"
                 size="small"
                 pagination={false}
                 scroll={{ x: 'max-content', y: 570 }}
