@@ -26,7 +26,7 @@ export const orderApi = api.injectEndpoints({
 
         // Update an existing order
         updateOrder: builder.mutation({
-            query: ({ id, updates }) => (console.log(id, updates), {
+            query: ({ id, updates }) => ({
                 url: `/order/${id}`,
                 method: "PUT",
                 body: updates,

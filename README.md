@@ -1,70 +1,87 @@
-# Getting Started with Create React App
+# Express API Router
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Bu loyiha Express.js yordamida yaratilgan backend API routerlarini o‘z ichiga oladi.
 
-## Available Scripts
+## API Endpointlar
 
-In the project directory, you can run:
+### **1. Admin**
+- `GET /admin/all` - Barcha adminlarni olish
+- `POST /admin/create` - Yangi admin yaratish
+- `POST /admin/login` - Admin tizimga kirishi
+- `DELETE /admin/delete/:id` - Adminni o‘chirish
+- `PUT /admin/update/:id` - Admin ma'lumotlarini yangilash
 
-### `npm start`
+### **2. Worker**
+- `GET /worker/all` - Barcha ishchilarni olish
+- `POST /worker/create` - Yangi ishchi qo‘shish
+- `DELETE /worker/delete/:id` - Ishchini o‘chirish
+- `PUT /worker/update/:id` - Ishchi ma'lumotlarini yangilash
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### **3. Attendance (Davomat)**
+- `GET /attendance/all` - Barcha davomatlarni olish
+- `GET /attendance/date/:date` - Berilgan sana bo‘yicha davomat
+- `GET /attendance/monthly/:year/:month` - Oylik davomat ma'lumotlari
+- `POST /attendance/create` - Davomat qo‘shish
+- `PUT /attendance/update/:id` - Davomatni yangilash
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### **4. Store (Ombor)**
+- `GET /store/all` - Barcha mahsulotlarni olish
+- `POST /store/create` - Yangi mahsulot qo‘shish
+- `DELETE /store/delete/:id` - Mahsulotni o‘chirish
+- `PUT /store/update/:id` - Mahsulotni yangilash
+- `GET /store/category/:category` - Kategoriya bo‘yicha mahsulotlarni olish
+- `PUT /store/decrement/:id` - Mahsulot miqdorini kamaytirish
+- `GET /store/byId/:id` - Mahsulotni ID bo‘yicha olish
+- `POST /store/update-many` - Ko‘p mahsulotlarni yangilash yoki qo‘shish
 
-### `npm test`
+### **5. Working Hours (Ish vaqtlari)**
+- `POST /workingHours/create` - Ish vaqtini qo‘shish
+- `GET /workingHours/` - Barcha ish vaqtlarini olish
+- `GET /workingHours/:id` - Ish vaqtini ID bo‘yicha olish
+- `PUT /workingHours/:id` - Ish vaqtini yangilash
+- `DELETE /workingHours/:id` - Ish vaqtini o‘chirish
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### **6. Salaries (Ish haqi)**
+- `POST /salaries` - Ish haqini yaratish
+- `GET /salaries` - Barcha ish haqilarni olish
+- `GET /salaries/:id` - Ish haqini ID bo‘yicha olish
+- `PUT /salaries/:id` - Ish haqini yangilash
+- `DELETE /salaries/:id` - Ish haqini o‘chirish
 
-### `npm run build`
+### **7. Expenses (Xarajatlar)**
+- `POST /expenses` - Yangi xarajat qo‘shish
+- `GET /expenses` - Barcha xarajatlarni olish
+- `GET /expenses/:id` - Xarajatni ID bo‘yicha olish
+- `PUT /expenses/:id` - Xarajatni yangilash
+- `DELETE /expenses/:id` - Xarajatni o‘chirish
+- `POST /expenses/period` - Ma'lum vaqt oralig‘idagi xarajatlarni olish
+- `POST /expenses/report` - Balans hisobotini olish
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### **8. Orders (Buyurtmalar)**
+- `GET /order/` - Barcha buyurtmalarni olish
+- `GET /order/:id` - Buyurtmani ID bo‘yicha olish
+- `POST /order/` - Yangi buyurtma yaratish
+- `PUT /order/:id` - Buyurtmani yangilash
+- `DELETE /order/:id` - Buyurtmani o‘chirish
+- `POST /order/giveMaterial` - Buyurtmaga material berish
+- `GET /order/progress/:orderId` - Buyurtma jarayonini olish
+- `GET /order/get-material/:orderId/:materialId` - Buyurtma materialini ID bo‘yicha olish
+- `GET /order/get-all-material/:orderId` - Buyurtmadagi barcha materiallarni olish
+- `GET /order-debt` - Buyurtma qarzlarini hisoblash
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### **9. New Order List (Yangi buyurtmalar ro‘yxati)**
+- `POST /list` - Yangi buyurtma yaratish
+- `GET /list` - Barcha buyurtmalarni olish
+- `GET /list/:id` - Buyurtmani ID bo‘yicha olish
+- `PATCH /list/:id` - Buyurtmani yangilash
+- `DELETE /list/:id` - Buyurtmani o‘chirish
+- `GET /list-history` - Buyurtmalar tarixi
+- `DELETE /list/:orderId/materials/:materialId` - Buyurtmadan ma'lum materialni o‘chirish
+- `DELETE /list/:orderId/materials` - Buyurtmadagi barcha materiallarni o‘chirish
+- `POST /list/:orderId/materials` - Buyurtmaga material qo‘shish
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### **10. Balance (Balans)**
+- `GET /balance` - Joriy balansni olish
+- `POST /balance/update` - Balansni yangilash
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Umumiy API endpointlar soni: **60 ta**

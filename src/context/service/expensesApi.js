@@ -37,6 +37,14 @@ export const expensesApi = api.injectEndpoints({
             }),
         }),
 
+        getBalanceReport: builder.query({
+            query: (expenseData) => ({
+                url: `expenses/report`,
+                method: 'POST',
+                body: expenseData,
+            }),
+        }),
+
 
     }),
 });
@@ -48,4 +56,5 @@ export const {
     useDeleteExpenseMutation,
     useGetExpensesByPeriodQuery,
     useCreateExpenseMutation,
+    useGetBalanceReportQuery
 } = expensesApi;

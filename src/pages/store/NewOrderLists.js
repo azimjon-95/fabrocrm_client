@@ -1,7 +1,10 @@
 import React from "react";
 import { Table, Button, message } from "antd";
 import { useGetOrderListsQuery, useUpdateOrderListMutation } from '../../context/service/listApi';
+import { useCreateExpenseMutation } from "../../context/service/expensesApi";
+import { useUpdateBalanceMutation, useGetBalanceQuery } from "../../context/service/balanceApi";
 import { FileExcelOutlined } from "@ant-design/icons";
+import { useUpdateManyStoresMutation } from "../../context/service/storeApi";
 import dayjs from "dayjs";
 import "dayjs/locale/uz";
 import * as XLSX from "xlsx";
@@ -17,20 +20,77 @@ const uzMonths = [
 const NewOrderList = ({ filteredLists, list }) => {
     const [updateOrderList] = useUpdateOrderListMutation();
     const { data, isLoading } = useGetOrderListsQuery();
+    const [createExpense] = useCreateExpenseMutation();
+    const [updateBalance] = useUpdateBalanceMutation();
+    const { data: balanceData } = useGetBalanceQuery();
+    const [updateManyStores] = useUpdateManyStoresMutation();
+
 
     const handlePayment = async (record) => {
+        if (!record?._id || !record?.totalPrice) {
+            return message.error("Ma'lumotlar to‘liq emas!");
+        }
+
+        // Joriy balansni olish
+        const currentBalance = balanceData?.innerData?.balance || 0;
+
+        // Balans yetarli emasligini tekshirish
+        if (currentBalance < record.totalPrice) {
+            return message.error("Balans yetarli emas! Iltimos, hisobingizni tekshiring yoki mablag' qo'shing.");
+
+        }
+
         try {
-            const response = await updateOrderList({ id: record._id, updateData: { isPaid: true, approvedByAccountant: false } })
-            if (response) {
-                message.success("To‘lov muvaffaqiyatli bajarildi!");
-            } else {
-                throw new Error("To‘lov amalga oshirilmadi.");
-            }
+            // Buyurtmani to'langan deb belgilash
+            const response = await updateOrderList({
+                id: record._id,
+                updateData: { isPaid: true, approvedByAccountant: false }
+            }).unwrap();
+
+            if (!response) throw new Error("Buyurtma holatini yangilashda xatolik!");
+
+            // Xarajatni qo‘shish uchun ma'lumot
+            const formData = {
+                name: "Xomashyo zakazi",  // Qisqartirilgan nom
+                amount: Number(record.totalPrice),
+                type: "Chiqim",
+                category: "Xomashyo",
+                description: `Ombor uchun ${record.totalPrice} so'mlik xomashyo sotib olindi.`,
+                paymentType: "Naqd" // Default "Naqd" agar aniqlanmasa
+            };
+
+            // Xarajatni qo‘shish
+            const createRes = await createExpense(formData).unwrap();
+            if (!createRes?.state) throw new Error("Xarajatni qo‘shishda xatolik!");
+
+            // Balansdan ayirish
+            const balanceRes = await updateBalance({
+                amount: record.totalPrice,
+                type: "subtract"
+            }).unwrap();
+            if (!balanceRes?.state) throw new Error("Balansni yangilashda xatolik!");
+
+            message.success("To‘lov muvaffaqiyatli bajarildi!");
         } catch (error) {
-            message.error(error.message);
+            message.error(error.message || "To‘lov amalga oshirishda xatolik!");
+            console.error(error);
         }
     };
 
+    const handleAddToWarehouse = async (record) => {
+        if (!record?.materials || record.materials.length === 0) {
+            message.warning("Yangilash uchun mahsulotlar yo‘q!");
+            return;
+        }
+
+        try {
+            await updateOrderList({ id: record?._id, updateData: { addedToData: true } }).unwrap();
+            await updateManyStores(record.materials).unwrap();
+            message.success("Mahsulotlar omborga kirib qo‘shildi!");
+        } catch (error) {
+            message.error(error.message || "Yangilashda xatolik yuz berdi.");
+        }
+    };
     const handleDebtPayment = async (record) => {
         try {
             const response = await updateOrderList({ id: record._id, updateData: { approvedByAccountant: true } })
@@ -117,7 +177,12 @@ const NewOrderList = ({ filteredLists, list }) => {
                     title: "Omborga qo'shildi",
                     dataIndex: "addedToData",
                     key: "addedToData",
-                    render: (addedToData) => (addedToData ? "Ha" : "Yo'q"),
+                    render: (addedToData, record) => {
+                        if ((record.approvedByAccountant || record.isPaid) && !addedToData) {
+                            return <Button style={{ background: "#0A3D3A" }} type="primary" onClick={() => handleAddToWarehouse(record)}>Qo‘shish</Button>;
+                        }
+                        return addedToData ? "Qo‘shilgan" : "Jarayonda";
+                    },
                 }]
             : []),
         {
