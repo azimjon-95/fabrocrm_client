@@ -1,14 +1,27 @@
 import { createApi, fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react";
 
-const baseQuery = fetchBaseQuery({
-  baseUrl: "http://localhost:5000/api",
-  // baseURL: "https://mebelx-server.vercel.app/api",
+// const baseQuery = fetchBaseQuery({
+//   baseURL: "https://mebelx-server-three.vercel.app/api",
+//   // baseUrl: "http://localhost:5000/api",
 
+//   prepareHeaders: (headers) => {
+//     const token = localStorage.getItem("token");
+//     if (token) {
+//       headers.set("Authorization", `Bearer ${token}`);
+//     }
+//     return headers;
+//   },
+// });
+
+const baseQuery = fetchBaseQuery({
+  // baseUrl: "https://mebelx-server-three.vercel.app/api",
+  baseUrl: "http://localhost:5000/api",
   prepareHeaders: (headers) => {
     const token = localStorage.getItem("token");
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
     }
+    headers.set("Cache-Control", "no-cache"); // Keshni chetlab o'tish uchun
     return headers;
   },
 });

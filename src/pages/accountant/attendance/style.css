@@ -117,7 +117,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 0;
+  padding: 0 0 10px 0;
   margin-bottom: 8px;
 }
 
@@ -127,6 +127,39 @@
   gap: 10px;
 }
 
+.story_nav div Button {
+  background: #0A3D3A;
+  color: #fff;
+}
+
+
+
+.datePicker_nav svg {
+  fill: #0A3D3A !important;
+}
+
+.story_nav :where(.css-dev-only-do-not-override-1drr2mu).ant-picker-outlined {
+  background: #ffffff;
+  border-width: 1px;
+  border-style: solid;
+  color: #0A3D3A !important;
+  border-radius: 6px !important;
+  border-color: #0A3D3A !important;
+}
+
+.story_nav div Button:hover {
+  color: #0A3D3A !important;
+  border-color: #0A3D3A !important;
+}
+
+.story_nav>Button {
+  color: #0A3D3A !important;
+  border-color: #0A3D3A !important;
+}
+
+.story_nav>h2 {
+  color: #0A3D3A !important;
+}
 
 .custom-tableAtt .ant-table-body {
   scrollbar-width: thin;
@@ -146,4 +179,23 @@
 
 .custom-tableAtt .ant-table-body::-webkit-scrollbar-track {
   background: #f0f0f0;
+}
+
+.updateAttendance-inp {
+  width: 30px;
+  margin: 0;
+  border-radius: 0px;
+  text-align: center;
+}
+
+.updateAttendance-inp:hover {
+  border: 1px solid #fff !important;
+}
+
+.ant-input,
+.ant-input-number,
+.ant-select-selector,
+.ant-picker {
+  height: 38px !important;
+  border-radius: 0px !important;
 }

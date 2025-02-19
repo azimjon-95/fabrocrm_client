@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Form, Input, Avatar, Button, Row, Col, Spin, message } from "antd";
+import { Form, Input, Avatar, Button, Row, Col, Select, Spin, message } from "antd";
 import {
     UploadOutlined,
     ArrowLeftOutlined,
@@ -30,11 +30,13 @@ const RegisterWorker = () => {
             setValue("dayOfBirth", userData.dayOfBirth);
             setValue("phone", userData.phone);
             setValue("idNumber", userData.idNumber);
+            setValue("workerType", userData.workerType);
             setImageUrl(userData.imageUrl || null); // If there's an image URL
         }
     }, [userData, setValue]);
 
     const onSubmit = async (data) => {
+        console.log(data);
         try {
             const formData = new FormData();
             formData.append("firstName", data.firstName);
@@ -44,6 +46,7 @@ const RegisterWorker = () => {
             formData.append("dayOfBirth", data.dayOfBirth);
             formData.append("phone", data.phone);
             formData.append("idNumber", data.idNumber);
+            formData.append("workerType", data.workerType);
 
             if (imageUrl) {
                 formData.append("image", imageUrl);
@@ -68,6 +71,8 @@ const RegisterWorker = () => {
         }
     };
 
+
+
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -84,7 +89,7 @@ const RegisterWorker = () => {
                     <ArrowLeftOutlined />
                     Orqaga qaytish
                 </button>
-                <h2 className="create-worker-title">{userData ? "Ishchi ma'lumotlarini yangilash" : "Ishchi Ro‘yxatdan O‘tkazish"}</h2>
+                <h2 className="create-worker-title">{userData ? "Hodimni ma'lumotlarini yangilash" : "Hodimlarni Ro‘yxatdan O‘tkazish"}</h2>
             </div>
 
             <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
@@ -106,7 +111,7 @@ const RegisterWorker = () => {
                             />
                         </Form.Item>
                     </Col>
-                    <Col span={12}>
+                    <Col span={6}>
                         <Form.Item required={true} label="Ism">
                             <Controller
                                 name="firstName"
@@ -118,9 +123,8 @@ const RegisterWorker = () => {
                             />
                         </Form.Item>
                     </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
+
+                    <Col span={6}>
                         <Form.Item required={true} label="Familiya">
                             <Controller
                                 name="lastName"
@@ -136,6 +140,8 @@ const RegisterWorker = () => {
                             />
                         </Form.Item>
                     </Col>
+                </Row>
+                <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="Otasining ismi">
                             <Controller
@@ -151,7 +157,18 @@ const RegisterWorker = () => {
                             />
                         </Form.Item>
                     </Col>
+                    <Col span={12}>
+                        <Form.Item required label="Kasbi">
+                            <Controller name="workerType" control={control} rules={{ required: true }} render={({ field }) => <Input {...field} />} />
+                        </Form.Item>
+                    </Col>
+
+
+
+
                 </Row>
+
+
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="Manzil">
@@ -246,3 +263,5 @@ const RegisterWorker = () => {
 };
 
 export default RegisterWorker;
+
+

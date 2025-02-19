@@ -5,14 +5,11 @@ import { Button, message, Select, Spin } from "antd";
 import { useGetExpensesByPeriodQuery, useCreateExpenseMutation, useGetBalanceReportQuery } from "../../../context/service/expensesApi";
 import { useUpdateBalanceMutation, useGetBalanceQuery } from "../../../context/service/balanceApi";
 import { useNavigate } from "react-router-dom";
-import { FaCalendarAlt } from "react-icons/fa";
 import ExpenseRegister from "./ExpenseRegister";
-import { FaMoneyBillWave, FaBalanceScale, FaHandHoldingUsd } from "react-icons/fa";
-import { MdMoneyOff } from "react-icons/md";
+import MainCards from "./MainCards";
 import { useGetOrdersQuery, useUpdateOrderMutation, useGetDebtQuery } from "../../../context/service/orderApi";
 import moment from "moment"; // For handling date formatting
-import BalanceSVGChart from "../../../components/BalanceSVGChart";
-import { BsArrowLeftRight } from "react-icons/bs";
+
 
 const AccountentMain = () => {
     const modalRef = useRef(null);
@@ -156,75 +153,7 @@ const AccountentMain = () => {
     return (
         <div className="accountent-container">
             {/* Yuqori qismdagi kartalar */}
-            <div className="cards-container">
-                <div className="card income">
-                    <button onClick={() => setOpen(true)} className="formattedPeriod-btn">{balanceReport?.innerData?.formattedPeriod} <FaCalendarAlt /></button>
-                    <FaMoneyBillWave className="icon" />
-                    <div className="balanceValue">
-                        <h3>Daromad</h3>
-                        <p> {Number(balanceReport?.innerData?.balance)
-                            .toLocaleString("en-US")
-                            .replace(/,/g, " ")}{" "} so'm</p>
-                    </div>
-                    <div className="balanceSVGChart" ref={cardRef}>
-                        <BalanceSVGChart
-                            data={balanceReport?.innerData?.chartData}
-                            chartWidth={dimensions.width}
-                            chartHeight={70}
-                            size="8"
-                        />
-                    </div>
-
-                </div>
-
-                {open && (
-                    <div className="dropdown-reportDates" ref={modalRef}>
-                        <input
-                            type="date"
-                            value={selectedReportDates[0] ? selectedReportDates[0].toISOString().split('T')[0] : ''}
-                            onChange={(e) => setSelectedReportDates([new Date(e.target.value), selectedReportDates[1]])}
-                        />
-                        <BsArrowLeftRight />
-                        <input
-                            type="date"
-                            value={selectedReportDates[1] ? selectedReportDates[1].toISOString().split('T')[0] : ''}
-                            onChange={(e) => setSelectedReportDates([selectedReportDates[0], new Date(e.target.value)])}
-                        />
-                    </div>
-                )}
-
-                <div className="card expense">
-                    <span>{expenses?.innerData?.period}</span>
-                    <MdMoneyOff className="icon" />
-                    <div>
-                        <h3>Xarajatlar</h3>
-                        <p>
-                            {Number(expenses?.innerData?.totalOutgoing)
-                                .toLocaleString("en-US")
-                                .replace(/,/g, " ")}{" "}
-                            so'm
-                        </p>
-                    </div>
-                </div>
-                <div className="card balance">
-                    <FaBalanceScale className="icon" />
-                    <div>
-                        <h3>Balans</h3>
-                        {isFetching ? (
-                            <Spin size="small" />
-                        ) : (
-                            <p>{formatNumber(balance?.innerData?.balance || 0)} so'm</p>
-                        )}
-                    </div>
-                </div>
-                <div className="card debt">
-                    <FaHandHoldingUsd className="icon" />
-                    <div>
-                        <h3>Qarz</h3>
-                        <p>{debtData?.innerData}</p>
-                    </div>
-                </div>
-            </div>
+            <MainCards expenses={expenses} balanceReport={balanceReport} selectedReportDates={selectedReportDates} setSelectedReportDates={setSelectedReportDates} />
 
             {/* Pastki qismdagi qutilar */}
             <div className="boxes-container">

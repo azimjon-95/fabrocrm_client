@@ -46,7 +46,8 @@ const MaterialItem = ({ material, orderId, inputValues, loadingStates, handleInp
 const Material = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { data: orderData, isLoading: isOrderLoading } = useGetOrderByIdQuery(id);
+    const { data: orderData, error, isLoading: isOrderLoading } = useGetOrderByIdQuery(id);
+    console.log(error);
     const [giveMaterial] = useGiveMaterialMutation();
     const [inputValues, setInputValues] = useState({});
     const [loadingStates, setLoadingStates] = useState({});

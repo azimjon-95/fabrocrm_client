@@ -16,9 +16,9 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post("/admin/login", data);
+      const res = await axios.post("/worker/login", data);
       message.success(res.data.message);
-
+      console.log(res.data?.innerData?.admin?.role);
       const { firstName = "", lastName = "" } = res.data?.innerData?.admin || {};
       localStorage.setItem("admin_fullname", `${firstName} ${lastName}`.trim());
       localStorage.setItem("token", res.data?.innerData?.token);

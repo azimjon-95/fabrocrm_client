@@ -7,9 +7,13 @@ export const orderApi = api.injectEndpoints({
             query: () => "/order/",
         }),
 
-        // Fetch order by ID
+        // Update an existing order
         getOrderById: builder.query({
-            query: (id) => `/order/${id}`,
+            query: (id) => ({
+                url: `/order/${id}`,
+                method: "GET",
+            }),
+
         }),
 
         // Create a new order
@@ -88,5 +92,6 @@ export const {
     useOrderProgressQuery,
     useGetMaterialByIdQuery,
     useGetAllMaterialByIdQuery,
-    useGetDebtQuery
+    useGetDebtQuery,
+
 } = orderApi;

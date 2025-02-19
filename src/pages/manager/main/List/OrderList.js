@@ -10,7 +10,7 @@ import "./style.css"; import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom"; // Sahifaga yo‘naltirish uchun
 
 const { Search } = Input;
-const OrderList = () => {
+const ViewOrder = () => {
   const navigate = useNavigate();
   const { data: orders, error, isLoading } = useGetOrdersQuery();
   const [modalVisible, setModalVisible] = useState(false);
@@ -282,6 +282,6 @@ const OrderList = () => {
   );
 };
 
-export default OrderList;
+export default ViewOrder;
 
 

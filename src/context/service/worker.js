@@ -4,13 +4,13 @@ export const worker = api.injectEndpoints({
   endpoints: (builder) => ({
     // GET WORKERS
     getWorkers: builder.query({
-      query: () => "/worker/all",
+      query: () => "worker/all",
       providesTags: ["Workers"],
     }),
 
     // POST || CREATE WORKER
     createWorker: builder.mutation({
-      query: (formData) => ({
+      query: (formData) => (console.log(formData), {
         url: "worker/create",
         method: "POST",
         body: formData,

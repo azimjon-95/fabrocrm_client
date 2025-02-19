@@ -9,12 +9,16 @@ aside {
 
 .sidebar_logo {
   height: 45px;
+  width: 240px;
+  min-width: 240px;
+  max-width: 240px;
   font-size: 30px;
   text-align: center;
   user-select: none;
   position: relative;
   border-bottom: 1px solid #FFBB00;
   margin-top: 5px;
+  background: #0A3D3A;
 }
 
 .sidebar_logo i {

@@ -3,6 +3,7 @@ import { AiOutlineLineChart } from "react-icons/ai";
 import { AppstoreAddOutlined, DashboardOutlined, MoneyCollectOutlined, ShoppingCartOutlined, FileTextOutlined } from "@ant-design/icons";
 import { MdChecklist, MdOutlineWarehouse } from "react-icons/md";
 import { FaWarehouse, FaClipboardList } from "react-icons/fa"; // Bo‘lim ikonkalari uchun
+import { VscChecklist } from "react-icons/vsc";
 
 
 export const menuItems = {
@@ -20,6 +21,11 @@ export const menuItems = {
     ],
     director: [
         { path: "/director", label: "Direktor" },
+        { icon: <VscChecklist size={20} />, path: "/all/attendance", label: "Davomat" },
+        { icon: <RiUserAddFill size={20} />, path: "/ctrl-persons", label: "Hodimlar" },
+        { icon: <MdOutlineWarehouse size={20} />, path: "/ctrl-warehouseman", label: "Omborxona" },
+        { icon: <DashboardOutlined size={20} />, path: "/director-orders", label: "Buyurtmalar" },
+
     ],
 
     deputy: [

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useGetOrdersQuery } from "../../../context/service/orderApi";
 import { Select, Table, Spin, Input, Alert, Image } from "antd";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { SearchOutlined } from "@ant-design/icons";
 import "./style.css";
 
 const ActiveOrders = () => {
+  const navigate = useNavigate();
   const { data: orders, error, isLoading } = useGetOrdersQuery();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegion, setSelectedRegion] = useState(null);
@@ -47,7 +48,15 @@ const ActiveOrders = () => {
       title: "Materiallar",
       dataIndex: "materials",
       key: "materials",
-      render: (_, record) => <Link to={`/store/materials/${record._id}`}>Ko‘rish</Link>,
+      render: (_, record) => {
+        return record ? (
+          <Link to={`/store/materials/${record._id}`}>
+            Ko‘rish
+          </Link>
+        ) : (
+          "Mavjud emas"
+        );
+      },
     },
   ];
 

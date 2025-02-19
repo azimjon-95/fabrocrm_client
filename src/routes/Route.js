@@ -22,6 +22,9 @@ import Material from "../pages/store/List/Material";
 import GivnMaterial from "../pages/store/List/GivnMaterial";
 import NewOrderLists from "../pages/store/NewOrderLists";
 import HistoryOrderLists from "../pages/store/HistoryOrderLists";
+import WarehouseView from "../pages/director/Main/WarehouseView";
+import CtrlWorkers from "../pages/director/Main/CtrlWorkers";
+import ViewOrder from "../pages/director/Main/ViewOrder";
 
 export const routes = [
   { path: "/manager", element: <Order />, private: true, role: ["manager", "deputy"] },
@@ -50,10 +53,18 @@ export const routes = [
   { path: "/accountant", element: <Accountant />, private: true, role: ["accountant", "deputy"] },
   // ==========================================================================================
   { path: "/deputy", element: <Persons />, private: true, role: "deputy" },
-  { path: "/worker/add", element: <RegisterWorker />, private: true, role: "deputy" },
-  { path: "/deputy/warehouse", element: <WarehouseForm />, private: true, role: "deputy" },
-  { path: "/director/add/worker", element: <AddPersons />, private: true, role: "deputy" },
+  { path: "/worker/add", element: <RegisterWorker />, private: true, role: ["deputy", "director"] },
+  { path: "/deputy/warehouse", element: <WarehouseForm />, private: true, role: ["deputy", "director"] },
+  { path: "/director/add/worker", element: <AddPersons />, private: true, role: ["deputy", "director"] },
   { path: "/deput/warehouse", element: <WarehouseForm />, private: true, role: "deputy" },
   // ==========================================================================================
-  { path: "/director", element: <Director />, private: true, role: ["director", "deputy"] },
+  { path: "/director", element: <Director />, private: true, role: ["director"] },
+  { path: "/director", element: <Director />, private: true, role: ["director"] },
+  { path: "/director-add", element: <Persons />, private: true, role: ["director"] },
+  { path: "/ctrl-warehouseman", element: <WarehouseView />, private: true, role: ["director"] },
+  { path: "/ctrl-persons", element: <CtrlWorkers />, private: true, role: ["director"] },
+  { path: "/all/attendance", element: <Story />, private: true, role: ["director"] },
+  { path: "/director-orders", element: <ViewOrder />, private: true, role: ["director"] },
+  { path: "/orders-materials/:id", element: <MaterialPage />, private: true, role: ["director"] },
+
 ];

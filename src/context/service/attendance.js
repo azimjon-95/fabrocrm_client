@@ -19,9 +19,9 @@ export const attendanceApi = api.injectEndpoints({
       }),
     }),
     updateAttendance: builder.mutation({
-      query: ({ id, updatedData }) => ({
-        url: `/attendance/update/${id}`,
-        method: "PUT",
+      query: (updatedData) => ({
+        url: `/attendance/update`,
+        method: "POST",
         body: updatedData,
       }),
     }),
