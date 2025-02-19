@@ -108,7 +108,7 @@ const SelectWarehouse = ({
   ];
 
   return (
-    <>
+    < >
       <div className="warehouse-navbar">
         <Input
           suffix={<SearchOutlined />}

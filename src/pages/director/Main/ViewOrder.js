@@ -21,13 +21,14 @@ const ViewOrder = () => {
 
   const filteredOrders = useMemo(() => {
     return newOrders.filter((order) => {
-      const matchesSearch = order.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = order.name?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesRegion = selectedRegion ? order?.address?.region === selectedRegion : true;
       return matchesSearch && matchesRegion;
     });
   }, [newOrders, searchTerm, selectedRegion]);
 
   const showCustomerInfo = useCallback((customer) => {
+    if (!customer) return;
     setSelectedCustomer(customer);
     setModalVisible(true);
   }, []);
@@ -43,6 +44,7 @@ const ViewOrder = () => {
   };
 
   const formatDateUzbek = (date) => {
+    if (!date) return "";
     const months = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"];
     const d = new Date(date);
     return `${d.getDate()}-${months[d.getMonth()]}`;
@@ -50,7 +52,6 @@ const ViewOrder = () => {
 
   if (isLoading) return <Spin size="large" style={{ display: "block", margin: "50px auto" }} />;
   if (error) return <Alert message="Xatolik yuz berdi" type="error" showIcon />;
-
 
   return (
     <div className="orderlist">
@@ -81,12 +82,11 @@ const ViewOrder = () => {
             cover={<Image src={order.image} alt="Mebel" className="Image-orders" />}
             actions={[
               <Button icon={<EditOutlined />} onClick={() => navigate(`/orders/materials/${order._id}`)} />,
-              <Button icon={<EyeOutlined />} onClick={() => showCustomerInfo(order?.customer || {})} />
-
+              <Button icon={<EyeOutlined />} onClick={() => showCustomerInfo(order?.customer)} />
             ]}
           >
             <Card.Meta title={order.name} description={`Tulov turi: ${order.paymentType}`} />
-            <div>{order.paid.toLocaleString()} so‘m</div>
+            <div>{order.paid?.toLocaleString() || "N/A"} so‘m</div>
             <div>
               <OrderProgress record={order} />
             </div>
@@ -102,28 +102,31 @@ const ViewOrder = () => {
         footer={[<Button key="close" onClick={closeModal}>Yopish</Button>]}
       >
         {selectedCustomer ? (
-          <ul>
-            <li><strong>Turi:</strong> {selectedCustomer?.customer?.type || "Ma'lumot yo'q"}</li>
-            {selectedCustomer?.customer?.fullName && <li><strong>F.I.O.:</strong> {selectedCustomer.customer.fullName}</li>}
-            <li><strong>Telefon:</strong> {selectedCustomer?.customer?.phone || "Ma'lumot yo'q"}</li>
-            {selectedCustomer?.customer?.companyName && <li><strong>Kompaniya nomi:</strong> {selectedCustomer.customer.companyName}</li>}
-            {selectedCustomer?.customer?.director && <li><strong>Direktor:</strong> {selectedCustomer.customer.director}</li>}
-            {selectedCustomer?.customer?.inn && <li><strong>INN:</strong> {selectedCustomer.customer.inn}</li>}
-            {selectedCustomer?.address && (
-              <li>
-                <strong>Manzil:</strong>
-                {selectedCustomer?.address?.region || ""} {selectedCustomer?.address?.district || ""} {selectedCustomer?.address?.street || ""}
-              </li>
-            )}
+          <ul className="customer-info-list">
+            {Object.entries(selectedCustomer)
+              .filter(([key, value]) => value !== undefined && value !== null && value !== "" && key !== "_id") // _id, undefined, null va bo'sh qiymatlarni olib tashlash
+              .map(([key, value], index) => {
+                const labels = {
+                  type: "Turi",
+                  fullName: "F.I.O.",
+                  phone: "Telefon",
+                  companyName: "Kompaniya",
+                  director: "Direktor",
+                  inn: "INN"
+                };
+                return (
+                  <li key={index}>
+                    <strong>{labels[key] || key}:</strong> {value}
+                  </li>
+                );
+              })}
           </ul>
         ) : (
-          <p>Ma'lumot mavjud emas</p>
+          <Alert message="Mijoz ma'lumotlari topilmadi" type="warning" showIcon />
         )}
       </Modal>
-
     </div>
   );
 };
 
 export default ViewOrder;
-

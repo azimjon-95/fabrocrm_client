@@ -16,6 +16,19 @@
     /* Enables vertical scrolling */
 }
 
+@media (max-width: 500px) {
+    .worker-list {
+        width: 100%;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 5px;
+        height: calc(100vh - 130px);
+        /* Adjust this to your desired height */
+        overflow-y: auto;
+        /* Enables vertical scrolling */
+    }
+}
+
 /* Custom scrollbar styling */
 .worker-list::-webkit-scrollbar {
     width: 3px;

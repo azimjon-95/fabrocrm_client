@@ -129,7 +129,7 @@ const Main = () => {
                 <BalanceSVGChart
                     data={balanceReport?.innerData?.chartData}
                     chartWidth={dimensions.width}
-                    chartHeight={190}
+                    chartHeight={window.innerWidth < 500 ? 130 : 190}
                     size="12"
                 />
             </div>

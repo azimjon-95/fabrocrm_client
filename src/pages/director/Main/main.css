@@ -63,6 +63,7 @@
     width: 100%;
 }
 
+
 .order-cards {
     display: flex;
     gap: 20px;
@@ -112,6 +113,34 @@
     overflow: hidden;
     min-width: 320px;
     width: 320px;
+}
+
+.orderlist {
+    padding: 20px;
+}
+
+.customer-navbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+
+.customer-info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.customer-info-list li {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 16px;
+    color: #333;
+}
+
+.customer-info-list li:last-child {
+    border-bottom: none;
 }
 
 @media (max-width: 500px) and (min-width: 340px) {

@@ -9,9 +9,22 @@
     overflow-wrap: break-word;
 }
 
-.text-green-500 {
-    display: flex;
-    flex-direction: column;
+@media (max-width: 500px) {}
+
+.orderlist {
+    padding: 4px !important;
+}
+
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper .ant-table-cell,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper .ant-table-thead>tr>th,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper .ant-table-tbody>tr>th,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper .ant-table-tbody>tr>td,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper tfoot>tr>th,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper tfoot>tr>td {
+    position: relative;
+    padding: 6px 6px;
+    overflow-wrap: break-word;
+
 }
 
 .customer-navbar .ant-input {

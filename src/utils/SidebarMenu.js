@@ -4,7 +4,8 @@ import { AppstoreAddOutlined, DashboardOutlined, MoneyCollectOutlined, ShoppingC
 import { MdChecklist, MdOutlineWarehouse } from "react-icons/md";
 import { FaWarehouse, FaClipboardList } from "react-icons/fa"; // Bo‘lim ikonkalari uchun
 import { VscChecklist } from "react-icons/vsc";
-
+import { TbHeartRateMonitor } from "react-icons/tb";
+import { TbReorder } from "react-icons/tb";
 
 export const menuItems = {
     accountant: [
@@ -20,11 +21,11 @@ export const menuItems = {
         { icon: <MdOutlineWarehouse size={20} />, path: "/manag/warehouse", label: "Omborxona" },
     ],
     director: [
-        { path: "/director", label: "Direktor" },
+        { icon: <TbHeartRateMonitor size={20} />, path: "/director", label: "Nazorat" },
+        { icon: <TbReorder size={20} />, path: "/director-orders", label: "Buyurtmalar" },
         { icon: <VscChecklist size={20} />, path: "/all/attendance", label: "Davomat" },
         { icon: <RiUserAddFill size={20} />, path: "/ctrl-persons", label: "Hodimlar" },
         { icon: <MdOutlineWarehouse size={20} />, path: "/ctrl-warehouseman", label: "Omborxona" },
-        { icon: <DashboardOutlined size={20} />, path: "/director-orders", label: "Buyurtmalar" },
 
     ],
 
