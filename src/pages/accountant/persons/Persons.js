@@ -10,7 +10,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCreateWorkerMutation, useUpdateWorkerMutation } from "../../../context/service/worker";
 import "./style.css";
-
+const { Option } = Select;
 const RegisterWorker = () => {
     const navigate = useNavigate();
     const [createWorker, { isLoading: isCreateLoading }] = useCreateWorkerMutation();
@@ -28,15 +28,19 @@ const RegisterWorker = () => {
             setValue("middleName", userData.middleName);
             setValue("address", userData.address);
             setValue("dayOfBirth", userData.dayOfBirth);
+            setValue("login", userData.login);
+            setValue("password", userData.password);
             setValue("phone", userData.phone);
             setValue("idNumber", userData.idNumber);
-            setValue("workerType", userData.workerType);
+            setValue("salary", userData.salary);
+            setValue("role", userData.role);
+            setValue("workerType", null);
             setImageUrl(userData.imageUrl || null); // If there's an image URL
         }
     }, [userData, setValue]);
 
     const onSubmit = async (data) => {
-        console.log(data);
+
         try {
             const formData = new FormData();
             formData.append("firstName", data.firstName);
@@ -44,9 +48,12 @@ const RegisterWorker = () => {
             formData.append("middleName", data.middleName);
             formData.append("address", data.address);
             formData.append("dayOfBirth", data.dayOfBirth);
+            formData.append("login", data.login);
+            formData.append("password", data.password);
             formData.append("phone", data.phone);
             formData.append("idNumber", data.idNumber);
-            formData.append("workerType", data.workerType);
+            formData.append("role", data.role);
+            formData.append("salary", +data.salary);
 
             if (imageUrl) {
                 formData.append("image", imageUrl);
@@ -60,6 +67,7 @@ const RegisterWorker = () => {
                 message.success("Foydalanuvchi yangilandi");
             } else {
                 // Create new worker if userData does not exist
+                console.log(formData);
                 response = await createWorker(formData).unwrap();
                 message.success(response.message);
             }
@@ -70,7 +78,6 @@ const RegisterWorker = () => {
             message.error(error?.data?.message || "Xatolik yuz berdi");
         }
     };
-
 
 
     const handleFileChange = (event) => {
@@ -111,7 +118,7 @@ const RegisterWorker = () => {
                             />
                         </Form.Item>
                     </Col>
-                    <Col span={6}>
+                    <Col span={4}>
                         <Form.Item required={true} label="Ism">
                             <Controller
                                 name="firstName"
@@ -124,7 +131,7 @@ const RegisterWorker = () => {
                         </Form.Item>
                     </Col>
 
-                    <Col span={6}>
+                    <Col span={4}>
                         <Form.Item required={true} label="Familiya">
                             <Controller
                                 name="lastName"
@@ -140,9 +147,7 @@ const RegisterWorker = () => {
                             />
                         </Form.Item>
                     </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
+                    <Col span={4}>
                         <Form.Item label="Otasining ismi">
                             <Controller
                                 name="middleName"
@@ -157,15 +162,43 @@ const RegisterWorker = () => {
                             />
                         </Form.Item>
                     </Col>
-                    <Col span={12}>
-                        <Form.Item required label="Kasbi">
-                            <Controller name="workerType" control={control} rules={{ required: true }} render={({ field }) => <Input {...field} />} />
+                </Row>
+                <Row gutter={16}>
+                    <Col span={6}>
+                        <Form.Item label="Lavozim">
+                            <Controller
+                                name="role"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select size="large" {...field} placeholder="Lavozim tanlang">
+                                        <Option value="manager">Menejer</Option>
+                                        <Option value="seller">Sotuvchi</Option>
+                                        <Option value="director">Direktor</Option>
+                                        <Option value="accountant">Buxgalter</Option>
+                                        <Option value="warehouseman">Omborchi</Option>
+                                        <Option value="deputy">Direktor o‘rinbosari</Option>
+                                    </Select>
+                                )}
+                            />
                         </Form.Item>
                     </Col>
 
+                    <Col span={6}>
+                        <Form.Item required label="Oylik maoshi">
+                            <Controller name="salary" control={control} rules={{ required: true }} render={({ field }) => <Input {...field} />} />
+                        </Form.Item>
+                    </Col>
 
-
-
+                    <Col span={6}>
+                        <Form.Item required label="Login">
+                            <Controller name="login" control={control} rules={{ required: true }} render={({ field }) => <Input {...field} />} />
+                        </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                        <Form.Item required label="Parol">
+                            <Controller name="password" control={control} rules={{ required: true }} render={({ field }) => <Input {...field} />} />
+                        </Form.Item>
+                    </Col>
                 </Row>
 
 
@@ -263,5 +296,3 @@ const RegisterWorker = () => {
 };
 
 export default RegisterWorker;
-
-

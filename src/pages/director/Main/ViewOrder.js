@@ -51,7 +51,7 @@ const ViewOrder = () => {
   if (isLoading) return <Spin size="large" style={{ display: "block", margin: "50px auto" }} />;
   if (error) return <Alert message="Xatolik yuz berdi" type="error" showIcon />;
 
-  console.log(selectedCustomer);
+
   return (
     <div className="orderlist">
       <div className="customer-navbar" style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>

@@ -4,7 +4,6 @@ import Director from "../pages/director/Main/Main";
 import RegisterWorker from "../pages/accountant/persons/Persons";
 import ViewPersons from "../pages/accountant/persons/ViewPersons";
 import Persons from "../pages/director/persons/ViewPersons";
-import AddPersons from "../pages/director/persons/Persons";
 import Attendance from "../pages/accountant/attendance/Attendance";
 import SettingsPage from "../pages/accountant/settingsPage/SettingsPage";
 import Story from "../pages/accountant/attendance/Story";
@@ -55,7 +54,7 @@ export const routes = [
   { path: "/deputy", element: <Persons />, private: true, role: "deputy" },
   { path: "/worker/add", element: <RegisterWorker />, private: true, role: ["deputy", "director"] },
   { path: "/deputy/warehouse", element: <WarehouseForm />, private: true, role: ["deputy", "director"] },
-  { path: "/director/add/worker", element: <AddPersons />, private: true, role: ["deputy", "director"] },
+  { path: "/director/add/worker", element: <RegisterWorker />, private: true, role: ["deputy", "director"] },
   { path: "/deput/warehouse", element: <WarehouseForm />, private: true, role: "deputy" },
   // ==========================================================================================
   { path: "/director", element: <Director />, private: true, role: ["director"] },
