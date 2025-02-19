@@ -19,6 +19,8 @@ import {
   useDeleteWorkerMutation,
 } from "../../../context/service/worker";
 
+import "./style.css";
+
 const WorkersTable = () => {
   const navigate = useNavigate();
   const [visibleId, setVisibleId] = useState(null);
@@ -246,10 +248,10 @@ const WorkersTable = () => {
     message.success("Excel fayli muvaffaqiyatli yaratildi!");
   };
   return (
-    <div>
+    <div className="wiew_persons">
       <div
         style={{
-          display: "flex",
+          display: "none",
           justifyContent: "space-between",
           marginBottom: 20,
           gap: "10px",
