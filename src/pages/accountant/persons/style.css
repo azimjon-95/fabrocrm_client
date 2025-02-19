@@ -9,17 +9,16 @@
 }
 
 .EyeInvisibleOutlined {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .EyeInvisibleOutlined button {
-    border: none;
-    background: transparent;
-    font-size: 17px;
+  border: none;
+  background: transparent;
+  font-size: 17px;
 }
-
 
 .nav_add Button {
   border: none;
@@ -83,4 +82,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.wiew_persons {
+  overflow: auto;
+  height: 100%;
 }

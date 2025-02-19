@@ -20,8 +20,8 @@
 
 .main-content {
   width: 100%;
-  height: calc(100% - 50px);
-  overflow: hidden;
+  height: calc(100vh - 50px);
+  /* overflow: hidden; */
   padding: 15px;
   background: #fff;
 }
