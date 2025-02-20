@@ -1,14 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Table, Button, message } from "antd";
-import { useGetOrderListsQuery, useUpdateOrderListMutation } from '../../context/service/listApi';
+import {
+  useGetOrderListsQuery,
+  useUpdateOrderListMutation,
+} from "../../context/service/listApi";
 import { useCreateExpenseMutation } from "../../context/service/expensesApi";
-import { useUpdateBalanceMutation, useGetBalanceQuery } from "../../context/service/balanceApi";
+import {
+  useUpdateBalanceMutation,
+  useGetBalanceQuery,
+} from "../../context/service/balanceApi";
 
 import { FileExcelOutlined } from "@ant-design/icons";
 import { useUpdateManyStoresMutation } from "../../context/service/storeApi";
 import dayjs from "dayjs";
 import "dayjs/locale/uz";
 import * as XLSX from "xlsx";
+import socket from "../../socket";
 
 dayjs.locale("uz");
 
@@ -29,12 +36,18 @@ const uzMonths = [
 
 const NewOrderList = ({ filteredLists, list }) => {
   const [updateOrderList] = useUpdateOrderListMutation();
-  const { data, isLoading } = useGetOrderListsQuery();
+  const { data, isLoading, refetch } = useGetOrderListsQuery();
   const [createExpense] = useCreateExpenseMutation();
   const [updateBalance] = useUpdateBalanceMutation();
   const { data: balanceData } = useGetBalanceQuery();
   const [updateManyStores] = useUpdateManyStoresMutation();
 
+  useEffect(() => {
+    const handleUpdateOrder = (data) => refetch();
+
+    socket.on("updateOrder", handleUpdateOrder);
+    return () => socket.off("updateOrder", handleUpdateOrder);
+  }, [refetch]);
   const handlePayment = async (record) => {
     if (!record?._id || !record?.totalPrice) {
       return message.error("Ma'lumotlar to‘liq emas!");
@@ -45,27 +58,28 @@ const NewOrderList = ({ filteredLists, list }) => {
 
     // Balans yetarli emasligini tekshirish
     if (currentBalance < record.totalPrice) {
-      return message.error("Balans yetarli emas! Iltimos, hisobingizni tekshiring yoki mablag' qo'shing.");
-
+      return message.error(
+        "Balans yetarli emas! Iltimos, hisobingizni tekshiring yoki mablag' qo'shing."
+      );
     }
 
     try {
       // Buyurtmani to'langan deb belgilash
       const response = await updateOrderList({
         id: record._id,
-        updateData: { isPaid: true, approvedByAccountant: false }
+        updateData: { isPaid: true, approvedByAccountant: false },
       }).unwrap();
 
       if (!response) throw new Error("Buyurtma holatini yangilashda xatolik!");
 
       // Xarajatni qo'shish uchun ma'lumot
       const formData = {
-        name: "Xomashyo zakazi",  // Qisqartirilgan nom
+        name: "Xomashyo zakazi", // Qisqartirilgan nom
         amount: Number(record.totalPrice),
         type: "Chiqim",
         category: "Xomashyo",
         description: `Ombor uchun ${record.totalPrice} so'mlik xomashyo sotib olindi.`,
-        paymentType: "Naqd" // Default "Naqd" agar aniqlanmasa
+        paymentType: "Naqd", // Default "Naqd" agar aniqlanmasa
       };
 
       // Xarajatni qo'shish
@@ -76,7 +90,7 @@ const NewOrderList = ({ filteredLists, list }) => {
       // Balansdan ayirish
       const balanceRes = await updateBalance({
         amount: record.totalPrice,
-        type: "subtract"
+        type: "subtract",
       }).unwrap();
       if (!balanceRes?.state) throw new Error("Balansni yangilashda xatolik!");
 
@@ -94,14 +108,16 @@ const NewOrderList = ({ filteredLists, list }) => {
     }
 
     try {
-      await updateOrderList({ id: record?._id, updateData: { addedToData: true } }).unwrap();
+      await updateOrderList({
+        id: record?._id,
+        updateData: { addedToData: true },
+      }).unwrap();
       await updateManyStores(record.materials).unwrap();
       message.success("Mahsulotlar omborga kirib qo‘shildi!");
     } catch (error) {
       message.error(error.message || "Yangilashda xatolik yuz berdi.");
     }
   };
-
 
   const handleDebtPayment = async (record) => {
     try {
@@ -119,7 +135,6 @@ const NewOrderList = ({ filteredLists, list }) => {
     }
   };
 
-
   const columns = [
     {
       title: "Umumiy narx",
@@ -129,91 +144,103 @@ const NewOrderList = ({ filteredLists, list }) => {
     },
     ...(!list
       ? [
-        {
-          title: "Holat",
-          key: "status",
-          render: (_, record) =>
-            record.isPaid ? "To'langan" : "To'lanmagan",
-        },
-      ]
+          {
+            title: "Holat",
+            key: "status",
+            render: (_, record) =>
+              record.isPaid ? "To'langan" : "To'lanmagan",
+          },
+        ]
       : [
-        {
-          title: "To‘lovni kechiktirish",
-          key: "pay",
-          render: (record) =>
-            record.approvedByAccountant ? (
-              <span style={{ color: "red", fontWeight: "bold" }}>Qarz</span>
-            ) : (
-              <Button
-                type="primary"
-                onClick={() => handleDebtPayment(record)}
-                style={{ background: "#0A3D3A" }}
-              >
-                Qarzga olish
-              </Button>
-            ),
-        },
-      ]),
+          {
+            title: "To‘lovni kechiktirish",
+            key: "pay",
+            render: (record) =>
+              record.approvedByAccountant ? (
+                <span style={{ color: "red", fontWeight: "bold" }}>Qarz</span>
+              ) : (
+                <Button
+                  type="primary"
+                  onClick={() => handleDebtPayment(record)}
+                  style={{ background: "#0A3D3A" }}
+                >
+                  Qarzga olish
+                </Button>
+              ),
+          },
+        ]),
     ...(!list
       ? [
-        {
-          title: "Yangi",
-          dataIndex: "isNew",
-          key: "isNew",
-          render: (isNew) => (isNew ? "Ha" : "Yo'q"),
-        },
-      ]
+          {
+            title: "Yangi",
+            dataIndex: "isNew",
+            key: "isNew",
+            render: (isNew) => (isNew ? "Ha" : "Yo'q"),
+          },
+        ]
       : []),
     ...(!list
       ? [
-        {
-          title: "Buxgalterga yuborilgan",
-          dataIndex: "sentToAccountant",
-          key: "sentToAccountant",
-          render: (sentToAccountant) => (sentToAccountant ? "Ha" : "Yo'q"),
-        },
-      ]
+          {
+            title: "Buxgalterga yuborilgan",
+            dataIndex: "sentToAccountant",
+            key: "sentToAccountant",
+            render: (sentToAccountant) => (sentToAccountant ? "Ha" : "Yo'q"),
+          },
+        ]
       : []),
 
     ...(list
       ? [
-        {
-          title: "To‘lov amali",
-          key: "pay",
-          render: (record) => (
-            <Button
-              type="primary"
-              onClick={() => handlePayment(record)}
-              style={{ background: "#0A3D3A" }}
-            >
-              To‘lash
-            </Button>
-          ),
-        },
-      ]
+          {
+            title: "To‘lov amali",
+            key: "pay",
+            render: (record) => (
+              <Button
+                type="primary"
+                onClick={() => handlePayment(record)}
+                style={{ background: "#0A3D3A" }}
+              >
+                To‘lash
+              </Button>
+            ),
+          },
+        ]
       : [
-        {
-          title: "Buxgalter tasdiqladi",
-          dataIndex: "approvedByAccountant",
-          key: "approvedByAccountant",
-          render: (approvedByAccountant) =>
-            approvedByAccountant ? "Ha" : "Yo'q",
-        },
-      ]),
+          {
+            title: "Buxgalter tasdiqladi",
+            dataIndex: "approvedByAccountant",
+            key: "approvedByAccountant",
+            render: (approvedByAccountant, item) =>
+              approvedByAccountant || item?.isPaid ? "Ha" : "Yo'q",
+          },
+        ]),
 
     ...(!list
       ? [
-        {
-          title: "Omborga qo'shildi",
-          dataIndex: "addedToData",
-          key: "addedToData",
-          render: (addedToData, record) => {
-            if ((record.approvedByAccountant || record.isPaid) && !addedToData) {
-              return <Button style={{ background: "#0A3D3A" }} type="primary" onClick={() => handleAddToWarehouse(record)}>Qo‘shish</Button>;
-            }
-            return addedToData ? "Qo‘shilgan" : "Jarayonda";
+          {
+            title: "Omborga qo'shildi",
+            dataIndex: "addedToData",
+            key: "addedToData",
+            render: (addedToData, record) => {
+              if (
+                (record.approvedByAccountant || record.isPaid) &&
+                !addedToData
+              ) {
+                return (
+                  <Button
+                    style={{ background: "#0A3D3A" }}
+                    type="primary"
+                    onClick={() => handleAddToWarehouse(record)}
+                  >
+                    Qo‘shish
+                  </Button>
+                );
+              }
+              return addedToData ? "Qo‘shilgan" : "Jarayonda";
+            },
           },
-        }]
+        ]
       : []),
     {
       title: "Sanasi",
@@ -227,24 +254,22 @@ const NewOrderList = ({ filteredLists, list }) => {
     // Agar `list` true bo'lsa, ushbu ustunni qo'shmaymiz
     ...(!list
       ? [
-        {
-          title: "Yuklab olish",
-          key: "download",
-          render: (record) => (
-            <Button
-              type="primary"
-              onClick={() => handleExport(record)}
-              style={{ background: "#0A3D3A" }}
-            >
-              <FileExcelOutlined /> Excel
-            </Button>
-          ),
-        },
-      ]
+          {
+            title: "Yuklab olish",
+            key: "download",
+            render: (record) => (
+              <Button
+                type="primary"
+                onClick={() => handleExport(record)}
+                style={{ background: "#0A3D3A" }}
+              >
+                <FileExcelOutlined /> Excel
+              </Button>
+            ),
+          },
+        ]
       : []),
   ];
-
-
 
   const expandedRowRender = (record) => {
     const materialColumns = [
@@ -274,7 +299,6 @@ const NewOrderList = ({ filteredLists, list }) => {
         dataIndex: "supplier",
         key: "supplier",
       },
-
     ];
     return (
       <Table
@@ -315,7 +339,8 @@ const NewOrderList = ({ filteredLists, list }) => {
       order.sentToAccountant ? "Ha" : "Yo'q",
       order.approvedByAccountant ? "Ha" : "Yo'q",
       order.addedToData ? "Ha" : "Yo'q",
-      `${dayjs(order.createdAt).date()}-${uzMonths[dayjs(order.createdAt).month()]
+      `${dayjs(order.createdAt).date()}-${
+        uzMonths[dayjs(order.createdAt).month()]
       } / ${dayjs(order.createdAt).format("HH:mm")}`,
     ]);
 
@@ -364,7 +389,6 @@ const NewOrderList = ({ filteredLists, list }) => {
     // **Yangi fayl nomi**
     XLSX.writeFile(wb, `Omdor_Buyurtma_${orderDate}.xlsx`);
   };
-
   return (
     <div>
       {!list && (
