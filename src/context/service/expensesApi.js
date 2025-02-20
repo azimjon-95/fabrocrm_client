@@ -45,7 +45,23 @@ export const expensesApi = api.injectEndpoints({
             }),
         }),
 
+        getRelevantExpenses: builder.query({
+            query: ({ relevantId, date }) => {
+                // Agar date kelmasa, hozirgi oyni olamiz
+                if (!date) {
+                    const now = new Date();
+                    date = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-01`;
+                }
 
+                return {
+                    url: `/expenses/relevant/${relevantId}`,
+                    params: { date }
+                };
+            }
+        }),
+        getExpensesBySalary: builder.query({
+            query: ({ year, month }) => `/expenses-by-salary?year=${year}&month=${month}`,
+        }),
     }),
 });
 
@@ -56,5 +72,7 @@ export const {
     useDeleteExpenseMutation,
     useGetExpensesByPeriodQuery,
     useCreateExpenseMutation,
-    useGetBalanceReportQuery
+    useGetBalanceReportQuery,
+    useGetRelevantExpensesQuery,
+    useGetExpensesBySalaryQuery
 } = expensesApi;

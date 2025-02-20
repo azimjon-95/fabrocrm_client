@@ -9,3 +9,26 @@ header {
   height: 50px;
   padding-top: 15px;
 }
+
+header button {
+  display: none;
+}
+
+
+
+/* Media */
+
+@media (max-width: 500px) {
+  header button {
+    display: block;
+    border: none;
+    background: transparent;
+    color: var(--bg-color);
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  header button:hover {
+    color: #FFBB00;
+  }
+}

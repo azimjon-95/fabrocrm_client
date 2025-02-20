@@ -14,6 +14,7 @@ import MaterialPage from "../pages/manager/main/List/MaterialPage";
 import UpdateOrderForm from "../pages/manager/main/List/UpdateOrderForm";
 import Salary from "../pages/accountant/salary/Salary";
 import OrderDetails from "../pages/accountant/accountentMain/OrderDetails";
+import History from "../pages/accountant/salary/History";
 import WarehouseForm from "../pages/store/WarehouseForm";
 import OrderMengement from "../pages/manager/main/OrderMengement";
 import MainOrder from "../pages/store/List/Main";
@@ -50,6 +51,7 @@ export const routes = [
   { path: "/salary", element: <Salary />, private: true, role: ["accountant", "deputy"] },
   { path: "/order/:id", element: <OrderDetails />, private: true, role: ["accountant", "deputy"] },
   { path: "/accountant", element: <Accountant />, private: true, role: ["accountant", "deputy"] },
+  { path: "/salary/history/:date", element: <History />, private: true, role: ["accountant", "deputy"] },
   // ==========================================================================================
   { path: "/deputy", element: <Persons />, private: true, role: "deputy" },
   { path: "/worker/add", element: <RegisterWorker />, private: true, role: ["deputy", "director"] },

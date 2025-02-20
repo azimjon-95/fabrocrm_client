@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 0;
+  padding: 0 0 10px 0;
   margin-bottom: 8px;
 }
 
@@ -59,4 +59,74 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   margin-bottom: 0px !important;
   vertical-align: top;
+}
+
+:where(.css-dev-only-do-not-override-1drr2mu).ant-btn-primary {
+  color: #fff;
+  background: #0A3D3A;
+  font-size: 20px;
+  padding: 5px;
+  box-shadow: 0 2px 0 rgba(5, 145, 255, 0.1);
+}
+
+:where(.css-dev-only-do-not-override-1drr2mu).ant-btn-primary:hover {
+  background: green !important;
+}
+
+
+/* Custom radio color */
+.form-value .ant-radio-checked .ant-radio-inner {
+  border-color: #0A3D3A;
+  background-color: #0A3D3A !important;
+}
+
+.form-value .ant-radio-checked .ant-radio-inner::after {
+  background-color: #fff;
+}
+
+.form-value .ant-radio:hover .ant-radio-inner {
+  border-color: #0A3D3A;
+}
+
+.form-value .ant-input,
+.form-value .ant-input-number,
+.form-value .ant-select-selector,
+.form-value .ant-picker {
+  height: 38px !important;
+  border-radius: 8px !important;
+}
+
+.form-value .ant-input:hover {
+  border: 1px solid #0A3D3A !important;
+}
+
+/* Checked holatdagi rang */
+.form-value .ant-radio-checked .ant-radio-inner {
+  border-color: #0A3D3A !important;
+  /* Checked border rangi */
+  background-color: #0A3D3A !important;
+  /* Checked fon rangi */
+}
+
+
+.salary-container .ant-table-cell {
+  padding: 0px 8px 2px 8px !important;
+}
+
+.Salary_nav Button {
+  background-color: #0A3D3A !important;
+  color: #fff;
+}
+
+.Salary_nav .ant-picker {
+  border-color: #0A3D3A !important;
+  border-radius: 8px !important;
+}
+
+.Salary_nav {
+  color: #0A3D3A !important;
+}
+
+.Salary_nav .ant-picker svg {
+  color: #0A3D3A !important;
 }
