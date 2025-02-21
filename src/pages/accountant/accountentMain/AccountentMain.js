@@ -25,7 +25,11 @@ import socket from "../../../socket";
 const AccountentMain = () => {
   const modalRef = useRef(null);
   const navigate = useNavigate();
-  const { data: ordersData, isLoading } = useGetOrdersQuery();
+  const {
+    data: ordersData,
+    isLoading,
+    refetch: refetchOrders,
+  } = useGetOrdersQuery();
   const [updateOrder] = useUpdateOrderMutation();
   const [inputValues, setInputValues] = useState({}); // Har bir order uchun input qiymati
   const [selectValues, setSelectValues] = useState({}); // Har bir order uchun input qiymati
@@ -58,13 +62,16 @@ const AccountentMain = () => {
   );
   useEffect(() => {
     const handleNewExpense = (data) => refetch();
+    const handleNewOrder = (data) => refetchOrders();
 
     socket.on("newExpense", handleNewExpense);
+    socket.on("newOrder", handleNewOrder);
 
     return () => {
       socket.off("newExpense", handleNewExpense);
+      socket.off("newOrder", handleNewOrder);
     };
-  }, [socket, refetch]);
+  }, [socket, refetch, refetchOrders]);
 
   const [selectedReportDates, setSelectedReportDates] = useState([
     startOfMonth,
