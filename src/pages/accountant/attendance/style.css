@@ -199,3 +199,57 @@
   height: 38px !important;
   border-radius: 0px !important;
 }
+
+.attendance-times-inp {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px !important;
+}
+
+.attendance-times-inp .ant-picker {
+  height: 32px !important;
+  border-radius: 8px !important;
+}
+
+.ant-select-selector {
+  height: 32px !important;
+  border-radius: 8px !important;
+}
+
+.attendance-times-inp .nightsStay {
+  background: #000;
+}
+
+.nightsStay {
+  background-color: transparent;
+  border-color: #d9d9d9;
+  color: #8c8c8c;
+  transition: all 0.3s ease;
+  font-size: 19px;
+  padding: 0 0 0 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.nightsStay.active {
+  background-color: #e6f7ff;
+  border-color: #0A3D3A !important;
+  color: #0A3D3A;
+  box-shadow: 0 0 8px #0A3D3A;
+  transform: scale(1.05);
+}
+
+.time-picker-inp {
+  height: 32px !important;
+  border-radius: 8px !important;
+}
+
+.time-picker {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+}

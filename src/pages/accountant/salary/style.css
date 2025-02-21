@@ -48,7 +48,7 @@
   vertical-align: top;
 }
 
-:where(.css-dev-only-do-not-override-1drr2mu).ant-form-item {
+.salary-constayner :where(.css-dev-only-do-not-override-1drr2mu).ant-form-item {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -61,7 +61,7 @@
   vertical-align: top;
 }
 
-:where(.css-dev-only-do-not-override-1drr2mu).ant-btn-primary {
+.salary-constayner :where(.css-dev-only-do-not-override-1drr2mu).ant-btn-primary {
   color: #fff;
   background: #0A3D3A;
   font-size: 20px;
@@ -69,7 +69,7 @@
   box-shadow: 0 2px 0 rgba(5, 145, 255, 0.1);
 }
 
-:where(.css-dev-only-do-not-override-1drr2mu).ant-btn-primary:hover {
+.salary-constayner :where(.css-dev-only-do-not-override-1drr2mu).ant-btn-primary:hover {
   background: green !important;
 }
 
