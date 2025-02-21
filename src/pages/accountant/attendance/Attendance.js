@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { TimePicker, Table, message, Input, Button, Space, Select, Form } from "antd";
 import { SearchOutlined, CheckCircleOutlined, EyeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { useGetAttendanceByDateQuery, useCreateAttendanceMutation } from "../../../context/service/attendance";
+import { useGetAttendanceByDateQuery, useCreateAttendanceMutation, useUpdateAttendanceMutation } from "../../../context/service/attendance";
 import { useGetOrdersQuery } from "../../../context/service/orderApi";
 import { useGetWorkersQuery } from "../../../context/service/worker";
 import { MdLightMode, MdNightsStay } from "react-icons/md";
@@ -15,11 +15,13 @@ const Attendance = () => {
     const [changeTime, setChangeTime] = useState({});
     const [selectedOption, setSelectedOption] = useState({});
 
-
     const [startTime, setStartTime] = useState({});
     const [endTime, setEndTime] = useState({});
     const [nightStart, setNightStart] = useState({});
     const [nightEnd, setNightEnd] = useState({});
+    // useUpdateAttendanceMutation
+
+    console.log(endTime);
 
     const { data: orders } = useGetOrdersQuery();
     const addresses = orders?.innerData?.filter(i => i.isType)?.map((order) => ({
@@ -27,7 +29,7 @@ const Attendance = () => {
         label: `${order.address.region}, ${order.address.district}`,
     })) || [];
 
-    const [createAttendance] = useCreateAttendanceMutation();
+
     const { data: workersData, isLoading: workersLoading } = useGetWorkersQuery();
     const workers = workersData?.innerData || [];
     const navigate = useNavigate();
@@ -53,8 +55,12 @@ const Attendance = () => {
             )} ${formattedPhone.slice(5, 7)} ${formattedPhone.slice(7, 9)}`
             : phone;
     };
-
-
+    const [createAttendance] = useCreateAttendanceMutation();
+    const [updateAttendance] = useUpdateAttendanceMutation();
+    const [isAttendance, setIsAttendance] = useState({
+        status: false,
+        id: null,
+    });
     const handleEdit = async (user) => {
         const payload = {
             workerName: user?.firstName + " " + user?.lastName,
@@ -72,21 +78,34 @@ const Attendance = () => {
             }
         };
 
-        console.log(payload);
-
+        console.log(isAttendance);
+        // 4454
         try {
-            await createAttendance(payload).unwrap();
-            message.success("Davomat muvaffaqiyatli qo'shildi!");
+            if (isAttendance.status) {
+                return
+                await updateAttendance({ ...payload, id: isAttendance.id }).unwrap();
+                message.success("Davomat muvaffaqiyatli yangilandi!");
+            } else {
+                return
+
+                // Aks holda, yangi attendance yaratiladi
+                await createAttendance(payload).unwrap();
+                message.success("Davomat muvaffaqiyatli qo'shildi!");
+            }
+
+            // State-larni tozalash
             setSelectedOption(prev => ({ ...prev, [user._id]: null }));
             setStartTime(prev => ({ ...prev, [user._id]: null }));
             setEndTime(prev => ({ ...prev, [user._id]: null }));
             setNightStart(prev => ({ ...prev, [user._id]: null }));
             setNightEnd(prev => ({ ...prev, [user._id]: null }));
+
+            // isAttendance ni yangilash
+            setIsAttendance({ id: user._id, status: true });
         } catch (error) {
             message.warning("Xatolik yuz berdi");
         }
     };
-
 
     const handleChangeTime = (recordId) => {
         setChangeTime((prevState) => ({
@@ -95,107 +114,168 @@ const Attendance = () => {
         }));
     };
 
-    const renderTimePickers = (record) => (
-        <Form onFinish={() => handleEdit(record)} className="attendance-times-inp">
-            <div className="time-picker">
-                {changeTime[record._id] ? (
-                    <>
-                        <TimePicker
-                            name={`nightStart-${record._id}`}
-                            onChange={(time, timeString) => setNightStart(prev => ({
-                                ...prev,
-                                [record._id]: timeString
-                            }))}
-                            placeholder="Kechki boshlanish"
-                            format="HH:mm"
-                            style={{ width: 110 }}
-                            size="small"
-                            className="time-picker-inp"
-                            value={nightStart[record._id] ? moment(nightStart[record._id], 'HH:mm') : null}
-                        />
-                        <TimePicker
-                            name={`nightEnd-${record._id}`}
-                            onChange={(time, timeString) => setNightEnd(prev => ({
-                                ...prev,
-                                [record._id]: timeString
-                            }))}
-                            placeholder="Kechki tugash"
-                            format="HH:mm"
-                            style={{ width: 120 }}
-                            size="small"
-                            className="time-picker-inp"
-                            value={nightEnd[record._id] ? moment(nightEnd[record._id], 'HH:mm') : null}
-                        />
-                    </>
-                ) : (
-                    <>
-                        <TimePicker
-                            name={`start-${record._id}`}
-                            onChange={(time, timeString) => setStartTime(prev => ({
-                                ...prev,
-                                [record._id]: timeString
-                            }))}
-                            placeholder="Boshlanish"
-                            format="HH:mm"
-                            style={{ width: 110 }}
-                            size="small"
-                            className="time-picker-inp"
-                            value={startTime[record._id] ? moment(startTime[record._id], 'HH:mm') : null}
-                        />
-                        <TimePicker
-                            name={`end-${record._id}`}
-                            onChange={(time, timeString) => setEndTime(prev => ({
-                                ...prev,
-                                [record._id]: timeString
-                            }))}
-                            placeholder="Tugash"
-                            format="HH:mm"
-                            style={{ width: 120 }}
-                            size="small"
-                            className="time-picker-inp"
-                            value={endTime[record._id] ? moment(endTime[record._id], 'HH:mm') : null}
-                        />
-                        <Select
-                            name={`location-${record._id}`}
-                            placeholder="Manzilni tanlang"
-                            style={{ width: 190 }}
-                            value={selectedOption[record._id]}
-                            onChange={(value) => {
-                                setSelectedOption(prev => ({
-                                    ...prev,
-                                    [record._id]: value
-                                }));
-                            }}
-                        >
-                            {addresses?.map((address, inx) => (
-                                <Option key={inx} value={address.value}>
-                                    {address.label}
-                                </Option>
-                            ))}
-                        </Select>
-                    </>
-                )}
-            </div>
+    const renderTimePickers = (record) => {
+        const todayAttendance = attendanceData?.innerData?.find(
+            (attendance) => attendance?.workerId === record?._id
+        );
 
-            <Button
-                icon={<CheckCircleOutlined />}
-                size="middle"
-                type="primary"
-                htmlType="submit"
-                disabled={
-                    changeTime[record._id]
-                        ? !nightStart[record._id] || !nightEnd[record._id]
-                        : !startTime[record._id] || !endTime[record._id]
-                }
-            />
-            <Button
-                icon={changeTime[record._id] ? <MdLightMode /> : <MdNightsStay />}
-                size="middle"
-                onClick={() => handleChangeTime(record._id)}
-                className={`nightsStay ${changeTime[record._id] ? 'active' : ''}`}
-            />
-        </Form>
-    );
+        if (!record?._id) {
+            console.error('record yoki record._id mavjud emas:', record);
+            return null;
+        }
+
+        const inTime = todayAttendance?.inTime || {};
+        const status = todayAttendance?.status || {};
+
+        // Agar har qanday qiymat mavjud bo'lsa, true o'rnatiladi
+        // if (
+        //     inTime.start ||
+        //     inTime.end ||
+        //     inTime.nightStart ||
+        //     inTime.nightEnd ||
+        //     status.loc
+        // ) {
+        //     setIsAttendance({
+        //         id: record._id,
+        //         status: true
+        //     });
+        // } else {
+        //     setIsAttendance({
+        //         id: record._id,
+        //         status: false
+        //     });
+        // }
+
+        return (
+            <Form onFinish={() => handleEdit(record)} className="attendance-times-inp">
+                <div className="time-picker">
+                    {changeTime[record._id] ? (
+                        <>
+                            <TimePicker
+                                name={`nightStart-${record._id}`}
+                                onChange={(time, timeString) => setNightStart(prev => ({
+                                    ...prev,
+                                    [record._id]: timeString
+                                }))}
+                                placeholder="Kechki boshlanish"
+                                format="HH:mm"
+                                style={{ width: 110 }}
+                                size="small"
+                                className="time-picker-inp"
+                                value={
+                                    inTime.nightStart
+                                        ? moment(inTime.nightStart, 'HH:mm')
+                                        : (nightStart[record._id] ? moment(nightStart[record._id], 'HH:mm') : null)
+                                }
+                                disabled={!!inTime.nightStart}
+                            />
+                            <TimePicker
+                                name={`nightEnd-${record._id}`}
+                                onChange={(time, timeString) => setNightEnd(prev => ({
+                                    ...prev,
+                                    [record._id]: timeString
+                                }))}
+                                placeholder="Kechki tugash"
+                                format="HH:mm"
+                                style={{ width: 120 }}
+                                size="small"
+                                className="time-picker-inp"
+                                value={
+                                    inTime.nightEnd
+                                        ? moment(inTime.nightEnd, 'HH:mm')
+                                        : (nightEnd[record._id] ? moment(nightEnd[record._id], 'HH:mm') : null)
+                                }
+                                disabled={!!inTime.nightEnd}
+                            />
+                        </>
+                    ) : (
+                        <>
+                            <TimePicker
+                                name={`start-${record._id}`}
+                                onChange={(time, timeString) => setStartTime(prev => ({
+                                    ...prev,
+                                    [record._id]: timeString
+                                }))}
+                                placeholder="Boshlanish"
+                                format="HH:mm"
+                                style={{ width: 110 }}
+                                size="small"
+                                className="time-picker-inp"
+                                value={
+                                    inTime.start
+                                        ? moment(inTime.start, 'HH:mm')
+                                        : (startTime[record._id] ? moment(startTime[record._id], 'HH:mm') : null)
+                                }
+                                disabled={!!inTime.start}
+                            />
+                            <TimePicker
+                                name={`end-${record._id}`}
+                                onChange={(time, timeString) => setEndTime(prev => ({
+                                    ...prev,
+                                    [record._id]: timeString
+                                }))}
+                                placeholder="Tugash"
+                                format="HH:mm"
+                                style={{ width: 120 }}
+                                size="small"
+                                className="time-picker-inp"
+                                value={
+                                    inTime.end
+                                        ? moment(inTime.end, 'HH:mm')
+                                        : (endTime[record._id] ? moment(endTime[record._id], 'HH:mm') : null)
+                                }
+                                disabled={!!inTime.end}
+                            />
+                            <Select
+                                name={`location-${record._id}`}
+                                placeholder="Manzilni tanlang"
+                                style={{ width: 190 }}
+                                value={
+                                    status.loc
+                                        ? status.loc
+                                        : selectedOption[record._id]
+                                }
+                                onChange={(value) => {
+                                    setSelectedOption(prev => ({
+                                        ...prev,
+                                        [record._id]: value
+                                    }));
+                                }}
+                                disabled={!!status.loc}
+                            >
+                                {addresses?.map((address, inx) => (
+                                    <Option key={inx} value={address.value}>
+                                        {address.label}
+                                    </Option>
+                                ))}
+                            </Select>
+                        </>
+                    )}
+                </div>
+
+                <Button
+                    icon={<CheckCircleOutlined />}
+                    size="middle"
+                    type="primary"
+                    htmlType="submit"
+                    disabled={
+                        changeTime[record._id]
+                            ? !nightStart[record._id] || !nightEnd[record._id]
+                            : !startTime[record._id] || !endTime[record._id]
+                    }
+                />
+                <Button
+                    icon={changeTime[record._id] ? <MdLightMode /> : <MdNightsStay />}
+                    size="middle"
+                    onClick={() => handleChangeTime(record._id)}
+                    className={`nightsStay ${changeTime[record._id] ? 'active' : ''}`}
+                />
+            </Form>
+        );
+    };
+
+
+
 
 
     const columns = [
@@ -273,17 +353,3 @@ const Attendance = () => {
 
 export default Attendance;
 
-
-{/*  // const todayAttendance = attendanceData?.innerData.find(
-                        //     (attendance) => attendance.workerId === record._id
-                        // );
-                        {todayAttendance ? (
-                            <div className="todayAttendance">
-                                <div>Kelgan vaqti: {todayAttendance?.inTime}</div>
-                                <div>Ish soati: {todayAttendance?.workingHours}</div>
-                                {todayAttendance?.status?.loc && (
-                                    <div>Komandirovka: {todayAttendance?.status?.loc}</div>
-                                )}
-                            </div>
-                        ) : (
-                            )} */}
