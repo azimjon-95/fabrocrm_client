@@ -25,6 +25,7 @@ import HistoryOrderLists from "../pages/store/HistoryOrderLists";
 import WarehouseView from "../pages/director/Main/WarehouseView";
 import CtrlWorkers from "../pages/director/Main/CtrlWorkers";
 import ViewOrder from "../pages/director/Main/ViewOrder";
+import EditAttendance from "../pages/accountant/attendance/EditAttendance";
 
 export const routes = [
   { path: "/manager", element: <Order />, private: true, role: ["manager", "deputy"] },
@@ -52,6 +53,7 @@ export const routes = [
   { path: "/order/:id", element: <OrderDetails />, private: true, role: ["accountant", "deputy"] },
   { path: "/accountant", element: <Accountant />, private: true, role: ["accountant", "deputy"] },
   { path: "/salary/history/:date", element: <History />, private: true, role: ["accountant", "deputy"] },
+  { path: "/edit/attendance/:workerName", element: <EditAttendance />, private: true, role: ["accountant", "deputy"] },
   // ==========================================================================================
   { path: "/deputy", element: <Persons />, private: true, role: "deputy" },
   { path: "/worker/add", element: <RegisterWorker />, private: true, role: ["deputy", "director"] },

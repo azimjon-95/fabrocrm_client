@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Table, Spin, Alert, message, DatePicker, Button, Input } from "antd";
+import { Table, Spin, Alert, DatePicker, Button } from "antd";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeftOutlined, FileExcelOutlined, EditOutlined } from "@ant-design/icons";
-import { useGetMonthlyAttendanceQuery, useUpdateAttendanceMutation } from "../../../context/service/attendance";
+import { ArrowLeftOutlined, FileExcelOutlined } from "@ant-design/icons";
+import { useGetMonthlyAttendanceQuery } from "../../../context/service/attendance";
+import { CiEdit } from "react-icons/ci";
 import dayjs from "dayjs";
 import * as XLSX from "xlsx";
 
@@ -11,17 +12,8 @@ const Story = () => {
     const [searchParams] = useSearchParams();
     const workerId = searchParams.get("workerId");
     const [selectedDate, setSelectedDate] = useState(dayjs());
-    const [updateAttendance] = useUpdateAttendanceMutation();
-    const [isEditing, setIsEditing] = useState(false);
-    const [editedData, setEditedData] = useState({});
-
-
     const location = useLocation();
     const [attendance] = useState(location.pathname === "/all/attendance");
-    console.log(attendance);
-
-
-
     const year = selectedDate.year();
     const month = String(selectedDate.month() + 1).padStart(2, "0");
     const { data, isLoading, error } = useGetMonthlyAttendanceQuery({ year, month });
@@ -35,57 +27,52 @@ const Story = () => {
     const filteredData = React.useMemo(() => {
         return workerId ? data?.innerData?.filter(item => item.workerId === workerId) : data?.innerData;
     }, [data, workerId]);
-
     if (isLoading) return <Spin size="large" style={{ display: "block", margin: "20px auto" }} />;
     if (error) return <Alert message="Ma'lumotlarni yuklashda xatolik yuz berdi!" type="error" showIcon />;
 
-    // Ishchilarni guruhlash va ish soatlarini hisoblash
-    const groupedData = {};
-    filteredData?.forEach(({ workerId, workerName, date, workingHours }) => {
-        if (!groupedData[workerId]) {
-            groupedData[workerId] = { workerId, workerName, workingHours: 0, dates: {} };
+    const groupedData = filteredData?.reduce((acc, { workerId, workerName, date, workingHours, nightWorkingHours }) => {
+        // Agar workerId mavjud bo'lmasa, yangi obyekt yaratamiz
+        if (!acc[workerId]) {
+            acc[workerId] = {
+                workerId,
+                workerName,
+                workingHours: 0,
+                nightWorkingHours: 0,
+                dates: {}
+            };
         }
-        groupedData[workerId].workingHours += +workingHours;
-        groupedData[workerId].dates[date] = workingHours;
-    });
 
+        // Umumiy ish va tun ishlagan soatlarni qo'shamiz
+        acc[workerId].workingHours += Number(workingHours) || 0;
+        acc[workerId].nightWorkingHours += Number(nightWorkingHours) || 0;
+
+        // Har bir sanaga mos ish va tun ishlagan soatlarni kiritamiz
+        acc[workerId].dates[date] = {
+            workingHours: Number(workingHours) || 0,
+            nightWorkingHours: Number(nightWorkingHours) || 0
+        };
+
+        return acc;
+    }, {});
     const tableData = Object.values(groupedData);
     const daysInMonth = dayjs(`${year}-${month}`).daysInMonth();
     const currentDate = dayjs().format("YYYY-MM-DD");
-    // const monthName = dayjs(`${year}-${month}-01`).format("MMMM");
 
-    // **UPDATE Attendance**
-    const handleUpdateAttendance = async (workerId, name, date, value) => {
-        const updatedData = {
-            workerId,
-            workerName: name,
-            date,
-            workingHours: value,
-        };
+    const getCellStyle = (isFutureDate, hasData) => ({
+        backgroundColor: isFutureDate ? "transparent" : hasData ? "#4CAF50" : "#FF5733",
+        color: "#fff",
+        textAlign: "center",
+        cursor: isFutureDate ? "not-allowed" : "pointer",
+        pointerEvents: isFutureDate ? "none" : "auto",
+        userSelect: isFutureDate ? "none" : "auto",
+        WebkitUserSelect: isFutureDate ? "none" : "auto",
+        msUserSelect: isFutureDate ? "none" : "auto",
+        MozUserSelect: isFutureDate ? "none" : "auto",
+        position: "relative"
+    });
 
-        try {
-            const res = await updateAttendance(updatedData).unwrap();
-            message.success(res.message);
-            setEditedData({})
-        } catch (error) {
-            console.error("Xatolik yuz berdi:", error);
-        }
-    };
-
-
-    const onCellClick = (record, date) => {
-        if (!isEditing) return;
-        setEditedData(prev => ({
-            ...prev,
-            [record.workerId]: { ...prev[record.workerId], [date]: record.dates[date] || "" }
-        }));
-    };
-
-    const onChange = (workerId, date, value) => {
-        setEditedData(prev => ({
-            ...prev,
-            [workerId]: { ...prev[workerId], [date]: value }
-        }));
+    const handleEditClick = (workerName) => {
+        navigate(`/edit/attendance/${workerName}`);
     };
 
     const columns = [
@@ -106,118 +93,105 @@ const Story = () => {
                     dataIndex: "dates",
                     key: date,
                     onCell: (record) => ({
-                        style: {
-                            backgroundColor: isFutureDate ? "transparent" : record.dates[date] ? "#4CAF50" : "#FF5733",
-                            color: "#fff",
-                            textAlign: "center",
-                            cursor: isFutureDate ? "not-allowed" : "pointer",
-                            pointerEvents: isFutureDate ? "none" : "auto",
-                            userSelect: isFutureDate ? "none" : "auto",
-                            WebkitUserSelect: isFutureDate ? "none" : "auto",
-                            msUserSelect: isFutureDate ? "none" : "auto",
-                            MozUserSelect: isFutureDate ? "none" : "auto",
-                            padding: isEditing ? "0px" : "5px",
-                        },
-                        onClick: () => onCellClick(record, date),
+                        style: getCellStyle(isFutureDate, record.dates[date]),
                     }),
                     render: (dates, record) => {
-                        if (isEditing && editedData[record.workerId]?.[date] !== undefined) {
-                            return (
-                                <Input
-                                    className="updateAttendance-inp"
-                                    size="small"
-                                    value={editedData[record.workerId][date]}
-                                    onChange={(e) => onChange(record.workerId, date, e.target.value)}
-                                    onBlur={() => handleUpdateAttendance(record.workerId, record.workerName, date, editedData[record.workerId][date])}
-                                    onPressEnter={() => handleUpdateAttendance(record.workerId, record.workerName, date, editedData[record.workerId][date])}
-                                    autoFocus
-                                    placeholder="..."
-                                />
-                            );
-                        }
-                        return dates[date] || "-";
+                        const dayData = dates[date] || {};
+                        const { workingHours = 0, nightWorkingHours = 0 } = dayData;
+                        return (
+                            <div className="workingHours-nightWorkingHours">
+                                {
+                                    workingHours > 0 &&
+                                    <span className={nightWorkingHours > 0 && `workingHours`} style={{ color: "#ffffff" }}>{workingHours}</span>
+                                }
+                                {
+                                    nightWorkingHours > 0 && workingHours > 0 && (
+                                        <div className="night-slesh"></div>
+                                    )
+                                }
+                                {nightWorkingHours > 0 && (
+                                    <span className={workingHours > 0 && "nightWorkingHours"} style={{ color: "#ffffff" }}>{nightWorkingHours}</span>
+                                )}
+                            </div>
+                        );
                     },
                 };
             }),
         },
         {
-            title: "Jami Ish Soatlari",
+            title: "Ish Soati",
             dataIndex: "workingHours",
             key: "workingHours",
         },
+        {
+            title: "Tungi Soat",
+            dataIndex: "nightWorkingHours",
+            key: "nightWorkingHours",
+        },
+        {
+            title: "Tahrirlash",
+            key: "edit",
+            render: (_, record) => (
+                <Button className="editAttendance-btn"
+                    type="link"
+                    onClick={() => handleEditClick(record.workerId)}
+                >
+                    <CiEdit />
+                </Button>
+            ),
+        }
+
     ];
 
-    const exportToExcel = () => {
-        const worksheetData = tableData?.map((item) => {
-            let row = { "FIO": item.workerName, "Oy Soatlari": item.workingHours }; // Xodimning oylik jami ish soati
+
+    const handleExportToExcel = () => {
+        const excelData = tableData.map((row) => {
+            const rowData = {
+                FIO: row.workerName,
+                "Ish Soati": row.workingHours,
+                "Tungi Soat": row.nightWorkingHours
+            };
 
             for (let i = 1; i <= daysInMonth; i++) {
                 const date = dayjs(`${year}-${month}-${String(i).padStart(2, "0")}`).format("YYYY-MM-DD");
-                const hours = item.dates[date] || "-";
-                row[i] = hours;
+                const dayData = row.dates[date] || {};
+                const workingHours = dayData.workingHours || 0;
+                const nightWorkingHours = dayData.nightWorkingHours || 0;
+
+                rowData[` ${i}`] = workingHours || nightWorkingHours
+                    ? `${workingHours} / ${nightWorkingHours}`
+                    : "";
             }
 
-            return row;
+            return rowData;
         });
 
-        // Har bir kun uchun jami soatlarni hisoblash
-        let totalHoursRow = { "FIO": "Jami:", "Oy Soatlari": tableData.reduce((sum, item) => sum + item.workingHours, 0) };
-        for (let i = 1; i <= daysInMonth; i++) {
-            totalHoursRow[i] = tableData.reduce((sum, item) => sum + (parseFloat(item.dates[dayjs(`${year}-${month}-${String(i).padStart(2, "0")}`).format("YYYY-MM-DD")]) || 0), 0);
-        }
-
-        worksheetData.push(totalHoursRow); // Umumiy natijani qo'shish
-
-        const worksheet = XLSX.utils.json_to_sheet(worksheetData, {
-            header: ["FIO"]
-        });
-
-        // Eng uzun "FIO" ni topish va ustun kengligini moslashtirish
-        let maxFioLength = Math.max(...tableData.map(item => item.workerName?.length), 4); // Minimal 4 ta harf
-        let colWidths = [{ wch: maxFioLength + 3 }, { wch: 10 }]; // "FIO" va "Oy Soatlari" kengliklari
-
-        for (let i = 1; i <= daysInMonth; i++) {
-            colWidths.push({ wch: 4 }); // Har bir kun uchun kichik kenglik (4 harf)
-        }
-
-        worksheet["!cols"] = colWidths; // Excel ustun kengliklarini sozlash
-
-        // Ranglarni qo'shish: yashil va sariq
-        worksheetData.forEach((row, rowIndex) => {
-            for (let colIndex = 1; colIndex <= daysInMonth; colIndex++) {
-                const cell = worksheet[XLSX.utils.encode_cell({ r: rowIndex + 1, c: colIndex + 1 })]; // Adjusted index (rowIndex + 1, colIndex + 1)
-                if (cell) {
-                    const value = row[colIndex];
-                    if (value !== "-" && value !== "") {
-                        // Ishlangan soatlar uchun yashil rang
-                        cell.s = { fill: { fgColor: { rgb: "00FF00" } }, font: { color: { rgb: "FFFFFF" } } };
-                    } else {
-                        // Ishlanmagan soatlar uchun sariq rang
-                        cell.s = { fill: { fgColor: { rgb: "FFFF00" } }, font: { color: { rgb: "000000" } } };
-                    }
-                }
-            }
-        });
-
-        // Freeze the first row (header)
-        worksheet["!freeze"] = { xSplit: 0, ySplit: 1 };
-
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Davomat Tarixi");
-        XLSX.writeFile(workbook, `Davomat_Tarixi_${year}_${month}.xlsx`);
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Davomat");
+
+        // Avtomatik kenglikni o'rnatish
+        const columnWidths = Object.keys(excelData[0]).map((key) => ({
+            wch: Math.max(...excelData.map((row) => (row[key] || "").toString().length)) + 5,
+        }));
+        worksheet["!cols"] = columnWidths;
+
+        XLSX.writeFile(workbook, `Davomat_${monthName}_${year}.xlsx`);
     };
+
+
 
     return (
         <div className="story_table">
             <div className="story_nav">
                 {
                     !attendance &&
-                    <Button size="large" onClick={() => navigate(-1)}>
+                    <Button size="middle" style={{ height: "36px" }} onClick={() => navigate(-1)}>
                         <ArrowLeftOutlined />
                         Orqaga qaytish
                     </Button>
                 }
-                <h2>{isEditing ? "Davomatni taxrirlash" : "Davomat tarixi"}</h2>
+                <h2>Davomat tarixi</h2>
                 <div>
                     <DatePicker className="datePicker_nav"
                         picker="month" size="large"
@@ -225,12 +199,8 @@ const Story = () => {
                         onChange={(date) => setSelectedDate(dayjs(date))}
                     />
                     {
-                        !attendance && <Button size="large" onClick={() => setIsEditing(!isEditing)} icon={<EditOutlined />}>
-                            {isEditing ? "Saqlash" : "Tahrirlash"}
-                        </Button>
-                    }
-                    {
-                        !attendance && <Button size="large" onClick={exportToExcel} icon={<FileExcelOutlined />}>
+                        !attendance &&
+                        <Button onClick={handleExportToExcel} size="large" icon={<FileExcelOutlined />}>
                             Excel
                         </Button>
                     }

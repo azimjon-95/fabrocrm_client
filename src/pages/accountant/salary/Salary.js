@@ -42,7 +42,6 @@ const Salary = () => {
     year,
     month,
   });
-  console.log(data, isLoading, error);
   const [createExpense] = useCreateExpenseMutation();
 
   // Submit function that includes server interaction
@@ -80,56 +79,55 @@ const Salary = () => {
     [createExpense]
   );
 
-  const groupedData = {};
-  data?.innerData?.forEach(({ workerId, workerName, workingHours, status }) => {
-    if (!groupedData[workerId]) {
-      groupedData[workerId] = {
-        workerId,
-        workerName,
-        hoursFrom1To10: 0,
-        hoursAbove10: 0,
-        voxa: 0,
-        toshkent: 0,
-      };
-    }
-    const hours = +workingHours;
-    if (status?.loc === "voxa") groupedData[workerId].voxa += hours;
-    else if (status?.loc === "toshkent")
-      groupedData[workerId].toshkent += hours;
-    else {
-      if (hours > 10) {
-        groupedData[workerId].hoursFrom1To10 += 10;
-        groupedData[workerId].hoursAbove10 += hours - 10;
-      } else {
-        groupedData[workerId].hoursFrom1To10 += hours;
-      }
-    }
-  });
 
-  const tableData = Object.values(groupedData).map((worker) => {
-    const totalVoxa =
-      worker.voxa *
-      (salaryDataObj.wages +
-        (salaryDataObj.wages * (salaryDataObj.voxa || 0)) / 100);
-    const totalToshkent =
-      worker.toshkent *
-      (salaryDataObj.wages +
-        (salaryDataObj.wages * (salaryDataObj.toshkent || 0)) / 100);
+  const groupedData = data?.innerData?.reduce((acc, curr) => {
+    const { workerId, workerName, workingHours, nightWorkingHours, status } = curr;
+    const hours = +workingHours || 0;
+    const nightHours = +nightWorkingHours || 0;
+    const location = status?.loc?.toLowerCase();
+
+    acc[workerId] = acc[workerId] || {
+      workerId,
+      workerName,
+      workingHours: 0,
+      nightWorkingHours: 0,
+      voxa: 0,
+      toshkent: 0,
+    };
+
+    acc[workerId].nightWorkingHours += nightHours;
+
+    if (location === "voxa") {
+      acc[workerId].voxa += hours;
+    } else if (location === "toshkent") {
+      acc[workerId].toshkent += hours;
+    } else {
+      acc[workerId].workingHours += hours;
+    }
+
+    return acc;
+  }, {});
+
+  // Agar groupedData mavjud bo'lmasa, bo'sh massiv qaytariladi
+  const tableData = Object.values(groupedData || {}).map((worker) => {
+    const { voxa, toshkent, workingHours, nightWorkingHours } = worker;
+    const { wages, overtimeWages, voxa: voxaPercent = 0, toshkent: toshkentPercent = 0 } = salaryDataObj || {};
+
+    const baseSalary = workingHours * (wages || 0);
+    const extraSalary = nightWorkingHours * (overtimeWages || 0);
+
+    const totalVoxa = voxa * (wages + (wages * voxaPercent) / 100);
+    const totalToshkent = toshkent * (wages + (wages * toshkentPercent) / 100);
 
     return {
       ...worker,
-      salary: worker.hoursFrom1To10 * salaryDataObj.wages,
-      extraSalary: worker.hoursAbove10 * salaryDataObj.overtimeWages,
+      salary: baseSalary,
+      extraSalary,
       totalVoxa,
       totalToshkent,
-      totalSalary:
-        worker.hoursFrom1To10 * salaryDataObj.wages +
-        worker.hoursAbove10 * salaryDataObj.overtimeWages +
-        totalVoxa +
-        totalToshkent,
+      totalSalary: baseSalary + extraSalary + totalVoxa + totalToshkent,
     };
   });
-
 
   // Render Salary Payment Form
   const SalaryPaymentForm = ({ remainingSalary, record }) => {
@@ -164,7 +162,7 @@ const Salary = () => {
             min={0}
             value={amount}
             type="number"
-            style={{ width: 120 }}
+            style={{ width: 120, marginTop: "15px" }}
             placeholder={`${remainingSalary?.toLocaleString()} so‘m`}
           />
         </Form.Item>
@@ -241,7 +239,7 @@ const Salary = () => {
       render: (_, record) => (
         <>
           <div>
-            <ClockCircleOutlined /> <strong>{record.hoursFrom1To10}</strong>{" "}
+            <ClockCircleOutlined /> <strong>{record.workingHours}</strong>{" "}
             soat
           </div>
           <div>
@@ -257,7 +255,7 @@ const Salary = () => {
       render: (_, record) => (
         <>
           <div>
-            <TbClockPlus /> <strong>{record.hoursAbove10}</strong> soat
+            <TbClockPlus /> <strong>{record.nightWorkingHours}</strong> soat
           </div>
           <div>
             <DollarCircleOutlined />{" "}
