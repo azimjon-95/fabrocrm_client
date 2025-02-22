@@ -193,7 +193,8 @@ const AccountentMain = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
-
+  let zakazlar = ordersData?.innerData || [];
+  console.log(zakazlar);
   return (
     <div className="accountent-container">
       {/* Yuqori qismdagi kartalar */}
@@ -218,7 +219,7 @@ const AccountentMain = () => {
             <p>Yuklanmoqda...</p>
           ) : (
             <ul>
-              {ordersData?.innerData?.map((order, index) => (
+              {zakazlar?.map((order, index) => (
                 <li key={index} className="order-item">
                   <div className="order-info">
                     <div>

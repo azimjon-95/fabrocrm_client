@@ -47,7 +47,7 @@ const UpdateOrderForm = () => {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      await updateOrder({ id, ...values });
+      let response = await updateOrder({ id, values });
       message.success("Buyurtma muvaffaqiyatli yangilandi!");
     } catch (error) {
       message.error("Xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring!");

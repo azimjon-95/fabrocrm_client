@@ -1,94 +1,98 @@
 .warehouse-navbar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    padding: 0 0 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 0 0 15px;
 }
 
 .warehouse-navbar_inp {
-    width: 50%;
-    height: 40px;
-    padding: 0 10px;
+  width: 50%;
+  height: 40px;
+  padding: 0 10px;
 }
 
-
 .radio_Group_inp {
-    display: flex;
-    width: 100%;
-    flex-wrap: wrap;
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .radio_Group_inp .ant-radio-wrapper {
-    width: 240px;
-    display: flex;
-    align-items: center;
-    height: 35px;
+  width: 240px;
+  display: flex;
+  align-items: center;
+  height: 35px;
 }
 
+.custom-table-scroll {
+  height: 100vh;
+}
 
 .custom-table-scroll .ant-table-body {
-    overflow-y: auto !important;
-    scrollbar-width: thin;
-    scrollbar-color: #0A3D3A var(--bg-color);
+  overflow-y: auto !important;
+  scrollbar-width: thin;
+  scrollbar-color: #0a3d3a var(--bg-color);
 }
 
 /* Chrome, Safari va Edge uchun */
 .custom-table-scroll .ant-table-body::-webkit-scrollbar {
-    width: 2px;
+  width: 2px;
 }
 
 .custom-table-scroll .ant-table-body::-webkit-scrollbar-track {
-    background: #f0f0f0;
-    border-radius: 4px !important;
+  background: #f0f0f0;
+  border-radius: 4px !important;
 }
 
 .custom-table-scroll .ant-table-body::-webkit-scrollbar-thumb {
-    background-color: var(--bg-color);
-    /* Scroll rangi */
-    border-radius: 4px;
-    border: 2px solid #f0f0f0;
+  background-color: var(--bg-color);
+  /* Scroll rangi */
+  border-radius: 4px;
+  border: 2px solid #f0f0f0;
 }
 
-:where(.css-dev-only-do-not-override-1drr2mu).ant-radio-button-wrapper>.ant-radio-button {
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline-start: 0;
-    z-index: -1;
-    width: 100%;
-    height: 100%;
-    background: #0A3D3A;
-    border: 1px solid #0A3D3A;
+:where(.css-dev-only-do-not-override-1drr2mu).ant-radio-button-wrapper
+  > .ant-radio-button {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  background: #0a3d3a;
+  border: 1px solid #0a3d3a;
 }
 
 .ant-radio-button-wrapper {
-
-    overflow: hidden;
+  overflow: hidden;
 }
 
-:where(.css-dev-only-do-not-override-1drr2mu).ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
-    z-index: 1;
-    color: #ffffff !important;
-    background: #ffffff;
-    border-color: #0A3D3A !important;
+:where(
+    .css-dev-only-do-not-override-1drr2mu
+  ).ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+  z-index: 1;
+  color: #ffffff !important;
+  background: #ffffff;
+  border-color: #0a3d3a !important;
 }
 
 .stororderhistory {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  position: relative;
 }
 
 .stororderhistory Button {
-    position: absolute;
-    top: 0;
-    left: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 90px;
-    height: 35px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 90px;
+  height: 35px;
 }

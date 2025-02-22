@@ -1,18 +1,49 @@
-import React, { useState, useMemo } from "react";
-import { useGetOrdersQuery, useOrderProgressQuery, useUpdateOrderMutation, useDeleteOrderMutation } from "../../../../context/service/orderApi";
-import { Dropdown, Menu, Select, Table, Spin, Input, Alert, Popconfirm, Modal, Button, Image, Progress } from "antd";
-import { MoreOutlined, EditOutlined, DeleteOutlined, CheckOutlined } from "@ant-design/icons";
+import React, { useState, useMemo, useEffect } from "react";
+import {
+  useGetOrdersQuery,
+  useOrderProgressQuery,
+  useUpdateOrderMutation,
+  useDeleteOrderMutation,
+} from "../../../../context/service/orderApi";
+import {
+  Dropdown,
+  Menu,
+  Select,
+  Table,
+  Spin,
+  Input,
+  Alert,
+  Popconfirm,
+  Modal,
+  Button,
+  Image,
+  Progress,
+  message,
+} from "antd";
+import {
+  MoreOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  CheckOutlined,
+} from "@ant-design/icons";
 import { BookOutlined } from "@ant-design/icons";
 import { EyeOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { SearchOutlined } from "@ant-design/icons";
-import "./style.css"; import dayjs from "dayjs";
+import "./style.css";
+import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom"; // Sahifaga yo‘naltirish uchun
+import socket from "../../../../socket";
 
 const { Search } = Input;
 const ViewOrder = () => {
   const navigate = useNavigate();
-  const { data: orders, error, isLoading } = useGetOrdersQuery();
+  const {
+    data: orders,
+    error,
+    isLoading,
+    refetch: refetchOrders,
+  } = useGetOrdersQuery();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const newOrders = orders?.innerData?.filter((order) => order.isType === true);
@@ -21,10 +52,32 @@ const ViewOrder = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegion, setSelectedRegion] = useState(null);
 
+  useEffect(() => {
+    socket.on("newOrder", () => {
+      refetchOrders();
+    });
+
+    return () => {
+      socket.off("newOrder");
+    };
+  }, [refetchOrders]);
+
+  useEffect(() => {
+    socket.on("updateOrder", (data) => {
+      console.log("Buyurtma yangilandi", data);
+      refetchOrders();
+    });
+    return () => {
+      socket.off("updateOrder");
+    };
+  }, [refetchOrders]);
+
   const handleClick = async (orderId) => {
     try {
       await updateOrder({ id: orderId, updates: { isType: false } });
+      message.success("Buyurtma yopildi");
     } catch (error) {
+      message.error(error.message || "Buyurtma yopishda xatolik yuz berdi");
       console.error("Xatolik yuz berdi:", error);
     }
   };
@@ -32,22 +85,30 @@ const ViewOrder = () => {
   const handleDelete = async (orderId) => {
     try {
       await deleteOrder(orderId).unwrap();
+      message.success("Buyurtma o‘chirildi");
     } catch (error) {
       console.error("Xatolik yuz berdi:", error);
+      message.error(error.message || "Buyurtma o‘chirishda xatolik yuz berdi");
     }
   };
 
   // Unikal regionlarni olish
   const uniqueRegions = useMemo(() => {
-    const regions = newOrders?.map((order) => order?.address?.region).filter(Boolean);
+    const regions = newOrders
+      ?.map((order) => order?.address?.region)
+      .filter(Boolean);
     return [...new Set(regions)];
   }, [newOrders]);
 
   // Buyurtmalarni qidirish va filterlash
   const filteredOrders = useMemo(() => {
     return newOrders?.filter((order) => {
-      const matchesSearch = order.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesRegion = selectedRegion ? order?.address?.region === selectedRegion : true;
+      const matchesSearch = order.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesRegion = selectedRegion
+        ? order?.address?.region === selectedRegion
+        : true;
       return matchesSearch && matchesRegion;
     });
   }, [newOrders, searchTerm, selectedRegion]);
@@ -63,25 +124,45 @@ const ViewOrder = () => {
   };
 
   if (isLoading)
-    return <Spin size="large" style={{ display: "block", margin: "50px auto" }} />;
+    return (
+      <Spin size="large" style={{ display: "block", margin: "50px auto" }} />
+    );
 
-  if (error)
-    return <Alert message="Xatolik yuz berdi" type="error" showIcon />;
+  if (error) return <Alert message="Xatolik yuz berdi" type="error" showIcon />;
 
   const OrderProgress = ({ record }) => {
-    const { data: progressData, isLoading: progressLoading } = useOrderProgressQuery(record._id);
+    const { data: progressData, isLoading: progressLoading } =
+      useOrderProgressQuery(record._id);
 
     return progressLoading ? (
       <Spin size="small" />
     ) : (
-      <Progress style={{ width: "130px" }} percent={progressData?.innerData?.percentage || 0} />
+      <Progress
+        style={{
+          width: "150px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "20px",
+        }}
+        percent={progressData?.innerData?.percentage || 0}
+      />
     );
   };
 
   const formatDateUzbek = (date) => {
     const months = [
-      "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
-      "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"
+      "Yanvar",
+      "Fevral",
+      "Mart",
+      "Aprel",
+      "May",
+      "Iyun",
+      "Iyul",
+      "Avgust",
+      "Sentabr",
+      "Oktabr",
+      "Noyabr",
+      "Dekabr",
     ];
 
     const d = new Date(date);
@@ -100,17 +181,40 @@ const ViewOrder = () => {
     >
       {customerData && (
         <ul>
-          <li><strong>Turi:</strong> {customerData.customer.type}</li>
-          {customerData.customer.fullName && <li><strong>F.I.O.:</strong> {customerData.customer.fullName}</li>}
-          <li><strong>Telefon:</strong> {customerData.customer.phone}</li>
-          {customerData.customer.companyName && <li><strong>Kompaniya nomi:</strong> {customerData.customer.companyName}</li>}
-          {customerData.customer.director && <li><strong>Direktor:</strong> {customerData.customer.director}</li>}
-          {customerData.customer.inn && <li><strong>INN:</strong> {customerData.customer.inn}</li>}
-          {customerData.address && <li
-            style={{ display: "flex", gap: "8px" }}>
-            <strong>Manzil:</strong>
-            {customerData.address.region}  {customerData.address.district}  {customerData.address.street}
-          </li>}
+          <li>
+            <strong>Turi:</strong> {customerData.customer.type}
+          </li>
+          {customerData.customer.fullName && (
+            <li>
+              <strong>F.I.O.:</strong> {customerData.customer.fullName}
+            </li>
+          )}
+          <li>
+            <strong>Telefon:</strong> {customerData.customer.phone}
+          </li>
+          {customerData.customer.companyName && (
+            <li>
+              <strong>Kompaniya nomi:</strong>{" "}
+              {customerData.customer.companyName}
+            </li>
+          )}
+          {customerData.customer.director && (
+            <li>
+              <strong>Direktor:</strong> {customerData.customer.director}
+            </li>
+          )}
+          {customerData.customer.inn && (
+            <li>
+              <strong>INN:</strong> {customerData.customer.inn}
+            </li>
+          )}
+          {customerData.address && (
+            <li style={{ display: "flex", gap: "8px" }}>
+              <strong>Manzil:</strong>
+              {customerData.address.region} {customerData.address.district}{" "}
+              {customerData.address.street}
+            </li>
+          )}
         </ul>
       )}
     </Modal>
@@ -143,10 +247,9 @@ const ViewOrder = () => {
     </Menu>
   );
 
-
   const columns = [
     {
-      title: "Rasimi",
+      title: "Rasmi",
       dataIndex: "image",
       key: "image",
 
@@ -166,9 +269,10 @@ const ViewOrder = () => {
       title: "Budjet",
       render: (paid) => (
         <div className="text-green-500">
-          <span>Tulov turi: {paid.paymentType} </span>
-          <span>{paid.budget.toLocaleString()} so‘m</span>
-        </div>),
+          <p>Tulov turi: {paid.paymentType} </p>
+          <p>{paid.budget.toLocaleString()} so‘m</p>
+        </div>
+      ),
     },
     {
       title: "To‘langan",
@@ -182,7 +286,7 @@ const ViewOrder = () => {
       render: (_, record) => <OrderProgress record={record} />,
     },
     {
-      title: "Buyurtma va qolgan kunlar",
+      title: "Buyurtma va mudat",
       dataIndex: "date",
       key: "date",
       render: (date, record) => {
@@ -195,9 +299,16 @@ const ViewOrder = () => {
         if (daysLeft <= 2) color = "red"; // 2 yoki undan kam bo‘lsa qizil tusga o‘tadi
 
         return (
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              // alignItems: "center",
+              // gap: "10px",
+            }}
+          >
             <div>{formatDateUzbek(orderDate)}</div> {/* Sanani ko‘rsatish */}
-            /
+            {/* / */}
             <div style={{ color }}>{daysLeft} kun</div> {/* Qolgan kunlar */}
           </div>
         );
@@ -208,7 +319,10 @@ const ViewOrder = () => {
       render: (paid) => (
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           {paid.customer.type}
-          <Button icon={<EyeOutlined />} onClick={() => showCustomerInfo(paid)} />
+          <Button
+            icon={<EyeOutlined />}
+            onClick={() => showCustomerInfo(paid)}
+          />
         </div>
       ),
     },
@@ -216,7 +330,9 @@ const ViewOrder = () => {
       title: "Materiallar",
       dataIndex: "materials",
       key: "materials",
-      render: (_, record) => <Link to={`/orders/materials/${record._id}`}>Ko‘rish</Link>,
+      render: (_, record) => (
+        <Link to={`/orders/materials/${record._id}`}>Ko‘rish</Link>
+      ),
     },
     {
       title: "Amallar",
@@ -229,11 +345,12 @@ const ViewOrder = () => {
     },
   ];
 
-
   return (
     <div className="orderlist">
-      <div className="customer-navbar" style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-
+      <div
+        className="customer-navbar"
+        style={{ display: "flex", gap: "10px", marginBottom: "20px" }}
+      >
         <Input
           size="small"
           placeholder="Mijozni qidirish..."
@@ -250,7 +367,9 @@ const ViewOrder = () => {
           onChange={setSelectedRegion}
         >
           {uniqueRegions.map((region) => (
-            <Select.Option key={region} value={region}>{region}</Select.Option>
+            <Select.Option key={region} value={region}>
+              {region}
+            </Select.Option>
           ))}
         </Select>
 
@@ -283,5 +402,3 @@ const ViewOrder = () => {
 };
 
 export default ViewOrder;
-
-

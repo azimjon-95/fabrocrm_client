@@ -1,206 +1,203 @@
 .lineCart-box {
-    width: 100%;
-    height: 200px;
-    /* background: #000; */
-    margin-bottom: 10px;
-    position: relative;
+  width: 100%;
+  height: 200px;
+  /* background: #000; */
+  margin-bottom: 10px;
+  position: relative;
 }
 
 .custom-table {
-    overflow-x: auto !important;
-    overflow-y: auto !important;
-    max-height: 340px !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  max-height: 340px !important;
+}
 
+.orderlist .custom-table {
+  max-height: 100% !important;
 }
 
 .custom-table .ant-table-tbody td {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 
 .custom-table .ant-table-cell {
-    color: #0A3D3A !important;
+  color: #0a3d3a !important;
 }
 
-
 .warehouse-navbar-view {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    padding: 0 0 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 0 0 15px;
 }
 
 .custom-table-scroll-view .ant-table-body {
-    overflow-y: auto !important;
-    scrollbar-width: thin;
-    scrollbar-color: #0A3D3A var(--bg-color);
+  overflow-y: auto !important;
+  scrollbar-width: thin;
+  scrollbar-color: #0a3d3a var(--bg-color);
 }
 
 /* Chrome, Safari va Edge uchun */
 .custom-table-scroll-view .ant-table-body::-webkit-scrollbar {
-    width: 2px;
+  width: 2px;
 }
 
 .custom-table-scroll-view .ant-table-body::-webkit-scrollbar-track {
-    background: #f0f0f0;
-    border-radius: 4px !important;
+  background: #f0f0f0;
+  border-radius: 4px !important;
 }
 
 .custom-table-scroll-view .ant-table-body::-webkit-scrollbar-thumb {
-    background-color: var(--bg-color);
-    /* Scroll rangi */
-    border-radius: 4px;
-    border: 2px solid #f0f0f0;
+  background-color: var(--bg-color);
+  /* Scroll rangi */
+  border-radius: 4px;
+  border: 2px solid #f0f0f0;
 }
 
 .warehouse-navbar_inp-view {
-    width: 50%;
-    height: 40px;
-    padding: 0 10px;
+  width: 50%;
+  height: 40px;
+  padding: 0 10px;
 }
 
 .orderlist {
-    width: 100%;
+  width: 100%;
 }
 
-
 .order-cards {
-    display: flex;
-    gap: 20px;
-    width: 100%;
-    flex-wrap: nowrap;
-    /* Scroll bo‘lishi uchun wrapni o‘chirib tashlaymiz */
-    overflow: auto;
-    /* Gorizontal scroll */
-    padding-bottom: 10px;
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  flex-wrap: nowrap;
+  /* Scroll bo‘lishi uchun wrapni o‘chirib tashlaymiz */
+  overflow: auto;
+  /* Gorizontal scroll */
+  padding-bottom: 10px;
 }
 
 /* Chrome, Edge va Safari uchun */
 .order-cards::-webkit-scrollbar {
-    height: 2px;
-    /* Scroll balandligi */
+  height: 2px;
+  /* Scroll balandligi */
 }
 
 .order-cards::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    /* Scroll orqa fon */
-    border-radius: 10px;
+  background: #f1f1f1;
+  /* Scroll orqa fon */
+  border-radius: 10px;
 }
 
 .order-cards::-webkit-scrollbar-thumb {
-    background: #888;
-    /* Scroll rangi */
-    border-radius: 10px;
+  background: #888;
+  /* Scroll rangi */
+  border-radius: 10px;
 }
 
 .order-cards::-webkit-scrollbar-thumb:hover {
-    background: #555;
-    /* Hover effekti */
+  background: #555;
+  /* Hover effekti */
 }
 
 .Image-orders {
-    width: 100%;
-    height: 210px;
-    object-fit: cover;
-    border-radius: 8px;
+  width: 100%;
+  height: 210px;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
 .order-cards :where(.css-dev-only-do-not-override-1drr2mu).ant-card-bordered {
-    border: 1px solid #0a3d3a57 !important;
+  border: 1px solid #0a3d3a57 !important;
 }
 
 .order-cards .ant-card {
-    overflow: hidden;
-    min-width: 320px;
-    width: 320px;
+  overflow: hidden;
+  min-width: 320px;
+  width: 320px;
 }
 
 .orderlist {
-    padding: 20px;
+  padding: 20px;
 }
 
 .customer-navbar {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-
 .customer-info-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .customer-info-list li {
-    padding: 8px 12px;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 16px;
-    color: #333;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 16px;
+  color: #333;
 }
 
 .customer-info-list li:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 @media (max-width: 500px) and (min-width: 340px) {
-    .warehouse-container-view {
-        padding: 8px;
-    }
+  .warehouse-container-view {
+    padding: 8px;
+  }
 
+  .warehouse-navbar-view {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
 
+  .warehouse-navbar-view .ant-select,
+  .warehouse-navbar-view .ant-input {
+    width: 100% !important;
+    font-size: 14px;
+  }
 
-    .warehouse-navbar-view {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
+  .custom-table-scroll-view .ant-table {
+    font-size: 12px;
+  }
 
-    .warehouse-navbar-view .ant-select,
-    .warehouse-navbar-view .ant-input {
-        width: 100% !important;
-        font-size: 14px;
-    }
+  .custom-table-scroll-view .ant-table-thead > tr > th {
+    font-size: 11px;
+    padding: 6px;
+  }
 
-    .custom-table-scroll-view .ant-table {
-        font-size: 12px;
-    }
+  .custom-table-scroll-view .ant-table-tbody > tr > td {
+    font-size: 11px;
+    padding: 10px !important;
+  }
 
-    .custom-table-scroll-view .ant-table-thead>tr>th {
-        font-size: 11px;
-        padding: 6px;
-    }
+  .custom-table-scroll-view .ant-table-container {
+    overflow-x: auto;
+  }
 
-    .custom-table-scroll-view .ant-table-tbody>tr>td {
-        font-size: 11px;
-        padding: 10px !important;
-    }
+  .story_table .ant-table-thead .ant-table-cell {
+    text-wrap: nowrap;
+    padding: 8px !important;
+  }
 
-    .custom-table-scroll-view .ant-table-container {
-        overflow-x: auto;
-    }
+  .story_nav > Button {
+    display: none;
+  }
 
-    .story_table .ant-table-thead .ant-table-cell {
-        text-wrap: nowrap;
-        padding: 8px !important;
-    }
+  .story_nav {
+    display: flex;
+    flex-direction: column;
+  }
 
-    .story_nav>Button {
-        display: none;
-    }
+  .story_nav > div {
+    flex-wrap: wrap;
+  }
 
-    .story_nav {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .story_nav>div {
-        flex-wrap: wrap;
-    }
-
-    .datePicker_nav {
-        min-width: 300px;
-        width: 100%;
-    }
-
+  .datePicker_nav {
+    min-width: 300px;
+    width: 100%;
+  }
 }

@@ -1,148 +1,175 @@
-.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper .ant-table-cell,
-.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper .ant-table-thead>tr>th,
-.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper .ant-table-tbody>tr>th,
-.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper .ant-table-tbody>tr>td,
-.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper tfoot>tr>th,
-.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper tfoot>tr>td {
-    position: relative;
-    padding: 6px 16px;
-    overflow-wrap: break-word;
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper
+  .ant-table-cell,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper
+  .ant-table-thead
+  > tr
+  > th,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper
+  .ant-table-tbody
+  > tr
+  > th,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper
+  .ant-table-tbody
+  > tr
+  > td,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper
+  tfoot
+  > tr
+  > th,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper
+  tfoot
+  > tr
+  > td {
+  position: relative;
+  padding: 6px 16px;
+  overflow-wrap: break-word;
 }
 
-@media (max-width: 500px) {}
-
-.orderlist {
-    padding: 4px !important;
-}
-
-.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper .ant-table-cell,
-.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper .ant-table-thead>tr>th,
-.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper .ant-table-tbody>tr>th,
-.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper .ant-table-tbody>tr>td,
-.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper tfoot>tr>th,
-.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper tfoot>tr>td {
-    position: relative;
-    padding: 6px 6px;
-    overflow-wrap: break-word;
-
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper
+  .ant-table-cell,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper
+  .ant-table-thead
+  > tr
+  > th,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper
+  .ant-table-tbody
+  > tr
+  > th,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper
+  .ant-table-tbody
+  > tr
+  > td,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper
+  tfoot
+  > tr
+  > th,
+.orderlist:where(.css-dev-only-do-not-override-1drr2mu).ant-table-wrapper
+  tfoot
+  > tr
+  > td {
+  position: relative;
+  padding: 6px 6px;
+  overflow-wrap: break-word;
 }
 
 .customer-navbar .ant-input {
-    height: 40px;
+  height: 40px;
 }
 
 .customer-info-modal ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .customer-info-modal li {
-    background: #f9f9f9;
-    padding: 10px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 16px;
+  background: #f9f9f9;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
 }
 
 .customer-info-modal li strong {
-    color: #0A3D3A;
-    font-weight: 600;
+  color: #0a3d3a;
+  font-weight: 600;
 }
 
 .customer-info-modal {
-    padding: 20px;
+  padding: 20px;
 }
 
 .customer-info-modal ul li:nth-child(even) {
-    background: #eef5f4;
+  background: #eef5f4;
 }
 
 .customer-navbar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0px 20px;
 }
 
 .custom-table {
-    user-select: none;
+  user-select: none;
 }
 
-
 .custom-table {
-    overflow-y: auto;
-    max-height: 605px;
-    scrollbar-width: thin;
-    scrollbar-color: #0A3D3A #f1f1f100;
+  /* overflow-y: auto; */
+  /* max-height: 605px; */
+  scrollbar-width: thin;
+  scrollbar-color: #0a3d3a #f1f1f100;
 }
 
 /* Chrome, Edge, Safari */
 .custom-table::-webkit-scrollbar {
-    width: 3px !important;
-    /* Scrollbar eni */
+  width: 3px !important;
+  /* Scrollbar eni */
 }
 
 .custom-table::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    /* Orqa fon */
-    border-radius: 5px;
+  background: #f1f1f1;
+  /* Orqa fon */
+  border-radius: 5px;
 }
 
 .custom-table::-webkit-scrollbar-thumb {
-    background: #888;
-    /* Scrollbar rangi */
-    border-radius: 5px;
+  background: #888;
+  /* Scrollbar rangi */
+  border-radius: 5px;
 }
 
 .custom-table::-webkit-scrollbar-thumb:hover {
-    background: #555;
-    /* Hover effekti */
+  background: #555;
+  /* Hover effekti */
 }
 
 .material-stor-select {
-    width: 100%;
-    padding: 0 5px;
+  width: 100%;
+  padding: 0 5px;
 }
 
 .material-stor-select div {
-    width: 100%;
-    display: flex;
-    padding: 2px 0;
-    position: relative;
+  width: 100%;
+  display: flex;
+  padding: 2px 0;
+  position: relative;
 }
 
 .material-stor-select div p {
-    width: 45%;
+  width: 45%;
 }
 
 .storeByCustomer {
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
 }
 
-
 .storeByCustomer p:nth-child(1) {
-    width: 45%;
+  width: 45%;
 }
 
 .storeByCustomer p:nth-child(2) {
-    padding: 2px 8px;
-    text-align: right;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    justify-content: end;
-    border-radius: 6px;
-    margin-top: 2px;
-    color: red;
-    border: 1px dashed rgba(255, 0, 0, 0.635);
+  padding: 2px 8px;
+  text-align: right;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  border-radius: 6px;
+  margin-top: 2px;
+  color: red;
+  border: 1px dashed rgba(255, 0, 0, 0.635);
 }
 
 .storeByCustomer p:nth-child(2) svg {
-    font-size: 19px;
+  font-size: 19px;
+}
+
+.orderlist {
+  padding: 0 !important;
 }
