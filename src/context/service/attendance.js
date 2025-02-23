@@ -25,6 +25,16 @@ export const attendanceApi = api.injectEndpoints({
         body: updatedData,
       }),
     }),
+
+    updateByAttendance: builder.mutation({
+      query: ({ id, updatedData }) => (console.log(id, updatedData), {
+        url: `/attendance/${id}`,
+        method: "PUT",
+        body: updatedData,
+      }),
+    }),
+
+
   }),
   overrideExisting: false,
 });
@@ -35,4 +45,5 @@ export const {
   useGetMonthlyAttendanceQuery,
   useCreateAttendanceMutation,
   useUpdateAttendanceMutation,
+  useUpdateByAttendanceMutation,
 } = attendanceApi;
