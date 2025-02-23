@@ -119,7 +119,7 @@ const MainCards = ({
         <div>
           <h3>Xarajatlar</h3>
           <p>
-            {Number(expenses?.innerData?.totalOutgoing)
+            {Number(expenses?.innerData?.totalOutgoing || 0)
               .toLocaleString("en-US")
               .replace(/,/g, " ")}{" "}
             so'm

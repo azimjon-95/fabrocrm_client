@@ -31,7 +31,7 @@
 .card > div {
   display: flex;
   flex-direction: column;
-  align-items: start;
+  align-items: flex-start;
   gap: 5px;
 }
 
@@ -159,8 +159,8 @@
 .order-info {
   display: flex;
   flex-direction: column;
-  justify-content: start;
-  align-items: start;
+  justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .order-info div {
@@ -931,7 +931,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: end;
+  justify-content: flex-end;
 }
 
 .formattedPeriod-btn {

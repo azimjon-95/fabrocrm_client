@@ -14,7 +14,7 @@ import { createApi, fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react";
 // });
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://mebelx-server-production.up.railway.app/api",
+  baseUrl: "https://mebelx.abdujabborov.uz/api",
   // baseUrl: "http://localhost:5000/api",
   prepareHeaders: (headers) => {
     const token = localStorage.getItem("token");

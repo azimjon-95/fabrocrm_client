@@ -72,6 +72,10 @@ const ExpenseForm = () => {
       console.log(err);
 
       message.error("Xarajatni qo'shishda xatolik yuz berdi.");
+    } finally {
+      setExpenseCategory("");
+      setExpensePaymentType("");
+      e.target.reset();
     }
   };
 

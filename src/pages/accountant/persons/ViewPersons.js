@@ -251,7 +251,7 @@ const WorkersTable = () => {
     <div className="wiew_persons">
       <div
         style={{
-          display: "none",
+          display: "flex",
           justifyContent: "space-between",
           marginBottom: 20,
           gap: "10px",
