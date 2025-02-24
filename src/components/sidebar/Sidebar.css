@@ -118,6 +118,39 @@ aside {
   font-size: 19px;
 }
 
+.sidebar_menu_button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 10px 2px 10px 10px;
+  border-radius: 5px;
+  width: 100%;
+  color: #fff;
+  height: 100%;
+}
+
+.sidebar_menu_button span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-wrap: nowrap;
+}
+
+.sidebar_submenu {
+  /* margin-left: 20px; */
+  text-wrap: nowrap;
+  margin: 2px 0 0 20px;
+}
+
+.sidebar_menu_button:hover {
+  color: var(--main-color);
+  background-color: var(--bg-color);
+
+}
+
 /* 📌 Media query: Maksimal kenglik 768px (planshetlar) */
 
 /* 📌 Media query: Maksimal kenglik 500px (mobil) */

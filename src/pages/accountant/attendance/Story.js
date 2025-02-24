@@ -154,8 +154,8 @@ const Story = () => {
               backgroundColor: isFutureDate
                 ? "transparent"
                 : record.dates[date]
-                ? "#4CAF50"
-                : "#FF5733",
+                  ? "#4CAF50"
+                  : "#FF5733",
               color: "#fff",
               textAlign: "center",
               cursor: isFutureDate ? "not-allowed" : "pointer",
@@ -243,9 +243,9 @@ const Story = () => {
           sum +
           (parseFloat(
             item.dates[
-              dayjs(`${year}-${month}-${String(i).padStart(2, "0")}`).format(
-                "YYYY-MM-DD"
-              )
+            dayjs(`${year}-${month}-${String(i).padStart(2, "0")}`).format(
+              "YYYY-MM-DD"
+            )
             ]
           ) || 0),
         0
@@ -276,7 +276,7 @@ const Story = () => {
       for (let colIndex = 1; colIndex <= daysInMonth; colIndex++) {
         const cell =
           worksheet[
-            XLSX.utils.encode_cell({ r: rowIndex + 1, c: colIndex + 1 })
+          XLSX.utils.encode_cell({ r: rowIndex + 1, c: colIndex + 1 })
           ]; // Adjusted index (rowIndex + 1, colIndex + 1)
         if (cell) {
           const value = row[colIndex];

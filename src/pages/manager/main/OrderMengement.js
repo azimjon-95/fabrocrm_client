@@ -38,6 +38,7 @@ const OrderMengement = () => {
   const location = useLocation();
   const data = location.state;
   const [createOrder, { isLoading }] = useCreateOrderMutation();
+  console.log(data);
 
   const [formDataNew, setFormDataNew] = useState({
     name: "",
