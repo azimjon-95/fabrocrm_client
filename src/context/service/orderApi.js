@@ -78,6 +78,11 @@ export const orderApi = api.injectEndpoints({
     getDebt: builder.query({
       query: () => "/order-debt",
     }),
+
+    // qarzdorlarni olish "/order/debtors
+    getDebtors: builder.query({
+      query: () => "/ordergetdebtors",
+    }),
   }),
 });
 
@@ -92,4 +97,5 @@ export const {
   useGetMaterialByIdQuery,
   useGetAllMaterialByIdQuery,
   useGetDebtQuery,
+  useGetDebtorsQuery,
 } = orderApi;

@@ -1,10 +1,13 @@
 import { useState } from "react";
 import "./style.css";
 import "moment/locale/uz"; // O'zbek tilini qo'shish
-import { Checkbox, message, Button, Input } from "antd";
+import { message, Button, Input, Radio } from "antd";
 import AsyncSelect from "react-select/async"; // Yangi import
 import { useCreateExpenseMutation } from "../../../context/service/expensesApi";
 import { useUpdateBalanceMutation } from "../../../context/service/balanceApi";
+// workers
+import { useGetWorkersQuery } from "../../../context/service/worker";
+import { useGetDebtorsQuery } from "../../../context/service/orderApi";
 
 const ExpenseForm = () => {
   const [expenseName, setExpenseName] = useState("");
@@ -16,6 +19,24 @@ const ExpenseForm = () => {
   const [updateBalance] = useUpdateBalanceMutation();
   const [expensePaymentType, setExpensePaymentType] = useState("");
   const [expenseCategory, setExpenseCategory] = useState("");
+  const [selectedType, setSelectedType] = useState("income");
+
+  const { data: workers } = useGetWorkersQuery();
+  const { data: debtors } = useGetDebtorsQuery();
+
+  const workersLists = workers?.innerData.map((worker) => ({
+    value: worker._id,
+    label: `${worker.firstName} ${worker.lastName} [${
+      worker.workerType || worker.role
+    }]`,
+  }));
+
+  const debtorLists = debtors?.innerData.map((debtor) => ({
+    value: debtor._id,
+    label: debtor.name,
+  }));
+
+  let options = selectedType === "income" ? workersLists : debtorLists;
 
   // Daromad va xarajat kategoriyalari (expenseSchema dagi enum ga mos)
   const incomeCategories = [
@@ -80,16 +101,6 @@ const ExpenseForm = () => {
   };
 
   // Type (Kirim/Chiqim) o'zgarganda kategoriya tanlovini tozalash
-  const handleTypeChange = (checked, type) => {
-    if (type === "income") {
-      setIsIncome(checked);
-      setIsExpense(!checked);
-    } else {
-      setIsExpense(checked);
-      setIsIncome(!checked);
-    }
-    setExpenseCategory("");
-  };
 
   // AsyncSelect loadOptions funksiyasi
   const loadCategoryOptions = (inputValue, callback) => {
@@ -103,13 +114,14 @@ const ExpenseForm = () => {
 
   // Default options uchun
   const defaultCategoryOptions = (
-    isIncome ? incomeCategories : expenseCategories
+    selectedType === "income" ? incomeCategories : expenseCategories
   ).map((cat) => ({ value: cat, label: cat }));
 
   const paymentTypeControl = [
     { label: "Naqd", value: "Naqd" },
     { label: "Karta orqali", value: "Karta orqali" },
     { label: "Bank orqali", value: "Bank orqali" },
+    { label: "$ Dollar", value: "dollar" },
   ];
 
   const loadPaymentTypeOptions = (inputValue, callback) => {
@@ -123,37 +135,33 @@ const ExpenseForm = () => {
 
   return (
     <form style={{ padding: "0 10px" }} onSubmit={handleSubmit}>
-      <Input
+      <Radio.Group
+        optionType="button"
+        buttonStyle="solid"
+        size="large"
+        value={selectedType}
+        onChange={(e) => setSelectedType(e.target.value)}
+      >
+        <Radio value="income">Kirim</Radio>
+        <Radio value="expense">Chiqim</Radio>
+      </Radio.Group>
+
+      {/* <Input
         type="text"
         placeholder="Xarajat nomi"
         value={expenseName}
         onChange={(e) => setExpenseName(e.target.value)}
-      />
+      /> */}
 
-      <Input
+      {/* <Input
         type="number"
         placeholder="Miqdori"
         value={expenseAmount}
         onChange={(e) => setExpenseAmount(e.target.value)}
-      />
-
-      <Checkbox
-        className="custom-checkbox"
-        checked={isIncome}
-        onChange={(e) => handleTypeChange(e.target.checked, "income")}
-      >
-        Kirim
-      </Checkbox>
-
-      <Checkbox
-        className="custom-checkbox"
-        checked={isExpense}
-        onChange={(e) => handleTypeChange(e.target.checked, "expense")}
-      >
-        Chiqim
-      </Checkbox>
+      /> */}
 
       <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+        {/* QAYERGA | QAYERDAN */}
         <AsyncSelect
           cacheOptions
           defaultOptions={defaultCategoryOptions}
@@ -166,8 +174,8 @@ const ExpenseForm = () => {
           onChange={(selectedOption) =>
             setExpenseCategory(selectedOption ? selectedOption.value : "")
           }
-          placeholder="Kategoriya tanlang"
-          menuPlacement="top"
+          placeholder={selectedType === "income" ? "Qayerdan" : "Qayerga"}
+          // menuPlacement="top"
           classNamePrefix="custom-select"
           styles={{
             container: (provided) => ({
@@ -199,6 +207,7 @@ const ExpenseForm = () => {
             }),
           }}
         />
+        {/* TO'LOV TURI */}
         <AsyncSelect
           cacheOptions
           defaultOptions={paymentTypeControl}
@@ -212,7 +221,7 @@ const ExpenseForm = () => {
             setExpensePaymentType(selectedOption ? selectedOption.value : "")
           }
           placeholder="Tulov turi tanlang"
-          menuPlacement="top"
+          // menuPlacement="top"
           classNamePrefix="custom-select"
           styles={{
             container: (provided) => ({
@@ -242,6 +251,52 @@ const ExpenseForm = () => {
           }}
         />
       </div>
+      {/* KIMGA | NIMAGA */}
+      <AsyncSelect
+        cacheOptions
+        defaultOptions={options}
+        loadOptions={loadCategoryOptions}
+        value={
+          expenseCategory
+            ? { value: expenseCategory, label: expenseCategory }
+            : null
+        }
+        onChange={(selectedOption) =>
+          setExpenseCategory(selectedOption ? selectedOption.value : "")
+        }
+        placeholder={selectedType === "income" ? "Qayerdan" : "Qayerga"}
+        // menuPlacement="top"
+        classNamePrefix="custom-select"
+        styles={{
+          container: (provided) => ({
+            ...provided,
+            width: "100%",
+            marginBottom: "1rem",
+          }),
+          // Ochilgan menyu konteyneri uchun uslublar
+          menu: (provided) => ({
+            ...provided,
+            height: "0px", // Menyu balandligini belgilash
+            backgroundColor: "#fff",
+            borderRadius: "5px",
+            marginTop: "0",
+            boxShadow: "0 0 8px rgba(0, 0, 0, 0.1)",
+          }),
+          // Har bir option uchun uslublar
+          option: (provided, state) => ({
+            ...provided,
+            backgroundColor: state.isFocused ? "#f0f0f0" : "#fff",
+            color: state.isFocused ? "#000" : "#333",
+            cursor: "pointer",
+            padding: "5px 12px",
+          }),
+          // Menyu ro'yxati uchun qo'shimcha uslub (paddingni olib tashlash)
+          menuList: (provided) => ({
+            ...provided,
+            padding: "0",
+          }),
+        }}
+      />
       <Input.TextArea
         placeholder="Qo‘shimcha Ma'lumot"
         value={expenseDescription}
@@ -254,7 +309,7 @@ const ExpenseForm = () => {
         type="primary"
         htmlType="submit"
       >
-        {isIncome ? "Kirim Qo'shish" : "Chiqim Qo'shish"}
+        saqlash
       </Button>
     </form>
   );

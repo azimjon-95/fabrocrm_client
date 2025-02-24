@@ -19,8 +19,6 @@ import { useNavigate } from "react-router-dom";
 import ExpenseForm from "./ExpenseForm";
 import { LiaFileDownloadSolid } from "react-icons/lia";
 
-import socket from "../../../socket";
-
 const formatDate = (date) => date.toISOString().split("T")[0];
 const oylar = [
   "Yanvar",
