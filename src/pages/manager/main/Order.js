@@ -1,6 +1,17 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Input, Button, message, List, Row, Col, Radio, Select, Form, Upload } from "antd";
+import {
+  Input,
+  Button,
+  message,
+  List,
+  Row,
+  Col,
+  Radio,
+  Select,
+  Form,
+  Upload,
+} from "antd";
 import { useNavigate } from "react-router-dom";
 import { HiArrowSmRight } from "react-icons/hi";
 import { IoMdImages } from "react-icons/io";
@@ -10,7 +21,6 @@ import { useCreateOrderMutation } from "../../../context/service/orderApi";
 import moment from "moment";
 import "./style.css";
 
-
 const { Option } = Select;
 const Order = () => {
   const [selectedRegion, setSelectedRegion] = useState(null);
@@ -19,6 +29,7 @@ const Order = () => {
   const [createOrder, { isLoading }] = useCreateOrderMutation();
 
   const [image, setImage] = useState(null);
+  const [file, setFile] = useState(null);
   const { control, handleSubmit, watch, reset } = useForm({
     defaultValues: {
       paymentType: "Naqd",
@@ -27,11 +38,10 @@ const Order = () => {
     },
   });
 
-
   const handleRegionChange = (value) => {
     const foundRegion = regions[value]; // value ni regions dan to'g'ridan-to'g'ri olish
     if (foundRegion) {
-      sessionStorage.setItem('location', foundRegion.location)
+      sessionStorage.setItem("location", foundRegion.location);
     } else {
       message.warning("Region topilmadi");
     }
@@ -121,15 +131,19 @@ const Order = () => {
   // );
   const onSubmit = useCallback(
     (data) => {
-      if (!data.customerType || !data.fullName || !data.phone || !data.address) {
+      if (
+        !data.customerType ||
+        !data.fullName ||
+        !data.phone ||
+        !data.address
+      ) {
         message.warning("Iltimos, barcha majburiy maydonlarni to'ldiring!");
         return;
       }
 
       const myData = {
-        customerType: data.customerType,
         fullName: data.fullName,
-        paid: +0,
+        paid: 0,
         address: {
           region: data.address.region,
           district: data.address.district,
@@ -148,49 +162,60 @@ const Order = () => {
           inn: data.inn || "",
           paymentType: data.paymentType,
         },
-        savedFurniture: savedFurniture,
+        isType: true,
+        orders: savedFurniture,
       };
+      console.log(myData);
 
       const formData = new FormData();
-      formData.append("date", myData.date);
-      formData.append("estimatedDays", myData.estimatedDays);
-      formData.append("customerType", myData.customerType);
-      formData.append("paid", myData.paid);
+      formData.append("fullName", data.fullName);
+      formData.append("paid", 0);
+      formData.append("address[region]", data.address.region);
+      formData.append("address[district]", data.address.district);
+      formData.append("address[street]", data.address.street);
+      formData.append("address[location]", sessionStorage.getItem("location"));
+      formData.append("description", data.description);
+      formData.append("date", moment(data.date).toISOString());
+      formData.append("estimatedDays", data.estimatedDays);
+      formData.append("customer[type]", data.customerType);
+      formData.append("customer[fullName]", data.fullName);
+      formData.append("customer[phone]", data.phone);
+      formData.append("customer[companyName]", data.companyName);
+      formData.append("customer[director]", data.director);
+      formData.append("customer[inn]", data.inn || "");
+      formData.append("customer[paymentType]", data.paymentType);
+      formData.append("isType", true);
 
-      // Mijoz ma'lumotlarini qo'shish
-      formData.append("customer[type]", myData.customer.type);
-      formData.append("customer[fullName]", myData.customer.fullName);
-      formData.append("customer[phone]", myData.customer.phone);
-      formData.append("customer[companyName]", myData.customer.companyName);
-      formData.append("customer[director]", myData.customer.director);
-      formData.append("customer[inn]", myData.customer.inn);
-
-      // **Saved Furniture ma'lumotlarini qo'shish**
+      // `orders` massivida har bir buyumni FormData ichiga joylash
       savedFurniture.forEach((item, index) => {
-        formData.append(`savedFurniture[${index}][name]`, item.name);
-        formData.append(`savedFurniture[${index}][dimensions][length]`, item.dimensions.length);
-        formData.append(`savedFurniture[${index}][dimensions][width]`, item.dimensions.width);
-        formData.append(`savedFurniture[${index}][dimensions][height]`, item.dimensions.height);
-        formData.append(`savedFurniture[${index}][budget]`, item.budget);
+        formData.append(`orders[${index}][name]`, item.name);
+        formData.append(
+          `orders[${index}][dimensions][length]`,
+          item.dimensions.length
+        );
+        formData.append(
+          `orders[${index}][dimensions][width]`,
+          item.dimensions.width
+        );
+        formData.append(
+          `orders[${index}][dimensions][height]`,
+          item.dimensions.height
+        );
+        formData.append(`orders[${index}][budget]`, item.budget);
 
-        // Rasmlarni qo'shish (agar mavjud bo'lsa)
-        if (item.images && item.images.length > 0) {
-          item.images.forEach((image, imgIndex) => {
-            formData.append(`savedFurniture[${index}][images][${imgIndex}]`, image);
-          });
+        if (item.image) {
+          formData.append("images", item.image);
         }
-      });
-      Object.entries(myData.address).forEach(([key, value]) => {
-        formData.append(`address[${key}]`, value);
       });
 
       createOrder(formData)
         .then((res) => {
           console.log(res);
           message.success("Buyurtma muvaffaqiyatli yaratildi!");
-          navigate("/order/mengement", { state: res?._id });
+          // navigate("/order/mengement", { state: res?.innerData?._id });
         })
         .catch((err) => {
+          console.error("Xatolik yuz berdi:", err);
           message.error("Xatolik yuz berdi! Iltimos, qaytadan urinib ko'ring.");
         });
     },
@@ -202,21 +227,19 @@ const Order = () => {
     { label: "Yuridik shaxs", value: "Yuridik shaxs" },
   ];
 
-
   // const { control, handleSubmit, reset } = useForm(); // useForm hooki orqali formni boshqarish
   const [formData, setFormData] = useState({
-    name: '',
+    name: "",
     dimensions: {
-      length: '',
-      width: '',
-      height: '',
+      length: "",
+      width: "",
+      height: "",
     },
   });
 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'name') {
+    if (name === "name") {
       setFormData({ ...formData, name: value });
     } else {
       setFormData({
@@ -233,6 +256,7 @@ const Order = () => {
     const file = e.target.files[0];
     if (file) {
       setImage(URL.createObjectURL(file));
+      setFile(file);
     }
   };
 
@@ -242,7 +266,7 @@ const Order = () => {
       formData.dimensions.length &&
       formData.dimensions.width &&
       formData.dimensions.height &&
-      image
+      file
     ) {
       const newFurniture = {
         name: formData.name,
@@ -251,18 +275,19 @@ const Order = () => {
           width: formData.dimensions.width,
           height: formData.dimensions.height,
         },
-        image,
+        image: file,
+        budget: 0,
       };
       setSavedFurniture([...savedFurniture, newFurniture]);
       setFormData({
-        name: '',
+        name: "",
         dimensions: {
-          length: '',
-          width: '',
-          height: '',
+          length: "",
+          width: "",
+          height: "",
         },
       });
-      setImage(null);
+      setFile(null);
     }
   };
 
@@ -275,7 +300,6 @@ const Order = () => {
       >
         <h2 style={{ color: "#0A3D3A" }}>Buyurtma qabul qilish</h2>
         <Row gutter={12}>
-
           <Col span={5}>
             <Form.Item label="Mijoz turi:">
               <Controller
@@ -355,7 +379,6 @@ const Order = () => {
                   />
                 </Form.Item>
               </Col>
-
             </Row>
           </>
         )}
@@ -374,11 +397,13 @@ const Order = () => {
                     onChange={(value) => {
                       field.onChange(value);
                       handleRegionChange(value);
-                      setSelectedRegion(value)
+                      setSelectedRegion(value);
                     }}
                     placeholder="Выберите область"
                     filterOption={(input, option) =>
-                      option.children.toLowerCase().includes(input.toLowerCase())
+                      option.children
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
                     }
                   >
                     {Object.keys(regions).map((region) => (
@@ -404,7 +429,9 @@ const Order = () => {
                       showSearch
                       placeholder="Выберите район"
                       filterOption={(input, option) =>
-                        option.children.toLowerCase().includes(input.toLowerCase())
+                        option.children
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
                       }
                     >
                       {regions[selectedRegion]?.districts?.map((district) => (
@@ -509,21 +536,34 @@ const Order = () => {
               header={<div>Mebellar</div>}
               bordered
               dataSource={savedFurniture}
-              style={{ marginTop: '20px' }}
+              style={{ marginTop: "20px" }}
               renderItem={(item) => (
                 <List.Item>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
                     <div>
                       <strong>Nomi:</strong> {item.name}
                       <br />
-                      <strong>Razmerlar:</strong> {item.dimensions.length}sm (U) × {item.dimensions.width}sm (E) × {item.dimensions.height}sm (B)
+                      <strong>Razmerlar:</strong> {item.dimensions.length}sm (U)
+                      × {item.dimensions.width}sm (E) × {item.dimensions.height}
+                      sm (B)
                     </div>
                     <div>
                       {item.image && (
                         <img
                           src={item.image}
                           alt={item.name}
-                          style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
+                          style={{
+                            width: "50px",
+                            height: "50px",
+                            objectFit: "cover",
+                            borderRadius: "4px",
+                          }}
                         />
                       )}
                     </div>
@@ -556,24 +596,36 @@ const Order = () => {
                 name="description"
                 control={control}
                 render={({ field }) => (
-                  <Input.TextArea {...field} autoSize={{ minRows: 5.8, maxRows: 5.8 }} placeholder="Tavsif" />
+                  <Input.TextArea
+                    {...field}
+                    autoSize={{ minRows: 5.8, maxRows: 5.8 }}
+                    placeholder="Tavsif"
+                  />
                 )}
               />
             </Form.Item>
             {/* </Form.Item> */}
           </Col>
-
-
         </Row>
 
         <Button
-          style={{ width: "200px", background: "#0A3D3A", marginTop: "15px", display: "flex", alignItems: "center", justifyContent: "center" }}
+          style={{
+            width: "200px",
+            background: "#0A3D3A",
+            marginTop: "15px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
           size="large"
           type="primary"
           htmlType="submit"
           loading={isLoading}
         >
-          Omborga o'tish <HiArrowSmRight style={{ marginTop: "4px", fontSize: "22px", marginLeft: "15px" }} />
+          Omborga o'tish{" "}
+          <HiArrowSmRight
+            style={{ marginTop: "4px", fontSize: "22px", marginLeft: "15px" }}
+          />
         </Button>
       </Form>
     </>
@@ -581,4 +633,3 @@ const Order = () => {
 };
 
 export default React.memo(Order);
-
