@@ -177,7 +177,7 @@ const AccountentMain = () => {
 
                       <div>
                         <span className="order-budget">
-                          Byudjet: {order.budget.toLocaleString()} so'm
+                          Byudjet: {order?.budget?.toLocaleString()} so'm
                         </span>
                       </div>
                     </div>

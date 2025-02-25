@@ -35,8 +35,9 @@ const ExpenseForm = () => {
     value: debtor._id,
     label: debtor.name,
   }));
+  console.log(selectedType);
 
-  let options = selectedType === "income" ? workersLists : debtorLists;
+  let options = selectedType !== "income" ? workersLists : debtorLists;
 
   // Daromad va xarajat kategoriyalari (expenseSchema dagi enum ga mos)
   const incomeCategories = [

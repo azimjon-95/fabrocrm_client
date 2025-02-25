@@ -212,7 +212,7 @@ const Order = () => {
         .then((res) => {
           console.log(res);
           message.success("Buyurtma muvaffaqiyatli yaratildi!");
-          navigate("/order/mengement", { state: res?.innerData?._id });
+          // navigate("/order/mengement", { state: res?.innerData?._id });
         })
         .catch((err) => {
           console.error("Xatolik yuz berdi:", err);
