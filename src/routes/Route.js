@@ -4,9 +4,8 @@ import Director from "../pages/director/Main/Main";
 import RegisterWorker from "../pages/accountant/persons/Persons";
 import ViewPersons from "../pages/accountant/persons/ViewPersons";
 import Persons from "../pages/director/persons/ViewPersons";
-import Attendance from "../pages/accountant/attendance/Attendance";
 import SettingsPage from "../pages/accountant/settingsPage/SettingsPage";
-import Story from "../pages/accountant/attendance/Story";
+import Attendance from "../pages/accountant/attendance/Attendance";
 import Order from "../pages/manager/main/Order";
 import OrderList from "../pages/manager/main/List/OrderList";
 import OrderStory from "../pages/manager/main/List/OrderStory";
@@ -25,7 +24,6 @@ import HistoryOrderLists from "../pages/store/HistoryOrderLists";
 import WarehouseView from "../pages/director/Main/WarehouseView";
 import CtrlWorkers from "../pages/director/Main/CtrlWorkers";
 import ViewOrder from "../pages/director/Main/ViewOrder";
-import EditAttendance from "../pages/accountant/attendance/EditAttendance";
 
 export const routes = [
   { path: "/manager", element: <Order />, private: true, role: ["manager", "deputy"] },
@@ -46,14 +44,12 @@ export const routes = [
   { path: "/persons/add", element: <RegisterWorker />, private: true, role: ["accountant", "deputy"] },
   { path: "/persons", element: <ViewPersons />, private: true, role: ["accountant", "deputy"] },
   { path: "/attendance", element: <Attendance />, private: true, role: ["accountant", "deputy"] },
-  { path: "/attendance/story", element: <Story />, private: true, role: ["accountant", "deputy"] },
   { path: "/setting", element: <SettingsPage />, private: true, role: ["accountant", "deputy"] },
   { path: "/order/history/lists", element: <HistoryOrderLists />, private: true, role: ["warehouseman", "accountant", "deputy"] },
   { path: "/salary", element: <Salary />, private: true, role: ["accountant", "deputy"] },
   { path: "/order/:id", element: <OrderDetails />, private: true, role: ["accountant", "deputy"] },
   { path: "/accountant", element: <Accountant />, private: true, role: ["accountant", "deputy"] },
   { path: "/salary/history/:date", element: <History />, private: true, role: ["accountant", "deputy"] },
-  { path: "/edit/attendance/:workerName", element: <EditAttendance />, private: true, role: ["accountant", "deputy"] },
   // ==========================================================================================
   { path: "/deputy", element: <Persons />, private: true, role: "deputy" },
   { path: "/worker/add", element: <RegisterWorker />, private: true, role: ["deputy", "director"] },
@@ -66,7 +62,7 @@ export const routes = [
   { path: "/director-add", element: <Persons />, private: true, role: ["director"] },
   { path: "/ctrl-warehouseman", element: <WarehouseView />, private: true, role: ["director"] },
   { path: "/ctrl-persons", element: <CtrlWorkers />, private: true, role: ["director"] },
-  { path: "/all/attendance", element: <Story />, private: true, role: ["director"] },
+  { path: "/all/attendance", element: <Attendance />, private: true, role: ["director"] },
   { path: "/director-orders", element: <ViewOrder />, private: true, role: ["director"] },
   { path: "/orders-materials/:id", element: <MaterialPage />, private: true, role: ["director"] },
 

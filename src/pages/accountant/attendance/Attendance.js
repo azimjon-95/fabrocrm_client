@@ -1,425 +1,421 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useMemo } from "react";
+import { Table, Spin, Alert, Input, Modal, Select, DatePicker, Button, message } from "antd";
+import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import {
-  TimePicker,
-  Table,
-  message,
-  Input,
-  Button,
-  Space,
-  Select,
-  Form,
-} from "antd";
-import {
-  SearchOutlined,
-  CheckCircleOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
-import {
-  useGetAttendanceByDateQuery,
-  useCreateAttendanceMutation,
-  useUpdateByAttendanceMutation,
+  useGetMonthlyAttendanceQuery,
+  useUpdateAttendanceMutation,
 } from "../../../context/service/attendance";
-import { useGetAllWorkingHoursQuery } from '../../../context/service/workingHours';
-
-import { useGetOrdersQuery } from "../../../context/service/orderApi";
+import { ArrowLeftOutlined, FileExcelOutlined } from "@ant-design/icons";
 import { useGetWorkersQuery } from "../../../context/service/worker";
-import { MdLightMode, MdNightsStay } from "react-icons/md";
-import moment from "moment";
-import "./style.css";
-import socket from "../../../socket";
-
-const { Option } = Select;
+import { useGetAllWorkingHoursQuery } from "../../../context/service/workingHours";
+import { useGetOrdersQuery } from "../../../context/service/orderApi";
+import dayjs from "dayjs";
+import * as XLSX from "xlsx";
+import './style.css';
 
 const Attendance = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedOption, setSelectedOption] = useState({});
-  const [startTime, setStartTime] = useState({});
-  const [endTime, setEndTime] = useState({});
-  const [nightStart, setNightStart] = useState({});
-  const [nightEnd, setNightEnd] = useState({});
-  const [isNight, setIsNight] = useState({ status: false, id: null });
-  const [createAttendance] = useCreateAttendanceMutation();
-  const [updateByAttendance] = useUpdateByAttendanceMutation();
-  const { data: orders, refetch: refetchOrders } = useGetOrdersQuery();
-  const { data: location } = useGetAllWorkingHoursQuery();
+  const [searchParams] = useSearchParams();
+  const workerId = searchParams.get("workerId");
+  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const year = selectedDate.year();
+  const location = useLocation();
+  const [attendance] = useState(location.pathname === "/all/attendance");
+  const [updateAttendance] = useUpdateAttendanceMutation();
+  const month = String(selectedDate.month() + 1).padStart(2, "0");
+  const { data, isLoading } = useGetMonthlyAttendanceQuery({ year, month });
+  const { data: ordersData } = useGetOrdersQuery();
+  const activeOrders = ordersData?.innerData?.filter((i) => i.isType);
+  // useGetAllWorkingHoursQuery 
+  const { data: workingHoursData } = useGetAllWorkingHoursQuery();
+  console.log(workingHoursData?.innerData);
 
-
-  const addresses =
-    orders?.innerData
-      ?.filter((i) => i.isType)
-      ?.map((order) => ({
-        value: order.address.location,
-        label: `${order.address.region}, ${order.address.district}`,
-      })) || [];
+  const months = [
+    "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
+    "Iyul", "Avgust", "Sentabr", "Oktyabr", "Noyabr", "Dekabr"
+  ];
+  const monthName = months[selectedDate.month()];
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalData, setModalData] = useState({
+    workerId: null,
+    date: null,
+    workingHours: "",
+    nightWorkingHours: "",
+    location: "",
+  });
 
   const {
     data: workersData,
     isLoading: workersLoading,
-    refetch: refetchWorkers,
+    refetch: workersRefetch
   } = useGetWorkersQuery();
-  const workers = workersData?.innerData || [];
-  const uzbekistanDate = new Date().toLocaleDateString("uz-UZ", {
-    timeZone: "Asia/Tashkent",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
+  const adminRoles = ["manager", "seller", "director", "accountant", "warehouseman", "deputy_director"];
+  const Workers = workersData?.innerData.filter(worker => !adminRoles.includes(worker.role));
+
+  // Filterlangan ma'lumotlar
+  const filteredData = useMemo(() => {
+    return workerId ? data?.innerData?.filter(item => item.workerId === workerId) : data?.innerData;
+  }, [data, workerId]);
+
+  // Ishchilarni workersData dan olish va davomat bilan birlashtirish
+  const combinedData = Workers?.map((worker) => {
+    const attendanceData = filteredData?.filter(item => item.workerId === worker._id) || [];
+
+    const dates = attendanceData.reduce((acc, { date, workingHours, nightWorkingHours }) => {
+      acc[date] = {
+        workingHours: Number(workingHours) || 0,
+        nightWorkingHours: Number(nightWorkingHours) || 0
+      };
+      return acc;
+    }, {});
+
+    const { voxa, toshkent, umumiyWorkingHours } = attendanceData.reduce((acc, item) => {
+      const hours = Number(item.workingHours) || 0;
+      const loc = item.status?.loc?.toLowerCase(); // loc ni kichik harfda olamiz
+      if (loc === 'voxa') {
+        acc.voxa += hours;
+      } else if (loc === 'toshkent') {
+        acc.toshkent += hours;
+      } else {
+        acc.umumiyWorkingHours += hours;
+      }
+      return acc;
+    }, { voxa: 0, toshkent: 0, umumiyWorkingHours: 0 });
+
+    return {
+      workerId: worker._id,
+      workerName: worker.firstName + " " + worker.lastName,
+      dates,
+      voxa,
+      toshkent,
+      workingHours: umumiyWorkingHours,
+      nightWorkingHours: attendanceData.reduce((sum, item) => sum + (Number(item.nightWorkingHours) || 0), 0),
+    };
   });
-  // Formatlash (YYYY-MM-DD)
-  const formattedDate = uzbekistanDate.split('.').reverse().join('-');
 
-  const {
-    data: attendanceData,
-    isLoading: attendanceLoading,
-    refetch: refetchAttendance,
-  } = useGetAttendanceByDateQuery(formattedDate);
+  console.log(combinedData);
 
-  const filteredWorkers = workers?.filter(
-    (worker) =>
-      (worker?.firstName + " " + worker?.lastName)
-        .toLowerCase()
-        .includes(searchTerm?.toLowerCase()) ||
-      worker?.phone.includes(searchTerm) ||
-      (worker.idNumber && worker.idNumber.includes(searchTerm))
-  );
 
-  const formatPhoneNumber = (phone) => {
-    if (!phone) return phone;
-    const formattedPhone = phone.replace(/[^\d]/g, "");
-    return formattedPhone.length === 9
-      ? `+998 ${formattedPhone.slice(0, 2)} ${formattedPhone.slice(
-        2,
-        5
-      )} ${formattedPhone.slice(5, 7)} ${formattedPhone.slice(7, 9)}`
-      : phone;
+  const daysInMonth = dayjs(`${year}-${month}`).daysInMonth();
+  const currentDate = dayjs().format("YYYY-MM-DD");
+
+  const handleOpenModal = (record, date) => {
+    setModalData({
+      workerId: record.workerId,
+      date,
+      workingHours: record.dates[date]?.workingHours || "",
+      nightWorkingHours: record.dates[date]?.nightWorkingHours || "",
+      location: record.dates[date]?.location || "",
+    });
+    setModalVisible(true);
   };
 
-  useEffect(() => {
-    socket.on("attendance_update", (data) => {
-      refetchAttendance();
-      refetchWorkers();
-      refetchOrders();
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setModalData({
+      workerId: null,
+      date: null,
+      workingHours: "",
+      nightWorkingHours: "",
+      location: "",
     });
-  }, [refetchOrders, refetchAttendance, refetchWorkers]);
+  };
 
+  const handleSave = async () => {
+    // workingHoursData ichidan location ga mos keluvchi prosentni olish
+    const selectedData = workingHoursData?.innerData.find(item => {
+      return item[modalData.location.toLowerCase()] !== undefined;
+    });
 
-  const handleEdit = async (user) => {
-
-    let inTime =
-      attendanceData?.innerData?.find(
-        (attendance) => attendance?.workerId === user?._id
-      ) || {};
-
-    // Avval hamma o'zgaruvchilarni e'lon qilamiz
-    const start = inTime?.inTime?.start || startTime[user._id] || "";
-    const end = inTime?.inTime?.end || endTime[user._id] || "";
-    const nightStartValue = inTime?.inTime?.nightStart || nightStart[user._id] || "";
-    const nightEndValue = inTime?.inTime?.nightEnd || nightEnd[user._id] || "";
-
-    // Kunning ish vaqti hisoblanmoqda
-    let workingHours = 0;
-    if (start && end) {
-      const startTimeObj = new Date(`1970-01-01T${start}:00`);
-      const endTimeObj = new Date(`1970-01-01T${end}:00`);
-      const diffMs = endTimeObj - startTimeObj;
-      workingHours = diffMs / (1000 * 60 * 60); // Millisekundlarni soatga o'zgartirish
-    }
-
-    // Tun ishlagan soatlarni hisoblash
-    let nightWorkingHours = 0;
-    if (nightStartValue && nightEndValue) {
-      let nightStartTimeObj = new Date(`1970-01-01T${nightStartValue}:00`);
-      let nightEndTimeObj = new Date(`1970-01-01T${nightEndValue}:00`);
-
-      // Agar tun ishlash vaqti ertalabgacha davom etsa
-      if (nightEndTimeObj < nightStartTimeObj) {
-        nightEndTimeObj.setDate(nightEndTimeObj.getDate() + 1);
-      }
-
-      const diffNightMs = nightEndTimeObj - nightStartTimeObj;
-      nightWorkingHours = diffNightMs / (1000 * 60 * 60);
-    }
-
-    // Payload obyektini tuzish
-    const selectedRegion = selectedOption[user._id];
-    let foiz = 0;
-
-    if (selectedRegion) {
-      // innerData ichidagi barcha key-value juftliklarini ko'rib chiqamiz
-      Object.entries(location?.innerData?.[0] || {}).forEach(([key, value]) => {
-        if (key === selectedRegion?.toLowerCase()) {
-          foiz = value; // Agar key selectedRegion ga teng bo'lsa, value ni foiz ga olamiz
-        }
-      });
-    }
-
-    // Payload obyektini tuzish
-    const payload = {
-      workerName: user?.firstName + " " + user?.lastName,
-      workerId: user?._id,
-      date: formattedDate,
-      status: {
-        foiz,
-        loc: selectedOption[user._id] || "",
-      },
-      inTime: {
-        start,
-        end,
-        nightStart: nightStartValue,
-        nightEnd: nightEndValue,
-      },
-      workingHours,
-      nightWorkingHours,
+    const updatedData = {
+      workerId: modalData.workerId,
+      date: modalData.date,
+      location: modalData.location,
+      prosent: selectedData ? selectedData[modalData.location.toLowerCase()] : 0,
+      workingHours: modalData.workingHours,
+      nightWorkingHours: modalData.nightWorkingHours,
     };
 
     try {
-      if (startTime[user._id] || startTime[user._id] === undefined) {
-        await createAttendance(payload).unwrap();
-        message.success("Davomat muvaffaqiyatli qo'shildi!");
-      } else {
-        await updateByAttendance({
-          id: inTime?._id,
-          updatedData: payload,
-        }).unwrap();
-        message.success("Davomat muvaffaqiyatli yangilandi!");
-      }
-
-      // State-larni tozalash
-      refetchAttendance();
-      setSelectedOption((prev) => ({ ...prev, [user._id]: null }));
-      setStartTime((prev) => ({ ...prev, [user._id]: null }));
-      setEndTime((prev) => ({ ...prev, [user._id]: null }));
-      setNightStart((prev) => ({ ...prev, [user._id]: null }));
-      setNightEnd((prev) => ({ ...prev, [user._id]: null }));
+      const res = await updateAttendance(updatedData).unwrap();
+      message.success(res.message);
+      workersRefetch();
     } catch (error) {
-      message.warning("Xatolik yuz berdi");
+      console.error("Xatolik yuz berdi:", error);
     }
+
+    handleCloseModal();
   };
 
-  const renderTimePickers = (record) => {
-    const todayAttendance = attendanceData?.innerData?.find(
-      (attendance) => attendance?.workerId === record?._id
-    );
-    const inTime = todayAttendance?.inTime || {};
-    const status = todayAttendance?.status || {};
 
-    return (
-      <Form
-        onFinish={() => handleEdit(record)}
-        className="attendance-times-inp"
-      >
-        <div className="time-picker">
-          {isNight.id === record._id ? (
-            <>
-              <TimePicker
-                name={`nightStart-${record._id}`}
-                onChange={(time, timeString) =>
-                  setNightStart((prev) => ({
-                    ...prev,
-                    [record._id]: timeString,
-                  }))
-                }
-                placeholder="Kechki boshlanish"
-                format="HH:mm"
-                style={{ width: 110 }}
-                size="small"
-                className="time-picker-inp"
-                value={
-                  inTime.nightStart
-                    ? moment(inTime.nightStart, "HH:mm")
-                    : nightStart[record._id]
-                      ? moment(nightStart[record._id], "HH:mm")
-                      : null
-                }
-                disabled={inTime.nightStart}
-              />
-              <TimePicker
-                name={`nightEnd-${record._id}`}
-                onChange={(time, timeString) =>
-                  setNightEnd((prev) => ({
-                    ...prev,
-                    [record._id]: timeString,
-                  }))
-                }
-                placeholder="Kechki tugash"
-                format="HH:mm"
-                style={{ width: 120 }}
-                size="small"
-                className="time-picker-inp"
-                value={
-                  inTime.nightEnd
-                    ? moment(inTime.nightEnd, "HH:mm")
-                    : nightEnd[record._id]
-                      ? moment(nightEnd[record._id], "HH:mm")
-                      : null
-                }
-                disabled={!!inTime.nightEnd}
-              />
-            </>
-          ) : (
-            <>
-              <TimePicker
-                name={`start-${record._id}`}
-                onChange={(time, timeString) =>
-                  setStartTime((prev) => ({
-                    ...prev,
-                    [record._id]: timeString,
-                  }))
-                }
-                placeholder="Boshlanish"
-                format="HH:mm"
-                style={{ width: 110 }}
-                size="small"
-                className="time-picker-inp"
-                value={
-                  inTime.start
-                    ? moment(inTime.start, "HH:mm")
-                    : startTime[record._id]
-                      ? moment(startTime[record._id], "HH:mm")
-                      : null
-                }
-                disabled={inTime.start}
-              />
-              <TimePicker
-                name={`end-${record._id}`}
-                onChange={(time, timeString) =>
-                  setEndTime((prev) => ({
-                    ...prev,
-                    [record._id]: timeString,
-                  }))
-                }
-                placeholder="Tugash"
-                format="HH:mm"
-                style={{ width: 120 }}
-                size="small"
-                className="time-picker-inp"
-                value={
-                  inTime.end
-                    ? moment(inTime.end, "HH:mm")
-                    : endTime[record._id]
-                      ? moment(endTime[record._id], "HH:mm")
-                      : null
-                }
-                disabled={inTime.end}
-              />
-              <Select
-                name={`location-${record._id}`}
-                placeholder="Manzilni tanlang"
-                style={{ width: 190 }}
-                value={status.loc ? status.loc : selectedOption[record._id]}
-                onChange={(value) => {
-                  setSelectedOption((prev) => ({
-                    ...prev,
-                    [record._id]: value,
-                  }));
-                }}
-                disabled={status.loc}
-              >
-                {addresses?.map((address, inx) => (
-                  <Option key={inx} value={address.value}>
-                    {address.label}
-                  </Option>
-                ))}
-              </Select>
-            </>
-          )}
-        </div>
-
-        <Button
-          icon={<CheckCircleOutlined />}
-          size="middle"
-          type="primary"
-          htmlType="submit"
-          className="check-btnIs"
-        />
-        <Button
-          icon={isNight.id === record._id ? <MdLightMode /> : <MdNightsStay />}
-          size="middle"
-          onClick={() =>
-            setIsNight({
-              status: !isNight.status,
-              id: isNight.id === record._id ? null : record._id,
-            })
-          }
-          className={`nightsStay ${isNight.id === record._id ? "active" : ""}`}
-        />
-      </Form>
-    );
+  const [selectedCell, setSelectedCell] = useState(null);
+  const onCellClick = (record, date) => {
+    setSelectedCell(`${record.workerId}-${date}`);
   };
 
   const columns = [
     {
-      title: "Ism Familya",
-      key: "fio",
-      render: (_, record) => (
-        <span>
-          {record.firstName} {record.lastName}
-        </span>
-      ),
+      title: "FIO",
+      dataIndex: "workerName",
+      key: "workerName",
+      fixed: "left",
     },
     {
-      title: "Telefon",
-      dataIndex: "phone",
-      key: "phone",
-      render: (phone) => formatPhoneNumber(phone),
+      title: monthName,
+      children: Array.from({ length: daysInMonth }, (_, index) => {
+        const day = index + 1;
+        const date = dayjs(`${year}-${month}-${String(day).padStart(2, "0")}`).format("YYYY-MM-DD");
+        const isFutureDate = dayjs(date).isAfter(currentDate);
+
+        return {
+          title: `${day}`,
+          dataIndex: "dates",
+          key: date,
+          onCell: (record) => ({
+            style: {
+              backgroundColor: isFutureDate
+                ? "transparent"
+                : record.dates[date]
+                  ? "#4CAF50"
+                  : "#FF5733",
+              color: "#fff",
+              textAlign: "center",
+              cursor: isFutureDate ? "not-allowed" : "pointer",
+              borderColor: selectedCell === `${record.workerId}-${date}` && "2px solid #1890ff",
+            },
+            onClick: () => {
+              if (!isFutureDate) {
+                handleOpenModal(record, date);
+                onCellClick(record, date);
+              }
+            },
+          }),
+          render: (dates, record) => {
+            const dayData = dates[date] || {};
+            const { workingHours = 0, nightWorkingHours = 0 } = dayData;
+
+            return (
+              <div className="workingHours-nightWorkingHours">
+                {workingHours > 0 && (
+                  <span
+                    className={nightWorkingHours > 0 && `workingHours`}
+                    style={{ color: "#ffffff" }}
+                  >
+                    {workingHours}
+                  </span>
+                )}
+                {nightWorkingHours > 0 && workingHours > 0 && (
+                  <div className="night-slesh"></div>
+                )}
+                {nightWorkingHours > 0 && (
+                  <span
+                    className={workingHours > 0 && "nightWorkingHours"}
+                    style={{ color: "#ffffff" }}
+                  >
+                    {nightWorkingHours}
+                  </span>
+                )}
+              </div>
+            );
+          },
+        };
+      }),
     },
     {
-      title: "Davomat",
-      key: "attendance",
-      render: (_, record) => {
-        return <Space size="middle">{renderTimePickers(record)}</Space>;
-      },
+      title: "Ish soatlar",
+      children: [
+        {
+          title: "Kunduzgi",
+          dataIndex: "workingHours",
+          key: "workingHours",
+          align: "center",
+          fixed: "right",
+
+        },
+        {
+          title: "Tungi",
+          dataIndex: "nightWorkingHours",
+          key: "nightWorkingHours",
+          align: "center",
+          fixed: "right",
+
+        },
+      ],
+      fixed: "right",
+
     },
     {
-      title: "Tarix",
-      key: "story",
-      render: (_, record) => (
-        <Button
-          type="default"
-          icon={<EyeOutlined />}
-          onClick={() => navigate(`/attendance/story?workerId=${record._id}`)}
-        >
-          Ko'rish
-        </Button>
-      ),
+      title: "Xizmat safari",
+      children: [
+        {
+          title: "Voxa",
+          dataIndex: "voxa",
+          key: "voxa",
+          align: "center",
+          fixed: "right",
+        },
+        {
+          title: "Toshkent",
+          dataIndex: "toshkent",
+          key: "toshkent",
+          align: "center",
+          fixed: "right",
+        },
+      ],
+      fixed: "right",
     },
   ];
 
-  return (
-    <div className="attendance-box">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: 20,
-          gap: 10,
-        }}
+  const handleExportToExcel = () => {
+    const excelData = Workers.map((row) => {
+      const rowData = {
+        FIO: row.workerName,
+        "Ish Soati": row.workingHours,
+        "Tungi Soat": row.nightWorkingHours
+      };
 
-      >
-        <Input
-          placeholder="Qidirish..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ width: "100%", height: "35px" }}
-          size="small"
-          prefix={<SearchOutlined style={{ color: "#cdcdcd" }} />}
+      for (let i = 1; i <= daysInMonth; i++) {
+        const date = dayjs(`${year}-${month}-${String(i).padStart(2, "0")}`).format("YYYY-MM-DD");
+        const dayData = row.dates[date] || {};
+        const workingHours = dayData.workingHours || 0;
+        const nightWorkingHours = dayData.nightWorkingHours || 0;
+
+        rowData[` ${i}`] = workingHours || nightWorkingHours
+          ? `${workingHours} / ${nightWorkingHours}`
+          : "";
+      }
+
+      return rowData;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Davomat");
+
+    // Avtomatik kenglikni o'rnatish
+    const columnWidths = Object.keys(excelData[0]).map((key) => ({
+      wch: Math.max(...excelData.map((row) => (row[key] || "").toString().length)) + 5,
+    }));
+    worksheet["!cols"] = columnWidths;
+
+    XLSX.writeFile(workbook, `Davomat_${monthName}_${year}.xlsx`);
+  };
+
+  const workerName = Workers?.find((worker) => worker._id === modalData.workerId)?.firstName + " " +
+    Workers?.find((worker) => worker._id === modalData.workerId)?.lastName;
+
+  const uzMonths = [
+    "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
+    "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"
+  ];
+
+  const formatUzbekDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = uzMonths[date.getMonth()];
+    return `${day}-${month}`;
+  };
+
+
+  if (isLoading || workersLoading) return <Spin size="large" style={{ display: "block", margin: "20px auto" }} />;
+  return (
+    <div className="story_table">
+      <div className="story_nav">
+
+
+        <DatePicker
+          className="datePicker_nav"
+          picker="month" size="large"
+          value={selectedDate}
+          onChange={(date) => setSelectedDate(dayjs(date))}
         />
-        <Button style={{ height: "35px" }} type="default" onClick={() => navigate("/attendance/story")}>
-          Davomat Tarixi
+        <h2>Davomat tarixi</h2>
+        <Button
+          size="large"
+          icon={<FileExcelOutlined />}
+          onClick={handleExportToExcel}
+        >
+          Excel
         </Button>
+
       </div>
       <Table
-        className="custom-tableAtt"
         columns={columns}
-        dataSource={filteredWorkers}
-        rowKey="_id"
-        loading={workersLoading || attendanceLoading}
+        dataSource={combinedData}
         pagination={false}
+        rowKey="workerId"
         size="small"
         bordered
-        scroll={{ x: "max-content", y: 560 }}
+        scroll={{ x: "max-content" }}
+        className="custom-table-scroll-view" // Add this class to the Table component
+
       />
+      {
+        !attendance &&
+        <Modal
+          title={
+            <div className="modal-title">
+              <div>Davomatni: {formatUzbekDate(modalData.date)}</div>
+              <div>{workerName}</div>
+            </div>
+          }
+          open={modalVisible}
+          onOk={handleSave}
+          onCancel={handleCloseModal}
+          className="updateAttendance-modal"
+          width={250}
+        >
+          <div className="updateAttendance-box">
+            <div>
+              <span>Kun: Soat:</span>
+              <Input
+                type="number"
+                className="updateAttendance-inp"
+                min={0}
+                value={modalData.workingHours}
+                onChange={(e) => setModalData({ ...modalData, workingHours: e.target.value })}
+              />
+            </div>
+            <div>
+              <span>Tun: Soat:</span>
+              <Input
+                type="number"
+                className="updateAttendance-inp"
+                min={0}
+                value={modalData.nightWorkingHours}
+                onChange={(e) => setModalData({ ...modalData, nightWorkingHours: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div>
+            <span>Manzil:</span>
+            <Select
+              className="updateAttendance-sel"
+              size="small"
+              placeholder="Komandirovka joyi"
+              value={modalData.location}
+              onChange={(value) => {
+                const selectedData = activeOrders.find(item => item.location === value);
+                setModalData({
+                  ...modalData,
+                  location: value,
+                  region: selectedData ? selectedData.region : '',
+                  district: selectedData ? selectedData.district : ''
+                });
+              }}
+            >
+              {activeOrders?.map((item) => (
+                <Select.Option key={item._id} value={item?.address.location}>
+                  {item?.address.region}, {item?.address.district}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+
+
+        </Modal>
+      }
     </div>
   );
 };
