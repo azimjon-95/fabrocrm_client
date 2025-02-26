@@ -15,7 +15,7 @@ const App = () => {
       const maxW = window.innerWidth;
       const maxH = window.innerHeight;
 
-      if (role !== "director" && maxW < maxH) {
+      if ((role !== "director" && role !== "distributor") && maxW < maxH) {
         setShowMessage(true);
       }
     };

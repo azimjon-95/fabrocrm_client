@@ -221,7 +221,7 @@ const RegisterWorker = () => {
                 render={({ field }) => (
                   <Select size="large" {...field} placeholder="Lavozim tanlang">
                     <Option value="manager">Menejer</Option>
-                    <Option value="seller">Sotuvchi</Option>
+                    <Option value="distributor">Yetkazib beruvchi</Option>
                     <Option value="director">Direktor</Option>
                     <Option value="accountant">Buxgalter</Option>
                     <Option value="warehouseman">Omborchi</Option>

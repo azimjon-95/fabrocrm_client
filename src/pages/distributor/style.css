@@ -1,0 +1,277 @@
+.list-market-name {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    position: relative;
+}
+
+.order-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background-color: #f0f2f5;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.order-header:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.order-header strong {
+    font-size: 1.2rem;
+    color: #333;
+    flex: 1;
+    padding-right: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.order-header button {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 5px 12px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.order-header button:hover {
+    background-color: #1677ff;
+    color: white;
+    transform: scale(1.05);
+}
+
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #ddd;
+    transition: background-color 0.3s;
+}
+
+.list-item:hover {
+    background-color: #f9f9f9;
+}
+
+.item-info-shop {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    width: 100%;
+}
+
+.item-name-shop {
+    color: #0a3d3a;
+    font-weight: bold;
+    width: 26%;
+}
+
+.item-category-shop {
+    color: #555;
+    width: 20%;
+}
+
+.stor_todolist-shop {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: calc(100vh - 67px);
+    position: relative;
+    padding-bottom: 10px;
+    overflow-y: auto;
+}
+
+.stor_todolist-shop::-webkit-scrollbar {
+    width: 6px !important;
+}
+
+.stor_todolist-shop::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    /* Scroll yo'lining orqa fon rangi */
+    border-radius: 4px;
+}
+
+.stor_todolist-shop::-webkit-scrollbar-thumb {
+    background: #888;
+    /* Scroll tugmachasining rangi */
+    border-radius: 4px;
+}
+
+.stor_todolist-shop::-webkit-scrollbar-thumb:hover {
+    background: #555;
+    /* Scroll tugmachasining hover holati */
+}
+
+
+
+.order-list-container-shop {
+    width: 100%;
+}
+
+.list-container-shop {
+    width: 100%;
+}
+
+.stor_todolist-shop .list-container .ant-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 8px !important;
+    transition: background-color 0.3s;
+}
+
+.item-price-shop {
+    color: #ff5722;
+    width: 21%;
+    font-weight: bold;
+}
+
+.item-quantity-shop {
+    width: 15%;
+    color: #673ab7;
+}
+
+.item-supplier-shop {
+    color: #4caf50;
+}
+
+.editMode-shop {
+    padding: 0;
+    height: 30px;
+    width: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: #0a3d3a;
+    font-size: 20px;
+}
+
+.showCloseShops {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+    gap: 8px;
+    padding: 0 10px;
+    background: #0a3d3a;
+}
+
+.showCloseShops-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 500px) and (min-width: 350px) {
+    .order-header {
+        padding: 12px;
+    }
+
+    .order-header strong {
+        font-size: 1rem;
+    }
+
+    .order-header button {
+        padding: 4px 10px;
+        font-size: 0.9rem;
+    }
+
+    .list-item {
+        padding: 10px 12px;
+    }
+
+    .item-info-shop {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .item-name-shop,
+    .item-category-shop,
+    .item-price-shop,
+    .item-quantity-shop {
+        width: 100%;
+    }
+
+    .stor_todolist-shop {
+        height: auto;
+        padding-bottom: 20px;
+    }
+
+    .editMode-shop {
+        width: 30px;
+        height: 28px;
+        font-size: 18px;
+    }
+
+    .showCloseShops {
+        padding: 0 8px;
+    }
+
+    .showCloseShops-box {
+        gap: 8px;
+    }
+
+    .stor_todolist-shop {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        height: calc(100vh - 67px);
+        position: relative;
+        padding-bottom: 10px;
+        overflow-y: auto;
+    }
+
+    .stor_todolist-shop::-webkit-scrollbar {
+        width: 6px !important;
+    }
+
+    .stor_todolist-shop::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        /* Scroll yo'lining orqa fon rangi */
+        border-radius: 4px;
+    }
+
+    .stor_todolist-shop::-webkit-scrollbar-thumb {
+        background: #888;
+        /* Scroll tugmachasining rangi */
+        border-radius: 4px;
+    }
+
+    .stor_todolist-shop::-webkit-scrollbar-thumb:hover {
+        background: #555;
+        /* Scroll tugmachasining hover holati */
+    }
+
+    .list-market-name strong {
+        position: fixed;
+        bottom: 17px;
+        /* Ekranning pastki chetidan 20px balandlikda */
+        left: 50%;
+        /* Ekranning o'rtasiga joylashtirish */
+        transform: translateX(-50%);
+        border-radius: 8px;
+        z-index: 1000;
+        /* Boshqa elementlardan ustun bo'lishi uchun */
+        font-size: 1.1rem;
+        /* Matn o'lchami */
+        color: #fff;
+        /* Matn rangi */
+        white-space: nowrap;
+        /* Matnni qatorga sig'dirish */
+    }
+}

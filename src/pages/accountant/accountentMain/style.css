@@ -28,7 +28,7 @@
   gap: 10px;
 }
 
-.card > div {
+.card>div {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -61,9 +61,7 @@
   border-radius: 0 0 8px 0;
 }
 
-.balance {
-  background-color: #2196f3;
-}
+
 
 .debt {
   background-color: #ff9800;
@@ -71,18 +69,11 @@
 
 /* Boxes Section */
 .boxes-container {
+  width: 100%;
   display: flex;
   gap: 20px;
 }
 
-.box {
-  width: 49.2%;
-  padding: 15px 0px 15px 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
 
 .payment-input {
   display: flex;
@@ -118,7 +109,7 @@
   font-size: 16px;
 }
 
-.box_expense-register > form > button {
+.box_expense-register>form>button {
   padding: 10px;
   background-color: #4caf50;
   color: white;
@@ -174,12 +165,12 @@
   width: 100%;
 }
 
-.order-box > div {
+.order-box>div {
   width: 180px;
   height: 28px;
 }
 
-.order-box > div:first-child {
+.order-box>div:first-child {
   border-right: 1px solid rgba(128, 128, 128, 0.34);
 }
 
@@ -267,14 +258,14 @@
   gap: 20px;
 }
 
-.order-details-page_box > div {
+.order-details-page_box>div {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.order-details-page > div > button {
+.order-details-page>div>button {
   background-color: #0a3d3a;
   color: white;
   border: none;
@@ -288,7 +279,7 @@
   transition: background-color 0.3s ease;
 }
 
-.order-details-page > button:hover {
+.order-details-page>button:hover {
   background-color: #0056b3;
 }
 
@@ -425,7 +416,7 @@
   gap: 5px;
 }
 
-.order-line > div {
+.order-line>div {
   width: 50%;
   height: 1px;
   background: #ddd;
@@ -468,7 +459,7 @@
   overflow: hidden;
 }
 
-.box_expense-register_menu > button {
+.box_expense-register_menu>button {
   background: #0a3d3a;
   color: white;
   width: 43px;
@@ -493,15 +484,15 @@
   top: 7.5px;
 }
 
-.box_expense-register_menu > button:first-child {
+.box_expense-register_menu>button:first-child {
   border-right: 1.5px solid#ddd;
 }
 
-.box_expense-register_menu > button:nth-child(2) {
+.box_expense-register_menu>button:nth-child(2) {
   border-right: 1.5px solid#ddd;
 }
 
-.box_expense-register_menu > button:nth-child(4) {
+.box_expense-register_menu>button:nth-child(4) {
   border-left: 1.5px solid#ddd;
 }
 
@@ -614,7 +605,7 @@
   background: #55555500;
 }
 
-.box_expense-content > form > button {
+.box_expense-content>form>button {
   background: #1890ff;
   color: white;
   width: 100%;
@@ -963,6 +954,95 @@
 .formattedPeriod-btn svg {
   font-size: 14px;
 }
+
+
+.card-balance {
+  background-color: #2196f3;
+
+  flex: 1;
+  min-width: 300px;
+  padding: 0 10px 0 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.balance-container {
+  width: 100%;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center;
+  gap: 5px;
+}
+
+.balance-container>div {
+  width: 60%;
+}
+
+
+.balance-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 16px;
+  white-space: nowrap;
+  color: #fff;
+}
+
+.balance-icon {
+  color: #fff;
+  font-size: 20px !important;
+}
+
+
+.box {
+  width: 36%;
+  height: calc(100vh - 200px);
+  /* Scroll chiqishi uchun balandlik beramiz */
+  padding: 15px 0px 15px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  overflow-y: auto;
+}
+
+/* Chrome, Safari va Edge uchun scroll style */
+.box::-webkit-scrollbar {
+  width: 3px;
+}
+
+.box::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.box::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+
+.box::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+.ish-haqi-avans {
+  width: 100%;
+  display: flex;
+  gap: 4px;
+}
+
+.ish-haqi-avans .ant-picker {
+  border-radius: 5px !important;
+}
+
 
 @media (max-width: 500px) {
   .cards-container {

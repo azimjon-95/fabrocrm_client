@@ -60,6 +60,15 @@ export const listApi = api.injectEndpoints({
       }),
     }),
 
+    // Redux Toolkit Query-da yangilash
+    updateMaterialById: builder.mutation({
+      query: ({ orderId, materialId, updateData }) => ({
+        url: `/list/${orderId}/materials/${materialId}`,
+        method: "PUT",
+        body: updateData, // Faqat o'zgargan qiymatlar ketadi
+      }),
+    }),
+
     deleteAllMaterials: builder.mutation({
       query: (orderId) => ({
         url: `/list/${orderId}/materials`,
@@ -72,7 +81,6 @@ export const listApi = api.injectEndpoints({
 export const {
   useCreateOrderListMutation,
   useGetOrderListsQuery,
-  // useGetOrderByIdQuery,
   useGetListByIdQuery,
   useGetNewOrderListsQuery,
   useUpdateOrderListMutation,
@@ -81,4 +89,5 @@ export const {
   useCreateMaterialMutation,
   useDeleteMaterialByIdMutation,
   useDeleteAllMaterialsMutation,
+  useUpdateMaterialByIdMutation
 } = listApi;

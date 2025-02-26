@@ -1,17 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
-import "./style.css"; // Stil faylini import qilamiz
-import { Spin } from "antd";
+import "./style.css";
 import { useGetBalanceQuery } from "../../../context/service/balanceApi";
 import { FaCalendarAlt } from "react-icons/fa";
 import {
-  FaMoneyBillWave,
-  FaBalanceScale,
+  FaCalculator,
   FaHandHoldingUsd,
 } from "react-icons/fa";
 import { MdMoneyOff } from "react-icons/md";
 import { useGetDebtQuery } from "../../../context/service/orderApi";
 import { BsArrowLeftRight } from "react-icons/bs";
 import socket from "../../../socket";
+import { Spin, Tooltip } from 'antd';
+import { FaMoneyBillWave, FaUniversity, FaDollarSign } from 'react-icons/fa';
+
 
 const MainCards = ({
   isState,
@@ -126,16 +127,48 @@ const MainCards = ({
           </p>
         </div>
       </div>
-      <div className="card balance">
-        <FaBalanceScale className="icon" />
-        <div>
-          <h3>Balans</h3>
-          {isFetching ? (
-            <Spin size="small" />
-          ) : (
-            <p>{formatNumber(balance?.innerData?.balance || 0)} so'm</p>
-          )}
-        </div>
+      <div className="card-balance">
+
+        {isFetching ? (
+          <Spin size="small" />
+        ) : (
+          <div className="balance-container">
+            <h3>Balans</h3>
+            <div>
+              <Tooltip title="Naqd pul balansi">
+                <p className="balance-item">
+                  <FaMoneyBillWave className="balance-icon" />
+                  {formatNumber(balance?.innerData?.cashBalance || 0)} so'm
+                </p>
+              </Tooltip>
+
+              <Tooltip title="Bank o'tkazmasi balansi">
+                <p className="balance-item">
+                  <FaUniversity className="balance-icon" />
+                  {formatNumber(balance?.innerData?.bankTransferBalance || 0)} so'm
+                </p>
+              </Tooltip>
+
+              <Tooltip title="Dollar balansi">
+                <p className="balance-item">
+                  <FaDollarSign className="balance-icon" />
+                  {formatNumber(balance?.innerData?.dollarBalance || 0)} so'm
+                </p>
+              </Tooltip>
+              <Tooltip title="Jami balansi">
+                <p className="balance-item total-balance">
+                  <FaCalculator className="balance-icon" />
+                  {formatNumber(
+                    (balance?.innerData?.cashBalance || 0) +
+                    (balance?.innerData?.bankTransferBalance || 0) +
+                    (balance?.innerData?.dollarBalance || 0)
+                  )} so'm
+                </p>
+              </Tooltip>
+            </div>
+          </div>
+        )}
+
       </div>
       <div className="card debt">
         <FaHandHoldingUsd className="icon" />

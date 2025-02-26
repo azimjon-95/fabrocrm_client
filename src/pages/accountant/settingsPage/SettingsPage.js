@@ -97,10 +97,10 @@ const SettingsPage = () => {
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button type="primary" onClick={() => handleEdit(record)}>
+                    <Button style={{ background: "#0A3D3A" }} type="primary" onClick={() => handleEdit(record)}>
                         Tahrirlash
                     </Button>
-                    <Button type="danger" onClick={() => handleDelete(record.id)}>
+                    <Button style={{ color: "#0A3D3A" }} type="danger" onClick={() => handleDelete(record.id)}>
                         O\'chirish
                     </Button>
                 </Space>
@@ -113,8 +113,8 @@ const SettingsPage = () => {
     if (error) return <p>Xatolik yuz berdi!</p>;
 
     return (
-        <div style={{ padding: '20px', background: '#fff', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
-            <h2 style={{ textAlign: 'center', color: '#4CAF50' }}>Ish Haqqi va Ish Vaqti Sozlamalari</h2>
+        <div style={{ background: '#fff', borderRadius: '8px' }}>
+            <h2 style={{ textAlign: 'center', color: '#0A3D3A' }}>Ish Haqqi va Ish Vaqti Sozlamalari</h2>
 
             {/* Form for creating and editing */}
             <Form
@@ -211,7 +211,7 @@ const SettingsPage = () => {
                 </Row>
 
                 <Form.Item style={{ textAlign: 'center' }}>
-                    <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
+                    <Button type="primary" htmlType="submit" style={{ background: "#0A3D3A", width: '100%' }}>
                         {editingId ? 'Yangilash' : 'Qo\'shish'}
                     </Button>
                 </Form.Item>

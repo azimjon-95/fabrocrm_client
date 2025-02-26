@@ -28,7 +28,6 @@ const Attendance = () => {
   const activeOrders = ordersData?.innerData?.filter((i) => i.isType);
   // useGetAllWorkingHoursQuery 
   const { data: workingHoursData } = useGetAllWorkingHoursQuery();
-  console.log(workingHoursData?.innerData);
 
   const months = [
     "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
@@ -92,8 +91,6 @@ const Attendance = () => {
       nightWorkingHours: attendanceData.reduce((sum, item) => sum + (Number(item.nightWorkingHours) || 0), 0),
     };
   });
-
-  console.log(combinedData);
 
 
   const daysInMonth = dayjs(`${year}-${month}`).daysInMonth();
@@ -267,11 +264,13 @@ const Attendance = () => {
   ];
 
   const handleExportToExcel = () => {
-    const excelData = Workers.map((row) => {
+    const excelData = combinedData.map((row) => {
       const rowData = {
         FIO: row.workerName,
         "Ish Soati": row.workingHours,
-        "Tungi Soat": row.nightWorkingHours
+        "Tungi Soat": row.nightWorkingHours,
+        "Voxa Soati": row.voxa,        // Voxa ish soatlari
+        "Toshkent Soati": row.toshkent // Toshkent ish soatlari
       };
 
       for (let i = 1; i <= daysInMonth; i++) {

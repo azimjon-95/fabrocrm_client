@@ -13,7 +13,6 @@ import MaterialPage from "../pages/manager/main/List/MaterialPage";
 import UpdateOrderForm from "../pages/manager/main/List/UpdateOrderForm";
 import Salary from "../pages/accountant/salary/Salary";
 import OrderDetails from "../pages/accountant/accountentMain/OrderDetails";
-import History from "../pages/accountant/salary/History";
 import WarehouseForm from "../pages/store/WarehouseForm";
 import OrderMengement from "../pages/manager/main/OrderMengement";
 import MainOrder from "../pages/store/List/Main";
@@ -24,6 +23,7 @@ import HistoryOrderLists from "../pages/store/HistoryOrderLists";
 import WarehouseView from "../pages/director/Main/WarehouseView";
 import CtrlWorkers from "../pages/director/Main/CtrlWorkers";
 import ViewOrder from "../pages/director/Main/ViewOrder";
+import Distributor from "../pages/distributor/Distributor";
 
 export const routes = [
   { path: "/manager", element: <Order />, private: true, role: ["manager", "deputy"] },
@@ -49,7 +49,6 @@ export const routes = [
   { path: "/salary", element: <Salary />, private: true, role: ["accountant", "deputy"] },
   { path: "/order/:id", element: <OrderDetails />, private: true, role: ["accountant", "deputy"] },
   { path: "/accountant", element: <Accountant />, private: true, role: ["accountant", "deputy"] },
-  { path: "/salary/history/:date", element: <History />, private: true, role: ["accountant", "deputy"] },
   // ==========================================================================================
   { path: "/deputy", element: <Persons />, private: true, role: "deputy" },
   { path: "/worker/add", element: <RegisterWorker />, private: true, role: ["deputy", "director"] },
@@ -65,5 +64,8 @@ export const routes = [
   { path: "/all/attendance", element: <Attendance />, private: true, role: ["director"] },
   { path: "/director-orders", element: <ViewOrder />, private: true, role: ["director"] },
   { path: "/orders-materials/:id", element: <MaterialPage />, private: true, role: ["director"] },
+  // ==========================================================================================
+  { path: "/distributor", element: <Distributor />, private: true, role: ["distributor", "deputy"] },
+
 
 ];

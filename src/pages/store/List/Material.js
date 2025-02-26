@@ -26,7 +26,7 @@ const MaterialItem = ({ material, orderId, inputValues, loadingStates, handleInp
                             placeholder="Miqdori"
                             value={inputValues[material._id] || ""}
                             onChange={(e) => handleInputChange(e, material._id)}
-                            style={{ width: "100px", marginLeft: "25px" }}
+                            style={{ width: "100px", marginLeft: "25px", }}
                         />
                         <Button
                             size="large"

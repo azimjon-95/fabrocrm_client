@@ -19,6 +19,8 @@ const AddItems = ({
   const [items, setItems] = useState([]);
   const [form] = Form.useForm();
   const [isDisabled, setIsDisabled] = useState(true);
+  const [isCategory, setIsCategory] = useState("");
+  const [isUnit, setIsUnit] = useState("");
   const [createMaterial, { isLoading: isCreating }] =
     useCreateMaterialMutation();
   const { data: lists = [] } = useGetOrderListsQuery();
@@ -36,16 +38,15 @@ const AddItems = ({
   ].map((label) => ({ label, value: label }));
 
   const onFinish = async (values) => {
-    const uniqueId = `67dl${Math.random().toString(36).substr(2, 9)}new${
-      items?.length + 1
-    }`;
+    const uniqueId = `67dl${Math.random().toString(36).substr(2, 9)}new${items?.length + 1
+      }`;
     const myNewOrder = {
       productId: uniqueId,
       name: values.name,
-      category: values.category,
+      category: isCategory,
       pricePerUnit: values.pricePerUnit,
       quantity: values.quantity,
-      unit: values.unit,
+      unit: isUnit,
       supplier: values.supplier,
     };
     setItems((prevItems) => [...prevItems, myNewOrder]);
@@ -53,6 +54,8 @@ const AddItems = ({
       orderId: newLists?._id,
       material: myNewOrder,
     }).unwrap();
+    setIsCategory("");
+    setIsUnit("");
     message.success("Material qo‘shildi!");
     form.resetFields();
     setIsDisabled(true);
@@ -97,43 +100,28 @@ const AddItems = ({
       </div>
 
       <div className="VscGitPullRequestGoToChanges">
-        <Form.Item
-          name="supplier"
-          rules={[{ required: true, message: "Narxni kiriting!" }]}
-        >
-          <Input placeholder="Yetkazib beruvchi!" />
-        </Form.Item>
-        <Form.Item
-          name="category"
-          rules={[{ required: true, message: "Kategoriyani tanlang!" }]}
-        >
-          <Select
-            placeholder="Kategoriya tanlang"
-            allowClear
-            style={{ width: 200 }}
-            size="large"
-          >
-            {categoryOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
 
-        <Form.Item
-          name="unit"
-          rules={[{ required: true, message: "O‘lchov birligini tanlang!" }]}
+        <Select
+          onChange={(value) => setIsCategory(value)}
+          placeholder="Kategoriya tanlang"
+          allowClear
+          size="large"
+          className="additems-sel"
         >
-          <Select size="large" placeholder="O‘lchov birligi">
-            <Option value="Dona">Dona</Option>
-            <Option value="Metr">Metr</Option>
-            <Option value="Kg">Kg</Option>
-            <Option value="Litr">Litr</Option>
-            <Option value="Kvadrat metr">Kvadrat metr</Option>
-          </Select>
-        </Form.Item>
+          {categoryOptions.map((option) => (
+            <Option key={option.value} value={option.value}>
+              {option.label}
+            </Option>
+          ))}
+        </Select>
 
+        <Select onChange={(value) => setIsUnit(value)} className="additems-sel" placeholder="O‘lchov birligi">
+          <Option value="Dona">Dona</Option>
+          <Option value="Metr">Metr</Option>
+          <Option value="Kg">Kg</Option>
+          <Option value="Litr">Litr</Option>
+          <Option value="Kvadrat metr">Kvadrat metr</Option>
+        </Select>
         <div className="VscGitPullRequestGoToChanges-btns">
           {sentAccountant || addedToData ? (
             <Tooltip title="Yangi mahsulot qo‘shib bo‘lmaydi (Ro‘yxat omborga yoki buxgalteriyaga yuborilgan)">

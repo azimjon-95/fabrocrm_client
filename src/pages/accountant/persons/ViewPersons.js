@@ -13,12 +13,10 @@ import {
 } from "@ant-design/icons";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-
 import {
   useGetWorkersQuery,
   useDeleteWorkerMutation,
 } from "../../../context/service/worker";
-
 import "./style.css";
 
 const WorkersTable = () => {
@@ -28,7 +26,8 @@ const WorkersTable = () => {
 
   const [deleteWorker] = useDeleteWorkerMutation();
   const { data: workersData, isLoading } = useGetWorkersQuery();
-  const workers = workersData?.innerData || [];
+  const adminRoles = ["manager", "seller", "director", "accountant", "warehouseman", "deputy_director"];
+  const workers = workersData?.innerData.filter(worker => !adminRoles.includes(worker.role));
 
   const handleDelete = async (id) => {
     try {
@@ -58,9 +57,9 @@ const WorkersTable = () => {
     const formattedPhone = phone.replace(/[^\d]/g, "");
     return formattedPhone.length === 9
       ? `+998 ${formattedPhone.slice(0, 2)} ${formattedPhone.slice(
-          2,
-          5
-        )} ${formattedPhone.slice(5, 7)} ${formattedPhone.slice(7, 9)}`
+        2,
+        5
+      )} ${formattedPhone.slice(5, 7)} ${formattedPhone.slice(7, 9)}`
       : phone;
   };
 
@@ -91,6 +90,7 @@ const WorkersTable = () => {
       key: "phone",
       render: (phone) => formatPhoneNumber(phone), // Format phone number
     },
+
     {
       title: "Manzil",
       dataIndex: "address",
@@ -112,9 +112,9 @@ const WorkersTable = () => {
         )
           .toString()
           .padStart(2, "0")}.${birthDate
-          .getDate()
-          .toString()
-          .padStart(2, "0")}`;
+            .getDate()
+            .toString()
+            .padStart(2, "0")}`;
 
         // Calculate age
         const age = today.getFullYear() - birthDate.getFullYear();
@@ -174,6 +174,11 @@ const WorkersTable = () => {
           {visibleId ? <span>{record.idNumber}</span> : <span>*********</span>}
         </div>
       ),
+    },
+    {
+      title: "Kasbi",
+      dataIndex: "workerType",
+      key: "workerType",
     },
     {
       title: "Amallar",
@@ -262,10 +267,11 @@ const WorkersTable = () => {
             placeholder="Qidirish..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ width: 600, height: "39px" }}
+            style={{ width: "100%", height: "39px", borderColor: "#0A3D3A", color: "#0A3D3A" }}
+
             size="small"
             prefix={
-              <SearchOutlined style={{ color: "#cdcdcd", marginTop: "3px" }} />
+              <SearchOutlined style={{ color: "#0A3D3A", marginTop: "3px" }} />
             }
           />
         </div>
@@ -274,6 +280,7 @@ const WorkersTable = () => {
           size="large"
           type="primary"
           icon={<PlusOutlined />}
+          style={{ background: "#0A3D3A", color: "#fff" }}
           onClick={() => navigate("/persons/add")}
         >
           Ishchilarni qabul qilish
@@ -282,6 +289,7 @@ const WorkersTable = () => {
           size="large"
           type="default"
           onClick={handleExportExcel}
+          style={{ borderColor: "#0A3D3A", color: "#0A3D3A" }}
           icon={<DownloadOutlined />}
         >
           Excel
@@ -298,7 +306,7 @@ const WorkersTable = () => {
         size="small"
         bordered
       />
-    </div>
+    </div >
   );
 };
 
