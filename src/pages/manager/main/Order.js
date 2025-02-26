@@ -210,9 +210,10 @@ const Order = () => {
 
       createOrder(formData)
         .then((res) => {
-          console.log(res);
           message.success("Buyurtma muvaffaqiyatli yaratildi!");
-          // navigate("/order/mengement", { state: res?.innerData?._id });
+          if (res?.data?.innerData) {
+            navigate("/order/mengement/" + res?.data?.innerData?._id);
+          }
         })
         .catch((err) => {
           console.error("Xatolik yuz berdi:", err);
@@ -300,7 +301,7 @@ const Order = () => {
       >
         <h2 style={{ color: "#0A3D3A" }}>Buyurtma qabul qilish</h2>
         <Row gutter={12}>
-          <Col span={5}>
+          <Col span={6}>
             <Form.Item label="Mijoz turi:">
               <Controller
                 name="customerType"
@@ -318,7 +319,7 @@ const Order = () => {
             </Form.Item>
           </Col>
 
-          <Col span={7}>
+          <Col span={6}>
             <Form.Item label="Masul Shaxs Ism Familyasi">
               <Controller
                 name="fullName"
