@@ -19,12 +19,14 @@ import {
   Image,
   Progress,
   message,
+  Avatar,
 } from "antd";
 import {
   MoreOutlined,
   EditOutlined,
   DeleteOutlined,
   CheckOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { BookOutlined } from "@ant-design/icons";
 import { EyeOutlined } from "@ant-design/icons";
@@ -51,6 +53,14 @@ const ViewOrder = () => {
   const [deleteOrder] = useDeleteOrderMutation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegion, setSelectedRegion] = useState(null);
+
+  let newOrders2 = [];
+  orders?.innerData.map((i) => {
+    let { orders, ...qolgani } = i;
+    orders.map((j) => {
+      newOrders2.push({ ...j, ...qolgani });
+    });
+  });
 
   useEffect(() => {
     socket.on("newOrder", () => {
@@ -94,24 +104,24 @@ const ViewOrder = () => {
 
   // Unikal regionlarni olish
   const uniqueRegions = useMemo(() => {
-    const regions = newOrders
+    const regions = newOrders2
       ?.map((order) => order?.address?.region)
       .filter(Boolean);
     return [...new Set(regions)];
-  }, [newOrders]);
+  }, [newOrders2]);
 
   // Buyurtmalarni qidirish va filterlash
   const filteredOrders = useMemo(() => {
-    return newOrders?.filter((order) => {
-      const matchesSearch = order.name
-        .toLowerCase()
+    return newOrders2?.filter((order) => {
+      const matchesSearch = order?.name
+        ?.toLowerCase()
         .includes(searchTerm.toLowerCase());
       const matchesRegion = selectedRegion
         ? order?.address?.region === selectedRegion
         : true;
       return matchesSearch && matchesRegion;
     });
-  }, [newOrders, searchTerm, selectedRegion]);
+  }, [newOrders2, searchTerm, selectedRegion]);
 
   const showCustomerInfo = (customer) => {
     setSelectedCustomer(customer);
@@ -253,24 +263,28 @@ const ViewOrder = () => {
       dataIndex: "image",
       key: "image",
 
-      render: (image) => (
-        <Image
-          src={image}
-          alt="Mebel"
-          width={50}
-          height={50}
-          style={{ objectFit: "cover", borderRadius: "8px" }}
-          preview={{ mask: "Kattalashtirish" }}
-        />
-      ),
+      render: (image) => {
+        return image ? (
+          <Image
+            src={image}
+            alt="Mebel"
+            width={50}
+            height={50}
+            style={{ objectFit: "cover", borderRadius: "8px" }}
+            preview={{ mask: "Kattalashtirish" }}
+          />
+        ) : (
+          <Avatar shape="square" size={50} icon={<UserOutlined />} />
+        );
+      },
     },
     { title: "Nomi", dataIndex: "name", key: "name" },
     {
       title: "Budjet",
-      render: (paid) => (
+      render: (paid, item) => (
         <div className="text-green-500">
-          <p>Tulov turi: {paid.paymentType} </p>
-          <p>{paid.budget.toLocaleString()} so‘m</p>
+          {item?.paymentType ? <p>Tulov turi: {item?.paymentType} </p> : ""}
+          <p>{item?.budget?.toLocaleString()} so‘m</p>
         </div>
       ),
     },
@@ -278,7 +292,7 @@ const ViewOrder = () => {
       title: "To‘langan",
       dataIndex: "paid",
       key: "paid",
-      render: (paid) => `${paid.toLocaleString()} so‘m`,
+      render: (paid) => `${paid?.toLocaleString()} so‘m`,
     },
     {
       title: "Tayyorlik darajasi",
@@ -344,6 +358,7 @@ const ViewOrder = () => {
       ),
     },
   ];
+  console.log(filteredOrders);
 
   return (
     <div className="orderlist">

@@ -33,18 +33,18 @@
   width: 100%;
 }
 
-.material-item>div {
+.material-item > div {
   display: flex;
   align-items: center;
   gap: 10px;
   width: 100%;
 }
 
-.material-item>div>p {
+.material-item > div > p {
   width: 50%;
 }
 
-.material-item>div>p:last-child {
+.material-item > div > p:last-child {
   width: 50%;
 }
 
@@ -95,16 +95,20 @@
   }
 }
 
-:where(.css-dev-only-do-not-override-1drr2mu).ant-form-vertical .ant-form-item-label,
+:where(.css-dev-only-do-not-override-1drr2mu).ant-form-vertical
+  .ant-form-item-label,
 :where(.css-dev-only-do-not-override-1drr2mu).ant-col-24.ant-form-item-label,
-:where(.css-dev-only-do-not-override-1drr2mu).ant-col-xl-24.ant-form-item-label {
+:where(
+    .css-dev-only-do-not-override-1drr2mu
+  ).ant-col-xl-24.ant-form-item-label {
   padding: 7px 0 3px 0;
   margin: 0;
   white-space: initial;
   text-align: start;
 }
 
-.ant-radio-group-large :where(.css-dev-only-do-not-override-1drr2mu).ant-radio-button-wrapper {
+.ant-radio-group-large
+  :where(.css-dev-only-do-not-override-1drr2mu).ant-radio-button-wrapper {
   height: 40px;
   font-size: 14px;
   line-height: 38px;
@@ -116,7 +120,7 @@
   gap: 10px;
 }
 
-.customerType>div {
+.customerType > div {
   display: flex;
   align-items: center;
   gap: 5px;
@@ -135,6 +139,8 @@
 
 .create_order_right {
   width: 50%;
+  height: 100%;
+  /* height: calc(100vh - 16vh); */
 }
 
 .create_order_right h3 {
@@ -158,7 +164,7 @@
   margin: 1px !important;
 }
 
-.form-data-container>div {
+.form-data-container > div {
   display: flex;
   gap: 3px;
   color: #fff;
@@ -170,6 +176,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  height: 100%;
 }
 
 .inp_add_pro_cont {
@@ -214,7 +221,8 @@
 
 .create_order_main {
   width: 50%;
-  height: calc(100vh - 168px);
+  /* height: calc(100vh - 168px); */
+  height: 100%;
   position: relative;
 }
 
@@ -225,7 +233,7 @@
 .inp_add_pro_myorder {
   width: 100%;
   overflow: auto;
-  height: 480px;
+  height: calc(100vh - 200px);
 }
 
 /* Chrome, Edge va Safari uchun */
@@ -240,7 +248,8 @@
 
 .create_order_right-box {
   width: 100%;
-  height: 570px;
+  height: 95%;
+  /* height: 570px; */
   overflow: auto;
 }
 
@@ -275,6 +284,7 @@
 .create_order_box {
   width: 100%;
   display: flex;
+  height: 100% !important;
   gap: 10px;
 }
 
@@ -326,19 +336,28 @@
   color: #ff0000;
 }
 
-
-.order-form :where(.css-dev-only-do-not-override-1drr2mu).ant-select-single.ant-select-lg:not(.ant-select-customize-input) .ant-select-selector {
+.order-form
+  :where(
+    .css-dev-only-do-not-override-1drr2mu
+  ).ant-select-single.ant-select-lg:not(.ant-select-customize-input)
+  .ant-select-selector {
   width: 100%;
   height: 38px !important;
   padding: 0 11px;
   border-radius: 0px !important;
 }
 
-.order-form .ant-radio-group-large :where(.css-dev-only-do-not-override-1drr2mu).ant-radio-button-wrapper:first-child {
+.order-form
+  .ant-radio-group-large
+  :where(
+    .css-dev-only-do-not-override-1drr2mu
+  ).ant-radio-button-wrapper:first-child {
   border-radius: 0px !important;
 }
 
-.order-form .ant-radio-group-large :where(.css-dev-only-do-not-override-1drr2mu).ant-radio-button-wrapper {
+.order-form
+  .ant-radio-group-large
+  :where(.css-dev-only-do-not-override-1drr2mu).ant-radio-button-wrapper {
   height: 38px !important;
   font-size: 14px;
   line-height: 38px;
@@ -352,7 +371,6 @@
   border: 1px solid #d9d9d9;
   border-radius: 0px !important;
 }
-
 
 .listItem {
   display: flex;
@@ -394,21 +412,20 @@
   align-items: center;
   gap: 5px;
   padding: 0px 8px;
-  background: #0A3D3A;
+  background: #0a3d3a;
   color: #fff;
-  border: 1px solid #0A3D3A;
+  border: 1px solid #0a3d3a;
   border-radius: 4px;
   height: 37px;
   font-size: 26px;
   cursor: pointer;
   transition: background-color 0.3s;
-
 }
 
 .uploadButton:hover {
-  border-color: #0A3D3A;
+  border-color: #0a3d3a;
   background-color: #fff;
-  color: #0A3D3A;
+  color: #0a3d3a;
 }
 
 .saveButton {
@@ -418,9 +435,9 @@
   gap: 5px;
   width: 55px;
   padding: 0px 8px;
-  background: #0A3D3A;
+  background: #0a3d3a;
   color: #fff;
-  border: 1px solid #0A3D3A;
+  border: 1px solid #0a3d3a;
   border-radius: 4px;
   height: 37px;
   font-size: 26px;
@@ -429,7 +446,7 @@
 }
 
 .saveButton:hover {
-  border-color: #0A3D3A;
+  border-color: #0a3d3a;
   background: #fff !important;
-  color: #0A3D3A !important;
+  color: #0a3d3a !important;
 }

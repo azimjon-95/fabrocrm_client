@@ -7,12 +7,14 @@ import {
 } from "@ant-design/icons";
 import { useGetAllStoresQuery } from "../../../context/service/storeApi";
 import { GiTakeMyMoney } from "react-icons/gi";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { IoCheckmarkSharp } from "react-icons/io5";
 import { MdOutlineAdd, MdOutlineAddShoppingCart } from "react-icons/md";
-import { useCreateOrderMutation } from "../../../context/service/orderApi";
+import {
+  useGetOrderByIdQuery,
+  useUpdateOrderMutation,
+} from "../../../context/service/orderApi";
 import "./style.css";
-import moment from "moment";
 
 const unitOptions = [
   { label: "Dona", value: "dona" },
@@ -24,22 +26,44 @@ const unitOptions = [
 
 const OrderMengement = () => {
   const navigate = useNavigate();
-  const { data: allStores = [] } = useGetAllStoresQuery();
+  let id = useParams().id;
+
   const [searchQuery, setSearchQuery] = useState("");
   const [budget, setBudget] = useState("");
   const [selectedMaterials, setSelectedMaterials] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [openBudget, setOpenBudget] = useState(true);
+  const [orderId, setOrderID] = useState(null);
+
+  const [updateOrder] = useUpdateOrderMutation();
+  const { data: allStores = [] } = useGetAllStoresQuery();
+  const { data: orderData } = useGetOrderByIdQuery(id);
+  let order = orderData?.innerData;
+
+  useEffect(() => {
+    localStorage.setItem("order", JSON.stringify(order));
+  }, [order]);
 
   useEffect(() => {
     setOpenBudget(selectedMaterials.length === 0);
   }, [selectedMaterials]);
 
-  const location = useLocation();
-  const data = location.state;
-  const [createOrder, { isLoading }] = useCreateOrderMutation();
-  console.log(data);
+  useEffect(() => {
+    const storedOrder = localStorage.getItem("order");
+    if (!storedOrder) return; // Agar "order" mavjud bo'lmasa, funksiyani tugatish
 
+    try {
+      const order = JSON.parse(storedOrder);
+      const foundOrder = order?.orders?.find((o) => o._id === orderId);
+
+      if (foundOrder?.materials) {
+        setSelectedMaterials(foundOrder.materials);
+      }
+
+      setBudget(order.budget);
+    } catch (error) {
+      console.error("JSON parse error:", error);
+    }
+  }, [orderId]);
   const [formDataNew, setFormDataNew] = useState({
     name: "",
     price: "",
@@ -56,8 +80,9 @@ const OrderMengement = () => {
 
   const handleAddMaterialNew = () => {
     // Generate a unique ID using random string + length
-    const uniqueId = `67d${Math.random().toString(36).substr(2, 9)}new${selectedMaterials.length + 1
-      }`;
+    const uniqueId = `67d${Math.random().toString(36).substr(2, 9)}new${
+      selectedMaterials.length + 1
+    }`;
 
     const newMaterial = {
       id: uniqueId,
@@ -98,7 +123,6 @@ const OrderMengement = () => {
 
   // Tanlangan materialni qo'shish
   const handleAddMaterial = (mat) => {
-
     setSelectedMaterials((prevState) => {
       const existingMaterial = prevState.find((item) => item.id === mat._id);
       const quantity = inputValues[mat._id] || 1; // Agar input bo'sh bo'lsa, 1 qiymatini oladi
@@ -116,7 +140,7 @@ const OrderMengement = () => {
             quantity: Number(quantity),
             unit: mat.unit,
             price: mat.pricePerUnit,
-            materialID: mat._id
+            materialID: mat._id,
           },
         ];
       }
@@ -133,141 +157,156 @@ const OrderMengement = () => {
     0
   );
 
+  const closeAndSave = () => {
+    let order = JSON.parse(localStorage.getItem("order"));
+    order.orders = order.orders?.map((i) =>
+      i._id === orderId
+        ? { ...i, materials: selectedMaterials, budget: +budget }
+        : i
+    );
 
+    localStorage.setItem("order", JSON.stringify(order));
+    setOrderID(null);
+    setSelectedMaterials([]);
+    setBudget(0);
+  };
   const createNewOrder = () => {
-    let newOrder = {
-      name: data.name,
-      budget: +budget,
-      paid: +0,
-      date: moment().format("YYYY-MM-DD"),
-      estimatedDays: +data.estimatedDays,
-      image: data.images,
-      materials: selectedMaterials,
-      dimensions: {
-        length: +data.dimensions.length,
-        width: +data.dimensions.width,
-        height: +data.dimensions.height,
-      },
-      customer: {
-        type: data.customerType,
-        fullName: data.fullName,
-        phone: data.phone,
-        companyName: data.companyName,
-        director: data.director,
-        inn: +data.inn,
-        paymentType: data.paymentType,
-      },
-      address: {
-        region: data.address.region,
-        district: data.address.district,
-        street: data.address.street,
-        location: data.address.location,
-      }
-    };
+    closeAndSave();
+    let order = JSON.parse(localStorage.getItem("order") || "{}");
+    order.fixed_price = budget;
 
-    setLoading(true);
-    const formData = new FormData();
-
-    // Soddalashtirilgan maydonlarni qo'shish
-    formData.append("name", newOrder.name);
-    formData.append("budget", newOrder.budget);
-    formData.append("paid", newOrder.paid);
-    formData.append("date", newOrder.date);
-    formData.append("estimatedDays", newOrder.estimatedDays);
-    formData.append("image", data.images);
-
-    // Materiallarni JSON formatida qo'shish
-    formData.append("materials", JSON.stringify(newOrder.materials));
-
-    // O'lchamlarni qo'shish
-    formData.append("dimensions[length]", newOrder.dimensions.length);
-    formData.append("dimensions[width]", newOrder.dimensions.width);
-    formData.append("dimensions[height]", newOrder.dimensions.height);
-
-    // Mijoz ma'lumotlarini qo'shish
-    formData.append("customer[type]", newOrder.customer.type);
-    formData.append("customer[fullName]", newOrder.customer.fullName);
-    formData.append("customer[phone]", newOrder.customer.phone);
-    formData.append("customer[companyName]", newOrder.customer.companyName);
-    formData.append("customer[director]", newOrder.customer.director);
-    formData.append("customer[inn]", newOrder.customer.inn);
-    // Manzilni optimallashtirib qo'shish
-    Object.entries(newOrder.address).forEach(([key, value]) => {
-      formData.append(`address[${key}]`, value);
-    });
-
-    formData.append("paymentType", newOrder.customer.paymentType);
-
-    createOrder(formData)
+    updateOrder({ id, updates: order })
       .then((res) => {
-        message.success("Buyurtma muvaffaqiyatli yaratildi!");
-        navigate("/main/orders"); // Yangi sahifaga yo'naltirish
-        setLoading(false);
+        if (res.data.state) {
+          navigate("/main/orders");
+          localStorage.removeItem("order");
+        }
       })
       .catch((err) => {
-        message.error("Xatolik yuz berdi! Iltimos, qaytadan urinib ko'ring.");
+        console.log(err);
       });
   };
 
+  let orderState;
+  try {
+    orderState = JSON.parse(localStorage.getItem("order"))?.orders?.some(
+      (i) => i.materials.length > 0
+    );
+  } catch (e) {
+    orderState = false;
+  }
+
+  let findedOrder;
+  try {
+    findedOrder = JSON.parse(localStorage.getItem("order"))?.orders?.find(
+      (i) => i._id === orderId
+    );
+  } catch (e) {
+    findedOrder = {};
+  }
   return (
     <>
-      {/* Form ma'lumotlarini chiroyli chiqarish */}
-      <div className="form-data-container">
-        <div className="backnext">
-          <Button
-            type="primary"
-            icon={<ArrowLeftOutlined />}
-            onClick={() => navigate(-1)}
-            style={{ width: "30px", background: "#0A3D3A" }}
-            size="large"
-          />
-        </div>
-        <Input
-          placeholder="Mahsulotlarni qidiring..."
-          onChange={(e) => setSearchQuery(e.target.value)}
-          prefix={<SearchOutlined />}
-          style={{ width: "100%" }}
-          className="warehouse-navbar_inp"
-        />
-      </div>
       <Form layout="vertical" className="order-form-main">
         <div className="create_order_box">
-          <div className="create_order_right">
-            <h3>Ombor</h3>
-            <div className="create_order_right-box">
-              {filteredData?.map((mat) => (
-                <div key={mat._id} className="material-item">
-                  <div>
-                    <p>{mat.name}</p> |{" "}
-                    <p>
-                      {mat.quantity} {mat.unit}
-                    </p>{" "}
-                    <p>
-                      1-{mat.unit} narxi: {mat.pricePerUnit.toLocaleString()}
-                    </p>
-                  </div>
-                  <Input
-                    min={1}
+          {!orderId ? (
+            <div className="create_order_left">
+              <h3>Buyurtmalar</h3>
+              <div className="create_order_left-box">
+                {order?.orders?.map((item, index) => (
+                  <div
                     style={{
-                      width: "100px",
-                      height: "32px",
-                      marginRight: "5px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: "10px",
+                      width: "100%",
+                      borderBottom: "1px solid #ddd",
                     }}
-                    size="small"
-                    value={inputValues[mat._id] || ""}
-                    onChange={(e) => handleInputChange(mat._id, e.target.value)}
-                    className="full-width"
-                    placeholder="Miqdori"
-                  />
-                  <Button onClick={() => handleAddMaterial(mat)}>
-                    <IoCheckmarkSharp />
-                  </Button>
-                </div>
-              ))}
+                    key={index}
+                  >
+                    <img
+                      style={{ width: "50px", height: "50px" }}
+                      src={item.image}
+                      alt=""
+                    />
+                    <b style={{ flex: 1 }}>{item.name}</b>{" "}
+                    <button
+                      style={{
+                        background: "#0A3D3A",
+                        color: "#fff",
+                        padding: "5px 10px",
+                        border: "none",
+                        outline: "none",
+                        cursor: "pointer",
+                        borderRadius: "5px",
+                      }}
+                      onClick={() => setOrderID(item._id)}
+                    >
+                      tanlash
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="create_order_right">
+              <div className="form-data-container">
+                <div className="backnext">
+                  <Button
+                    type="primary"
+                    icon={<ArrowLeftOutlined />}
+                    onClick={() => navigate(-1)}
+                    style={{ width: "30px", background: "#0A3D3A" }}
+                    size="large"
+                  />
+                </div>
+                <Input
+                  placeholder="Mahsulotlarni qidiring..."
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  prefix={<SearchOutlined />}
+                  style={{ width: "100%" }}
+                  className="warehouse-navbar_inp"
+                />
+              </div>
+              <h3>Ombor</h3>
+              <div className="create_order_right-box">
+                {filteredData?.map((mat) => (
+                  <div key={mat._id} className="material-item">
+                    <div>
+                      <p>{mat.name}</p> |{" "}
+                      <p>
+                        {mat.quantity} {mat.unit}
+                      </p>{" "}
+                      <p>
+                        1-{mat.unit} narxi: {mat.pricePerUnit.toLocaleString()}
+                      </p>
+                    </div>
+                    <Input
+                      min={1}
+                      style={{
+                        width: "100px",
+                        height: "32px",
+                        marginRight: "5px",
+                      }}
+                      size="small"
+                      value={inputValues[mat._id] || ""}
+                      onChange={(e) =>
+                        handleInputChange(mat._id, e.target.value)
+                      }
+                      className="full-width"
+                      placeholder="Miqdori"
+                    />
+                    <Button onClick={() => handleAddMaterial(mat)}>
+                      <IoCheckmarkSharp />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="create_order_main">
-            <h3>Mebel uchun sarflanadigan mahsulotlar!</h3>
+            <h3>{findedOrder?.name} uchun mahsulotlar!</h3>
             <div className="inp_add_pro_myorder">
               {selectedMaterials.map((mat, inx) => (
                 <div key={inx} className="selected-material-item">
@@ -394,7 +433,15 @@ const OrderMengement = () => {
               ) : (
                 <div className="inp_add_pro_box_right">
                   <Form.Item label=" " style={{ width: "200px" }}>
-                    <p style={{ fontSize: "17px", fontWeight: "bold", color: "#0A3D3A" }}>{totalPrice.toLocaleString()} so'm</p>
+                    <p
+                      style={{
+                        fontSize: "17px",
+                        fontWeight: "bold",
+                        color: "#0A3D3A",
+                      }}
+                    >
+                      {totalPrice.toLocaleString()} so'm
+                    </p>
                   </Form.Item>
                   <Form.Item label="Buyurtma budjeti (so'm)">
                     <Input
@@ -405,23 +452,35 @@ const OrderMengement = () => {
                     />
                   </Form.Item>
                   <Form.Item label=" ">
-                    <Button
-                      onClick={() => createNewOrder()}
-                      style={{ width: "200px", height: "40px", background: "#0A3D3A" }}
-                      type="primary"
-                      htmlType="button"
-                      loading={loading}
-                    >
-                      Buyurtmani yaratish
-                    </Button>
-
+                    {orderState ? (
+                      <Button
+                        onClick={() => createNewOrder()}
+                        style={{
+                          width: "200px",
+                          height: "40px",
+                          background: "#0A3D3A",
+                        }}
+                        type="primary"
+                        htmlType="button"
+                        disabled={!budget}
+                      >
+                        Buyurtmani yaratish
+                      </Button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={!budget}
+                        onClick={() => closeAndSave()}
+                      >
+                        yopish
+                      </button>
+                    )}
                   </Form.Item>
                 </div>
               )}
             </div>
           </div>
         </div>
-
       </Form>
     </>
   );

@@ -171,5 +171,10 @@
 }
 
 .orderlist {
-  padding: 0 !important;
+  padding: 0px !important;
+  height: 91vh;
+
+  .custom-table {
+    height: 83vh;
+  }
 }
