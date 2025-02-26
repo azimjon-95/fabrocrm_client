@@ -259,11 +259,16 @@
 
     .list-market-name strong {
         position: fixed;
-        bottom: 17px;
+        bottom: 6px;
         /* Ekranning pastki chetidan 20px balandlikda */
         left: 50%;
         /* Ekranning o'rtasiga joylashtirish */
         transform: translateX(-50%);
+        /* Markazga to'g'ri joylashtirish */
+        background-color: #0a3d3a;
+        /* Orqa fon rangi */
+        padding: 10px 20px;
+        /* Ichki padding */
         border-radius: 8px;
         z-index: 1000;
         /* Boshqa elementlardan ustun bo'lishi uchun */

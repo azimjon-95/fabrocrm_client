@@ -18,12 +18,11 @@ function Layout() {
 
   return (
     <div className="layout">
-      {
-        role !== "distributor" &&
-        <div className="layout_left">
-          <Sidebar />
-        </div>
-      }
+
+      <div className="layout_left">
+        <Sidebar />
+      </div>
+
       <div className="layout_right">
         <Header />
         <main className="main-content">
