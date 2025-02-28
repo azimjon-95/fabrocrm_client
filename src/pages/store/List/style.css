@@ -503,6 +503,7 @@
 
 .material-name-box {
   margin-bottom: 5px;
+  position: relative;
 }
 
 .material-name-box>h4 {
@@ -533,4 +534,21 @@
 .dimension-item svg {
   color: #0A3D3A;
   font-size: 18px;
+}
+
+.add-button-matr {
+  position: absolute;
+  right: 0px;
+  top: -4px;
+  padding: 0;
+  height: 30px;
+  width: 30px;
+  font-size: 20px;
+  color: #0A3D3A;
+}
+
+.add-button-matr:hover {
+  background-color: #0A3D3A !important;
+  color: #fff !important;
+  border-color: #0A3D3A !important;
 }

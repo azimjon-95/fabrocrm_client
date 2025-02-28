@@ -66,23 +66,25 @@ const Warehouse = () => {
   const [form] = Form.useForm();
   const [isContainerVisible, setIsContainerVisible] = useState(false);
   const { data: allStores = [], refetch: refetchAll } = useGetAllStoresQuery();
-  const { data: filteredStores = [], refetch: refetchFiltered } =
-    useGetStoreByCategoryQuery(selectedCategory, { skip: !selectedCategory });
+  const { data: filteredStores = [], refetch: refetchFiltered } = useGetStoreByCategoryQuery(selectedCategory, { skip: !selectedCategory });
   const [deleteStore] = useDeleteStoreMutation();
   const [addMaterial] = useAddMaterialMutation()
-  const [createShop] = useCreateShopMutation();
+  const [createShop, { isLoading: isCreate }] = useCreateShopMutation();
   const { data: allShops = [], refetch: refetchAllShops } = useGetAllShopsQuery();
-  const shop = allShops?.innerData?.find(i => i.isType) || {};
+  const shop = allShops?.innerData?.find(i => i.isType === true) || {};
   const stores = selectedCategory ? filteredStores : allStores;
   const [editingItem, setEditingItem] = useState(null);
   const { data: shops } = useGetShopsQuery();
   const [addShop] = useAddShopMutation();
   const [name, setName] = useState("");
   const [updateShop, { isLoading: isUpdatingShop }] = useUpdateShopMutation();
-
-  // RTK Query hooks
   const [createStore, { isLoading: isUpdating }] = useCreateStoreMutation();
   const [updateStore, { isLoading: isCreating }] = useUpdateStoreMutation();
+  useEffect(() => {
+    if (isEditMode) {
+      form.setFieldValue('quantity', undefined);
+    }
+  }, [isModalOpen, isEditMode]);
   const openModal = (record = null) => {
 
     if (record) {
@@ -110,6 +112,10 @@ const Warehouse = () => {
   };
 
   const onFinish = async (values) => {
+    if (!shop || !Object.keys(shop).length) {
+      message.warning('Iltimos, avval roʻyxat yarating!');
+      return;
+    }
     const quantity = filteredData?.find(i => i._id === selectedProduct?._id);
 
     const updatedMater = {
@@ -147,7 +153,7 @@ const Warehouse = () => {
       refetchAll();
       refetchFiltered();
     } catch (error) {
-      message.error(error?.response?.data?.message);
+      message.error(error?.data?.message);
     }
   };
 
@@ -262,7 +268,6 @@ const Warehouse = () => {
 
 
   // =======================================
-  // Input qiymatini yangilash
   const onNameChange = (event) => {
     setName(event.target.value);
   };
@@ -298,11 +303,13 @@ const Warehouse = () => {
     }));
   }, [name, shops]);
 
+
   const onSelectChange = async (value) => {
     setIsContainerVisible(true)
     try {
       const parsedValue = JSON.parse(value);
       await updateShop({ id: shop._id, updatedShop: { shopsId: parsedValue.id, shopName: parsedValue.value } })
+
     } catch (error) {
       message.error(error);
     }
@@ -310,10 +317,18 @@ const Warehouse = () => {
 
 
   const onCloseChange = async () => {
+    if (shop.materials?.length === 0) {
+      message.warning('Boʻsh roʻyxatni buxgalteriyaga yuborib boʻlmaydi. Iltimos, mahsulotlarni qoʻshing.');
+      return
+    }
+    if (shop?.shopName === "") {
+      message.warning("Do'kon tanlanmagan! Iltimos, do'konni tanlang.");
+      return
+    }
     try {
       const res = await updateShop({ id: shop._id, updatedShop: { isType: false } })
       if (res.success) {
-        message.success('Buxgalteryaga muvaffaqiyatli yuborildi! ')
+        message.success('Buxgalteryaga muvaffaqiyatli yuborildi!')
         setIsContainerVisible(false)
       }
     } catch (error) {
@@ -321,14 +336,13 @@ const Warehouse = () => {
     }
   }
 
-
   const content = (
-    <div>
-      <Button style={{ background: "#0A3D3A" }} loading={isUpdatingShop} onClick={onCloseChange} type="primary">
-        Ha
-      </Button>
-    </div>
+    <Button style={{ background: "#0A3D3A" }} loading={isUpdatingShop} onClick={onCloseChange} type="primary">
+      Ha
+    </Button>
   );
+
+
   return (
     <div className="warehouse-container">
       <div className="warehouse-navbar">
@@ -374,15 +388,22 @@ const Warehouse = () => {
         onCancel={closeModal}
         footer={null}
       >
-        {!shop.isType &&
+        {!shop?.isType &&
           <Button
+            loading={isCreate}
             ref={closeButtonRef}
             onClick={() => handleCreateShop()}
-            className="create-shops-modal-btn"
+            className="create-shops-btn"
           >
-            Yangi list
+            Roʻyxat yarating!
           </Button>}
-        <Form form={form} onFinish={onFinish} layout="vertical">
+        <Form
+          form={form} onFinish={onFinish}
+          initialValues={{
+            category: categoryOptions[0]?.value,
+            quantity: undefined, // Quantity uchun initialValue yo'q
+          }}
+          layout="vertical">
           <Form.Item
             label="Mahsulot nomi"
             name="name"
@@ -403,8 +424,6 @@ const Warehouse = () => {
               onChange={(e) => form.setFieldValue('category', e.target.value)}
             />
           </Form.Item>
-
-
           <Form.Item
             label="O‘lchov birligi"
             name="unit"
@@ -418,7 +437,9 @@ const Warehouse = () => {
               <Form.Item
                 label="Miqdor"
                 name="quantity"
+                shouldUpdate={false}
                 rules={[{ required: true, message: "Miqdorni kiriting!" }]}
+
               >
                 <InputNumber min={1} style={{ width: "100%" }} placeholder="Miqdor" />
               </Form.Item>
@@ -434,7 +455,7 @@ const Warehouse = () => {
             </Col>
           </Row>
           <Button
-            style={{ width: "100%", marginTop: "20px" }}
+            style={{ background: "#0A3D3A", width: "100%", marginTop: "20px", height: "34px" }}
             type="primary"
             htmlType="submit"
             loading={isCreating || isUpdating}
@@ -456,9 +477,10 @@ const Warehouse = () => {
           </Button>
           <div className="shopsnew-container-nav">
             <Select
+              style={{ width: "220px" }}
+              defaultValue={shop?.shopName}
               placeholder="Do'konni tanlang yoki yarating"
               loading={isUpdatingShop}
-
               onChange={(value) => {
                 onSelectChange(value);
                 setIsContainerVisible(true);

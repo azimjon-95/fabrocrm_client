@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useGetOrderByIdQuery, useGiveMaterialMutation, useGetMaterialByIdQuery } from "../../../context/service/orderApi";
-import { Card, Input, List, Spin, Button, message } from "antd";
+import { Card, Input, List, Spin, Button, message, Modal } from "antd";
+import { IoMdAdd } from "react-icons/io";
 import { AiOutlineColumnWidth, AiOutlineColumnHeight, AiOutlineBorder } from 'react-icons/ai';
 import { MdOutlineHistory } from "react-icons/md";
 import { TfiCheckBox } from "react-icons/tfi";
+import AddMaterials from './AddMaterials';
 
 // Har bir material uchun alohida komponent
 const MaterialItem = ({ material, orderCardId, orderId, inputValues, loadingStates, handleInputChange, handleAddMaterial }) => {
@@ -12,6 +14,8 @@ const MaterialItem = ({ material, orderCardId, orderId, inputValues, loadingStat
         orderId,
         materialId: material._id,
     });
+
+
 
     if (isMaterialLoading) return <List.Item><Card style={{ height: "140px" }}><Spin tip="Yuklanmoqda..." /></Card></List.Item>;
 
@@ -51,11 +55,10 @@ const Material = () => {
     const [giveMaterial] = useGiveMaterialMutation();
     const [inputValues, setInputValues] = useState({});
     const [loadingStates, setLoadingStates] = useState({});
+    const [items, setItems] = useState([]);
+    // useCreateMaterialMutation
+    // const [createMaterial, { loading: isCreating }] = useCreateMaterialMutation();
 
-    if (isOrderLoading) return <Spin tip="Yuklanmoqda..." style={{ display: "block", margin: "20px auto" }} />;
-
-    const order = orderData?.innerData;
-    if (!order) return <p>Buyurtma topilmadi</p>;
 
     const handleInputChange = (e, materialId) => {
         const { value } = e.target;
@@ -94,25 +97,77 @@ const Material = () => {
     };
 
 
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [selectedMaterial, setSelectedMaterial] = useState(null);
+
+    const showModal = (material) => {
+        setSelectedMaterial(material);
+        setIsModalVisible(true);
+    };
+
+    const handleOk = () => {
+        setIsModalVisible(false);
+    };
+
+    const handleCancel = () => {
+        setIsModalVisible(false);
+    };
+
+    const handleAdd = async (record) => {
+        const quantityToAdd = inputValues[record._id] || 0;
+        const existingItemIndex = items.findIndex((item) => item.name === record.name);
+
+        if (existingItemIndex !== -1) {
+            // Mahsulot mavjud bo‘lsa, faqat quantity ni yangilaymiz
+            setItems((prevItems) =>
+                prevItems.map((item, index) =>
+                    index === existingItemIndex ? { ...item, quantity: quantityToAdd } : item
+                )
+            );
+        } else {
+            // Yangi mahsulot qo‘shamiz
+            const newItem = {
+                productId: record._id,
+                name: record.name,
+                category: record.category,
+                pricePerUnit: record.pricePerUnit,
+                quantity: quantityToAdd,
+                unit: record.unit,
+                supplier: record.supplier,
+            };
+
+            // await createMaterial({ orderId: newLists?._id, material: newItem }).unwrap();
+            message.success("Material qo‘shildi!");
+
+            setItems((prevItems) => [...prevItems, newItem]);
+        }
+
+        setInputValues({});
+    };
+
+
+
+
+    if (isOrderLoading) return <Spin tip="Yuklanmoqda..." style={{ display: "block", margin: "20px auto" }} />;
+    const order = orderData?.innerData;
+    if (!order) return <p>Buyurtma topilmadi</p>;
     return (
         <div >
             <div className="material-box">
                 <Button onClick={() => window.history.back()}>⬅ Orqaga</Button>
-                <h3>{order.name} uchun materiallar</h3>
+                <h3>{order?.address?.region}, {order?.address?.district}, {order?.address?.street}</h3>
                 <Button
                     style={{ minWidth: "35px", background: "#0A3D3A" }}
                     type="primary"
                     icon={<MdOutlineHistory style={{ fontSize: "20px", marginTop: "1px" }} />}
                     onClick={() => navigate(`/store/givn/material/${id}`)}
                 >
-
-
                 </Button>
             </div>
             <div className="store-material-box">
-                {order.orders?.map((material, inx) => {
+                {order?.orders?.map((material, inx) => {
                     // order.orders uzunligini olish
-                    const orderLength = order.orders.length;
+                    const orderLength = order?.orders?.length;
 
                     // column va kenglik qiymatini dinamik belgilash
                     let columnValue;
@@ -136,6 +191,7 @@ const Material = () => {
                         >
                             <div className="material-name-box">
                                 <h4>{material.name}</h4>
+                                <Button className="add-button-matr" onClick={() => showModal(material)}><IoMdAdd /></Button>
 
                                 <span className="material-dimensions">
                                     <span className="dimension-item">
@@ -170,6 +226,21 @@ const Material = () => {
                     )
                 })}
             </div>
+
+            {/* Modal qismi */}
+            <Modal
+                title="Material Tafsilotlari"
+                open={isModalVisible}
+                onOk={handleOk}
+                onCancel={handleCancel}
+            >
+                <AddMaterials
+                    isCreating={''}
+                    inputValues={inputValues}
+                    handleAdd={handleAdd}
+                    handleInputChange={handleInputChange}
+                />
+            </Modal>
         </div >
     );
 };
