@@ -146,6 +146,11 @@ const Warehouse = () => {
       }
 
       await addMaterial({ ShopId: shop._id, material });
+
+      const materialTotal = material.pricePerUnit * material.quantity;
+      const newTotalPrice = (shop.totalPrice || 0) + materialTotal;
+      await updateShop({ id: shop._id, updatedShop: { totalPrice: newTotalPrice } });
+
       refetchAllShops();
 
       form.resetFields();
