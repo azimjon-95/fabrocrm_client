@@ -28,7 +28,7 @@
   gap: 10px;
 }
 
-.card>div {
+.card > div {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -61,8 +61,6 @@
   border-radius: 0 0 8px 0;
 }
 
-
-
 .debt {
   background-color: #ff9800;
 }
@@ -73,7 +71,6 @@
   display: flex;
   gap: 20px;
 }
-
 
 .payment-input {
   display: flex;
@@ -109,7 +106,7 @@
   font-size: 16px;
 }
 
-.box_expense-register>form>button {
+.box_expense-register > form > button {
   padding: 10px;
   background-color: #4caf50;
   color: white;
@@ -165,12 +162,12 @@
   width: 100%;
 }
 
-.order-box>div {
+.order-box > div {
   width: 180px;
   height: 28px;
 }
 
-.order-box>div:first-child {
+.order-box > div:first-child {
   border-right: 1px solid rgba(128, 128, 128, 0.34);
 }
 
@@ -247,7 +244,7 @@
   display: flex;
   width: 100%;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
 }
 
@@ -258,14 +255,14 @@
   gap: 20px;
 }
 
-.order-details-page_box>div {
+.order-details-page_box > div {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.order-details-page>div>button {
+.order-details-page > div > button {
   background-color: #0a3d3a;
   color: white;
   border: none;
@@ -279,7 +276,7 @@
   transition: background-color 0.3s ease;
 }
 
-.order-details-page>button:hover {
+.order-details-page > button:hover {
   background-color: #0056b3;
 }
 
@@ -362,7 +359,7 @@
 
 .materials-list {
   width: 100%;
-  display: flex;
+  /* display: flex; */
   /* justify-content: center; */
   gap: 10px;
   flex-wrap: wrap;
@@ -416,7 +413,7 @@
   gap: 5px;
 }
 
-.order-line>div {
+.order-line > div {
   width: 50%;
   height: 1px;
   background: #ddd;
@@ -459,7 +456,7 @@
   overflow: hidden;
 }
 
-.box_expense-register_menu>button {
+.box_expense-register_menu > button {
   background: #0a3d3a;
   color: white;
   width: 43px;
@@ -484,15 +481,15 @@
   top: 7.5px;
 }
 
-.box_expense-register_menu>button:first-child {
+.box_expense-register_menu > button:first-child {
   border-right: 1.5px solid#ddd;
 }
 
-.box_expense-register_menu>button:nth-child(2) {
+.box_expense-register_menu > button:nth-child(2) {
   border-right: 1.5px solid#ddd;
 }
 
-.box_expense-register_menu>button:nth-child(4) {
+.box_expense-register_menu > button:nth-child(4) {
   border-left: 1.5px solid#ddd;
 }
 
@@ -518,17 +515,22 @@
 .order-details-page_image {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   width: 48%;
-  height: 400px;
+  /* height: 400px; */
   background-color: white;
-  padding: 15px;
+  /* padding: 15px; */
   border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
 .order-details-page_image img {
-  width: 100%;
-  height: 100%;
+  width: 49%;
+  max-width: 265px;
+  height: 260px;
   border-radius: 10px;
   margin-bottom: 20px;
+  object-fit: contain;
 }
 
 .order-details-page_box_owner-main {
@@ -543,7 +545,7 @@
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   width: 48%;
-  height: 400px;
+  /* height: 400px; */
 }
 
 .order-details-page_box_owner h3 {
@@ -605,7 +607,7 @@
   background: #55555500;
 }
 
-.box_expense-content>form>button {
+.box_expense-content > form > button {
   background: #1890ff;
   color: white;
   width: 100%;
@@ -955,7 +957,6 @@
   font-size: 14px;
 }
 
-
 .card-balance {
   background-color: #2196f3;
 
@@ -983,10 +984,9 @@
   gap: 5px;
 }
 
-.balance-container>div {
+.balance-container > div {
   width: 60%;
 }
-
 
 .balance-item {
   display: flex;
@@ -1001,7 +1001,6 @@
   color: #fff;
   font-size: 20px !important;
 }
-
 
 .box {
   width: 36%;
@@ -1042,7 +1041,6 @@
 .ish-haqi-avans .ant-picker {
   border-radius: 5px !important;
 }
-
 
 @media (max-width: 500px) {
   .cards-container {

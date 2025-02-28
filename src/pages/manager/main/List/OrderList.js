@@ -54,13 +54,13 @@ const ViewOrder = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegion, setSelectedRegion] = useState(null);
 
-  let newOrders2 = [];
-  orders?.innerData.map((i) => {
-    let { orders, ...qolgani } = i;
-    orders.map((j) => {
-      newOrders2.push({ ...j, ...qolgani });
-    });
-  });
+  // let newOrders2 = [];
+  // orders?.innerData.map((i) => {
+  //   let { orders, ...qolgani } = i;
+  //   orders.map((j) => {
+  //     newOrders2.push({ ...j, ...qolgani });
+  //   });
+  // });
 
   useEffect(() => {
     socket.on("newOrder", () => {
@@ -104,24 +104,24 @@ const ViewOrder = () => {
 
   // Unikal regionlarni olish
   const uniqueRegions = useMemo(() => {
-    const regions = newOrders2
+    const regions = newOrders
       ?.map((order) => order?.address?.region)
       .filter(Boolean);
     return [...new Set(regions)];
-  }, [newOrders2]);
+  }, [newOrders]);
 
   // Buyurtmalarni qidirish va filterlash
   const filteredOrders = useMemo(() => {
-    return newOrders2?.filter((order) => {
-      const matchesSearch = order?.name
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase());
+    return newOrders?.filter((order) => {
+      const matchesSearch = order?.orders?.some((item) =>
+        item?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase())
+      );
       const matchesRegion = selectedRegion
         ? order?.address?.region === selectedRegion
         : true;
       return matchesSearch && matchesRegion;
     });
-  }, [newOrders2, searchTerm, selectedRegion]);
+  }, [newOrders, searchTerm, selectedRegion]);
 
   const showCustomerInfo = (customer) => {
     setSelectedCustomer(customer);
@@ -154,7 +154,7 @@ const ViewOrder = () => {
           flexDirection: "column",
           gap: "20px",
         }}
-        percent={progressData?.innerData?.percentage || 0}
+        percent={progressData?.percentage || 0}
       />
     );
   };
@@ -258,35 +258,46 @@ const ViewOrder = () => {
   );
 
   const columns = [
-    {
-      title: "Rasmi",
-      dataIndex: "image",
-      key: "image",
+    // {
+    //   title: "Rasmi",
+    //   dataIndex: "image",
+    //   key: "image",
 
-      render: (image) => {
-        return image ? (
-          <Image
-            src={image}
-            alt="Mebel"
-            width={50}
-            height={50}
-            style={{ objectFit: "cover", borderRadius: "8px" }}
-            preview={{ mask: "Kattalashtirish" }}
-          />
-        ) : (
-          <Avatar shape="square" size={50} icon={<UserOutlined />} />
-        );
-      },
+    //   render: (image) => {
+    //     return image ? (
+    //       <Image
+    //         src={image}
+    //         alt="Mebel"
+    //         width={50}
+    //         height={50}
+    //         style={{ objectFit: "cover", borderRadius: "8px" }}
+    //         preview={{ mask: "Kattalashtirish" }}
+    //       />
+    //     ) : (
+    //       <Avatar shape="square" size={50} icon={<UserOutlined />} />
+    //     );
+    //   },
+    // },
+    {
+      title: "Nomi",
+      dataIndex: "name",
+      key: "name",
+      render: (i, item) => item.orders?.map((i) => <p key={i._id}>{i.name}</p>),
     },
-    { title: "Nomi", dataIndex: "name", key: "name" },
     {
       title: "Budjet",
-      render: (paid, item) => (
-        <div className="text-green-500">
-          {item?.paymentType ? <p>Tulov turi: {item?.paymentType} </p> : ""}
-          <p>{item?.budget?.toLocaleString()} so‘m</p>
-        </div>
-      ),
+      render: (paid, item) => {
+        let totalBudget = item?.orders?.reduce(
+          (total, order) => total + order.budget,
+          0
+        );
+        return (
+          <div className="text-green-500">
+            {item?.paymentType ? <p>Tulov turi: {item?.paymentType} </p> : ""}
+            <p>{totalBudget?.toLocaleString()} so‘m</p>
+          </div>
+        );
+      },
     },
     {
       title: "To‘langan",
@@ -358,7 +369,6 @@ const ViewOrder = () => {
       ),
     },
   ];
-  console.log(filteredOrders);
 
   return (
     <div className="orderlist">
@@ -398,9 +408,12 @@ const ViewOrder = () => {
       </div>
       <div className="custom-table">
         <Table
-          dataSource={filteredOrders}
+          dataSource={filteredOrders.map((item, index) => ({
+            ...item,
+            key: `${item._id || "custom"}-${index}`,
+          }))}
           columns={columns}
-          rowKey="_id"
+          rowKey="key"
           bordered
           pagination={false}
           size="small"

@@ -173,11 +173,10 @@ const OrderMengement = () => {
   const createNewOrder = () => {
     closeAndSave();
     let order = JSON.parse(localStorage.getItem("order") || "{}");
-    order.fixed_price = budget;
-
     updateOrder({ id, updates: order })
       .then((res) => {
         if (res.data.state) {
+          console.log(">>>", res.data);
           navigate("/main/orders");
           localStorage.removeItem("order");
         }
@@ -452,7 +451,7 @@ const OrderMengement = () => {
                     />
                   </Form.Item>
                   <Form.Item label=" ">
-                    {orderState ? (
+                    {order?.orders?.length === 1 || orderState ? (
                       <Button
                         onClick={() => createNewOrder()}
                         style={{
@@ -472,7 +471,7 @@ const OrderMengement = () => {
                         disabled={!budget}
                         onClick={() => closeAndSave()}
                       >
-                        yopish
+                        Yopish
                       </button>
                     )}
                   </Form.Item>

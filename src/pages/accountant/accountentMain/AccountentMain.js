@@ -137,7 +137,6 @@ const AccountentMain = () => {
   }, [open]);
   let zakazlar = ordersData?.innerData || [];
 
-
   console.log(zakazlar);
   return (
     <div className="accountent-container">
@@ -167,8 +166,13 @@ const AccountentMain = () => {
                 <li key={index} className="order-item">
                   <div className="order-info">
                     <div>
-                      {index + 1}) {order?.orders?.map((item, idx) => (
-                        <span key={idx} style={{ color: "#0A3D3A" }} className="order-name">
+                      {index + 1}){" "}
+                      {order?.orders?.map((item, idx) => (
+                        <span
+                          key={idx}
+                          style={{ color: "#0A3D3A" }}
+                          className="order-name"
+                        >
                           {item.name}
                         </span>
                       ))}
@@ -182,7 +186,14 @@ const AccountentMain = () => {
 
                       <div>
                         <span className="order-budget">
-                          Byudjet: {order?.orders?.reduce((total, item) => total + (item.budget || 0), 0).toLocaleString()} so'm
+                          Byudjet:{" "}
+                          {order?.orders
+                            ?.reduce(
+                              (total, item) => total + (item.budget || 0),
+                              0
+                            )
+                            .toLocaleString()}{" "}
+                          so'm
                         </span>
                       </div>
                     </div>
@@ -204,7 +215,7 @@ const AccountentMain = () => {
                       style={{ color: "#0A3D3A" }}
                       className="eye-icon"
                       onClick={() =>
-                        navigate(`/order/${order.id}`, { state: { order } })
+                        navigate(`/order/${order._id}`, { state: { order } })
                       }
                     />
                   </div>

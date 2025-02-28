@@ -178,3 +178,9 @@
     height: 83vh;
   }
 }
+
+.order_Edit_Form {
+  width: 100%;
+  height: 100% !important;
+  overflow-y: auto;
+}
