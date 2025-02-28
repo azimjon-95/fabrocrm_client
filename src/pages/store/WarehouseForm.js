@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Modal,
   Table,
@@ -6,26 +6,37 @@ import {
   Form,
   Input,
   InputNumber,
+  Popover,
   Select,
   Col,
   Row,
   Radio,
   message,
+  Divider, Space
 } from "antd";
+
 import {
   SearchOutlined,
-  PlusOutlined,
   EditOutlined,
-  DeleteOutlined,
+  DeleteOutlined
 } from "@ant-design/icons";
+import { RiSendPlaneFill } from "react-icons/ri";
+import { MdMenuOpen } from "react-icons/md";
+import { IoCloseSharp } from "react-icons/io5";
 import { useLocation } from "react-router-dom";
+import { PlusOutlined } from "@ant-design/icons";
 import {
-  useCreateStoreMutation,
+  useGetShopsQuery,
+  useAddShopMutation,
+} from "../../context/service/shopsApi";
+import {
   useGetAllStoresQuery,
   useGetStoreByCategoryQuery,
   useUpdateStoreMutation,
   useDeleteStoreMutation,
+  useCreateStoreMutation
 } from "../../context/service/storeApi";
+import { useCreateShopMutation, useGetAllShopsQuery, useAddMaterialMutation, useUpdateShopMutation } from "../../context/service/newOredShops";
 import "./style.css";
 
 const { Option } = Select;
@@ -45,25 +56,47 @@ const unitOptions = ["Dona", "Kg", "Litr", "Metr", "Kvadrat Metr"].map(
 );
 
 const Warehouse = () => {
+  const containerRef = useRef(null);
+  const inputRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [form] = Form.useForm();
-
+  const [isContainerVisible, setIsContainerVisible] = useState(false);
   const { data: allStores = [], refetch: refetchAll } = useGetAllStoresQuery();
   const { data: filteredStores = [], refetch: refetchFiltered } =
     useGetStoreByCategoryQuery(selectedCategory, { skip: !selectedCategory });
-  const [updateStore, { isLoading: isCreating }] = useUpdateStoreMutation();
   const [deleteStore] = useDeleteStoreMutation();
-
+  const [addMaterial] = useAddMaterialMutation()
+  const [createShop] = useCreateShopMutation();
+  const { data: allShops = [], refetch: refetchAllShops } = useGetAllShopsQuery();
+  const shop = allShops?.innerData?.find(i => i.isType) || {};
   const stores = selectedCategory ? filteredStores : allStores;
+  const [editingItem, setEditingItem] = useState(null);
+  const { data: shops } = useGetShopsQuery();
+  const [addShop] = useAddShopMutation();
+  const [name, setName] = useState("");
+  const [updateShop, { isLoading: isUpdatingShop }] = useUpdateShopMutation();
 
+  // RTK Query hooks
+  const [createStore, { isLoading: isUpdating }] = useCreateStoreMutation();
+  const [updateStore, { isLoading: isCreating }] = useUpdateStoreMutation();
   const openModal = (record = null) => {
-    setIsEditMode(!!record);
-    setSelectedProduct(record);
+
+    if (record) {
+      setIsEditMode(true);
+      setEditingItem(record);
+      form.setFieldsValue(record);
+    } else {
+      setIsEditMode(false);
+      setEditingItem(null);
+      form.resetFields();
+    }
     setIsModalOpen(true);
+
+    setSelectedProduct(record);
     form.setFieldsValue(
       record || {
         name: "",
@@ -77,13 +110,38 @@ const Warehouse = () => {
   };
 
   const onFinish = async (values) => {
-    try {
-      const res = await updateStore({
-        id: selectedProduct?._id,
-        updatedData: values,
-      });
+    const quantity = filteredData?.find(i => i._id === selectedProduct?._id);
 
-      message.success(res?.data?.message);
+    const updatedMater = {
+      name: quantity?.name,
+      category: quantity?.category,
+      quantity: quantity?.quantity + values.quantity,
+      unit: quantity?.unit,
+      pricePerUnit: values?.pricePerUnit || quantity?.pricePerUnit,
+    }
+    try {
+      if (isEditMode && editingItem) {
+        const res = await updateStore({
+          id: selectedProduct?._id,
+          updatedData: updatedMater,
+        });
+        message.success(res?.data?.message);
+      } else {
+        const res = await createStore(values).unwrap();
+        message.success(res?.data?.message);
+      }
+
+      const material = {
+        name: values?.name,
+        category: values?.category,
+        quantity: values?.quantity,
+        unit: values?.unit,
+        pricePerUnit: values?.pricePerUnit,
+      }
+
+      await addMaterial({ ShopId: shop._id, material });
+      refetchAllShops();
+
       form.resetFields();
       setIsModalOpen(false);
       refetchAll();
@@ -110,6 +168,15 @@ const Warehouse = () => {
     store?.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setIsEditMode(false);
+    setEditingItem(null);
+    form.resetFields();
+  };
+
   const location = useLocation();
   const isHidden =
     location.pathname === "/manag/warehouse" ||
@@ -135,7 +202,6 @@ const Warehouse = () => {
         `${(quantity * pricePerUnit).toLocaleString("uz-UZ")} so‘m`,
     },
     !isHidden && {
-      // isHidden true bo‘lsa, ustun qo‘shilmaydi
       title: "Harakatlar",
       key: "actions",
       render: (_, record) => (
@@ -159,10 +225,112 @@ const Warehouse = () => {
         </div>
       ),
     },
-  ].filter(Boolean); // undefined elementlarni olib tashlash
+  ].filter(Boolean);
 
+
+
+  const handleCreateShop = async () => {
+    try {
+      await createShop();
+      refetchAllShops();
+    } catch (error) {
+      console.error("Error creating shop:", error);
+      alert("Failed to create shop");
+    }
+  };
+
+  const closeButtonRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Tashqariga klik qilishni tekshirish
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target) &&
+        !closeButtonRef.current.contains(event.target) // closeButton ustida klik bo‘lsa
+      ) {
+        setIsContainerVisible(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+
+  // =======================================
+  // Input qiymatini yangilash
+  const onNameChange = (event) => {
+    setName(event.target.value);
+  };
+  // Yangi shop qo'shish
+  const addItem = async (e) => {
+    e.preventDefault();
+    if (name && !shops?.innerData?.some((shop) => shop.name.toLowerCase() === name.toLowerCase())) {
+      await addShop({ name }).unwrap();
+      setName("");
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+    }
+  };
+
+  // Variantlarni qayta hisoblaydi
+  const computedOptions = useMemo(() => {
+    const isExisting = shops?.innerData?.some(
+      (item) => item.name.toLowerCase() === name.toLowerCase()
+    );
+
+    const newOptions = isExisting
+      ? shops?.innerData
+      : [...(shops?.innerData || []), { _id: null, name: name }];
+
+    return newOptions.map((item) => ({
+      value: JSON.stringify({ id: item._id, value: item.name }),  // JSON qilib uzatamiz
+      label: (
+        <Space>
+          {item.name}
+        </Space>
+      ),
+    }));
+  }, [name, shops]);
+
+  const onSelectChange = async (value) => {
+    setIsContainerVisible(true)
+    try {
+      const parsedValue = JSON.parse(value);
+      await updateShop({ id: shop._id, updatedShop: { shopsId: parsedValue.id, shopName: parsedValue.value } })
+    } catch (error) {
+      message.error(error);
+    }
+  }
+
+
+  const onCloseChange = async () => {
+    try {
+      const res = await updateShop({ id: shop._id, updatedShop: { isType: false } })
+      if (res.success) {
+        message.success('Buxgalteryaga muvaffaqiyatli yuborildi! ')
+        setIsContainerVisible(false)
+      }
+    } catch (error) {
+      message.error(error);
+    }
+  }
+
+
+  const content = (
+    <div>
+      <Button style={{ background: "#0A3D3A" }} loading={isUpdatingShop} onClick={onCloseChange} type="primary">
+        Ha
+      </Button>
+    </div>
+  );
   return (
-    <>
+    <div className="warehouse-container">
       <div className="warehouse-navbar">
         <Select
           placeholder="Kategoriya tanlang"
@@ -184,43 +352,59 @@ const Warehouse = () => {
           prefix={<SearchOutlined />}
           className="warehouse-navbar_inp"
         />
+        <Button className="create-shops-modal-btn" type="primary" onClick={() => openModal(null)}>
+          Mahsulot qo‘shish
+        </Button>
       </div>
 
-      <Table
-        dataSource={filteredData}
-        columns={columns}
-        rowKey="_id"
-        size="small"
-        pagination={false}
-        scroll={{ x: "max-content", y: 570 }}
-        className="custom-table-scroll3"
-      />
+      <div className="custom-tabl-scroll3">
+        <Table
+          dataSource={filteredData}
+          columns={columns}
+          rowKey="_id"
+          size="small"
+          pagination={false}
+        />
+      </div>
 
       <Modal
         width={545}
-        title={isEditMode ? "Mahsulotni tahrirlash" : "Mahsulot qo‘shish"}
+        title={isEditMode ? "Mahsulotni tahrirlash" : "Yangi mahsulot qo‘shish"}
         open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
+        onCancel={closeModal}
         footer={null}
       >
+        {!shop.isType &&
+          <Button
+            ref={closeButtonRef}
+            onClick={() => handleCreateShop()}
+            className="create-shops-modal-btn"
+          >
+            Yangi list
+          </Button>}
         <Form form={form} onFinish={onFinish} layout="vertical">
           <Form.Item
             label="Mahsulot nomi"
             name="name"
             rules={[{ required: true, message: "Mahsulot nomini kiriting!" }]}
           >
-            <Input placeholder="Введите название продукта" />
+            <Input placeholder="Mahsulot nomini kiriting" />
           </Form.Item>
+
           <Form.Item
             label="Kategoriya"
             name="category"
+            initialValue={categoryOptions[0]?.value} // Birinchi kategoriyani tanlash
             rules={[{ required: true, message: "Kategoriya tanlang!" }]}
           >
             <Radio.Group
               className="radio_Group_inp"
               options={categoryOptions}
+              onChange={(e) => form.setFieldValue('category', e.target.value)}
             />
           </Form.Item>
+
+
           <Form.Item
             label="O‘lchov birligi"
             name="unit"
@@ -228,6 +412,7 @@ const Warehouse = () => {
           >
             <Radio.Group options={unitOptions} />
           </Form.Item>
+
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
@@ -235,11 +420,7 @@ const Warehouse = () => {
                 name="quantity"
                 rules={[{ required: true, message: "Miqdorni kiriting!" }]}
               >
-                <InputNumber
-                  min={1}
-                  style={{ width: "100%" }}
-                  placeholder="Введите количество"
-                />
+                <InputNumber min={1} style={{ width: "100%" }} placeholder="Miqdor" />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -247,30 +428,102 @@ const Warehouse = () => {
                 <InputNumber
                   min={0}
                   style={{ width: "100%" }}
-                  placeholder="Введите цену за единицу"
+                  placeholder="Birlik narxi"
                 />
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item label="Yetkazib beruvchi" name="supplier">
-            <Input
-              style={{ width: "100%" }}
-              placeholder="Введите название поставщика"
-            />
-          </Form.Item>
-
           <Button
             style={{ width: "100%", marginTop: "20px" }}
             type="primary"
             htmlType="submit"
-            loading={isCreating}
+            loading={isCreating || isUpdating}
           >
             {isEditMode ? "Yangilash" : "Saqlash"}
           </Button>
         </Form>
       </Modal>
-    </>
+
+      {
+        shop.isType === true &&
+        <div ref={containerRef} className={`shopsnew-container ${isContainerVisible ? "show" : ""}`} >
+          <Button
+            ref={closeButtonRef}
+            onClick={() => setIsContainerVisible(!isContainerVisible)}
+            className="open-shops-modal-btn"
+          >
+            {isContainerVisible ? <IoCloseSharp style={{ color: "red" }} /> : <MdMenuOpen />}
+          </Button>
+          <div className="shopsnew-container-nav">
+            <Select
+              placeholder="Do'konni tanlang yoki yarating"
+              loading={isUpdatingShop}
+
+              onChange={(value) => {
+                onSelectChange(value);
+                setIsContainerVisible(true);
+              }}
+              dropdownRender={(menu) => (
+                <div className="select-shops">
+                  {menu}
+                  <Divider
+                    style={{
+                      margin: "8px 0",
+                    }}
+                  />
+                  <Space
+                    style={{
+                      padding: "0 8px 4px",
+                    }}
+                  >
+                    <Input
+                      placeholder="Yangi variant kiriting"
+                      ref={inputRef}
+                      value={name}
+                      onChange={onNameChange}
+                      onKeyDown={(e) => e.stopPropagation()}
+                    />
+                    <Button type="text" onClick={addItem}> <PlusOutlined /></Button>
+                  </Space>
+                </div>
+              )}
+              options={computedOptions}
+              allowClear
+            />
+            <Popover
+              trigger="click"
+              content={content}
+              title="Siz rostdan Buxgalteryaga yubarmoqchimisiz?"
+            >
+              <Button style={{ color: "#0A3D3A", fontSize: "16px", display: "flex", alignItems: "center", gap: "8px" }}>Yuborish <RiSendPlaneFill /></Button>
+            </Popover>
+          </div>
+          <h4>Omborga kelgan mahsulotlar ro'yxati</h4>
+          {
+            shop.materials?.map((item, inx) =>
+            (<div key={inx} className="item-info-shop">
+              <span className="item-name-shop">{item.name}</span>
+              <span className="item-quantity-shop">
+                {item.quantity} {item.unit}
+              </span>
+
+
+              <span className="item-price-shop">
+                {item.pricePerUnit.toLocaleString("uz-UZ")} so‘m
+              </span>
+              <span className="item-price-shop">
+                {(item.pricePerUnit * item.quantity).toLocaleString("uz-UZ")}{" "}
+                so‘m
+              </span>
+            </div>
+            ))
+          }
+        </div>
+      }
+    </div>
   );
 };
 
 export default Warehouse;
+
+

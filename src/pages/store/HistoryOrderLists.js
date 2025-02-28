@@ -42,43 +42,43 @@ const HistoryOrderLists = ({ list }) => {
     },
     ...(!list
       ? [
-          {
-            title: "Yangi",
-            dataIndex: "isNew",
-            key: "isNew",
-            render: (isNew) => (isNew ? "Ha" : "Yo'q"),
-          },
-        ]
+        {
+          title: "Yangi",
+          dataIndex: "isNew",
+          key: "isNew",
+          render: (isNew) => (isNew ? "Ha" : "Yo'q"),
+        },
+      ]
       : []),
     ...(!list
       ? [
-          {
-            title: "Buxgalterga yuborilgan",
-            dataIndex: "sentToAccountant",
-            key: "sentToAccountant",
-            render: (sentToAccountant) => (sentToAccountant ? "Ha" : "Yo'q"),
-          },
-        ]
+        {
+          title: "Buxgalterga yuborilgan",
+          dataIndex: "sentToDistributor",
+          key: "sentToDistributor",
+          render: (sentToDistributor) => (sentToDistributor ? "Ha" : "Yo'q"),
+        },
+      ]
       : []),
 
     {
       title: "Buxgalter tasdiqladi",
-      dataIndex: "approvedByAccountant",
-      key: "approvedByAccountant",
-      render: (approvedByAccountant) => {
-        return approvedByAccountant ? "Ha" : "Yo'q";
+      dataIndex: "approvedByDistributor",
+      key: "approvedByDistributor",
+      render: (approvedByDistributor) => {
+        return approvedByDistributor ? "Ha" : "Yo'q";
       },
     },
 
     ...(!list
       ? [
-          {
-            title: "Omborga qo'shildi",
-            dataIndex: "addedToData",
-            key: "addedToData",
-            render: (addedToData) => (addedToData ? "Ha" : "Yo'q"),
-          },
-        ]
+        {
+          title: "Omborga qo'shildi",
+          dataIndex: "addedToData",
+          key: "addedToData",
+          render: (addedToData) => (addedToData ? "Ha" : "Yo'q"),
+        },
+      ]
       : []),
     {
       title: "Sanasi",
@@ -91,20 +91,20 @@ const HistoryOrderLists = ({ list }) => {
     },
     ...(!list
       ? [
-          {
-            title: "Yuklab olish",
-            key: "download",
-            render: (record) => (
-              <Button
-                type="primary"
-                onClick={() => handleExport(record)}
-                style={{ background: "#0A3D3A" }}
-              >
-                <FileExcelOutlined /> Excel
-              </Button>
-            ),
-          },
-        ]
+        {
+          title: "Yuklab olish",
+          key: "download",
+          render: (record) => (
+            <Button
+              type="primary"
+              onClick={() => handleExport(record)}
+              style={{ background: "#0A3D3A" }}
+            >
+              <FileExcelOutlined /> Excel
+            </Button>
+          ),
+        },
+      ]
       : []),
   ];
 
@@ -173,11 +173,10 @@ const HistoryOrderLists = ({ list }) => {
       order.totalPrice.toLocaleString() + " so'm",
       order.isPaid ? "To'langan" : "To'lanmagan",
       order.isNew ? "Ha" : "Yo'q",
-      order.sentToAccountant ? "Ha" : "Yo'q",
-      order.approvedByAccountant ? "Ha" : "Yo'q",
+      order.sentToDistributor ? "Ha" : "Yo'q",
+      order.approvedByDistributor ? "Ha" : "Yo'q",
       order.addedToData ? "Ha" : "Yo'q",
-      `${dayjs(order.createdAt).date()}-${
-        uzMonths[dayjs(order.createdAt).month()]
+      `${dayjs(order.createdAt).date()}-${uzMonths[dayjs(order.createdAt).month()]
       } / ${dayjs(order.createdAt).format("HH:mm")}`,
     ]);
 

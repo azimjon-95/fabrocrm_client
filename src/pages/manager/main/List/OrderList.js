@@ -53,7 +53,6 @@ const ViewOrder = () => {
   const [deleteOrder] = useDeleteOrderMutation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegion, setSelectedRegion] = useState(null);
-  console.log(newOrders);
 
   // let newOrders2 = [];
   // orders?.innerData.map((i) => {
@@ -155,7 +154,7 @@ const ViewOrder = () => {
           flexDirection: "column",
           gap: "20px",
         }}
-        percent={progressData?.innerData?.percentage || 0}
+        percent={progressData?.percentage || 0}
       />
     );
   };
@@ -370,8 +369,6 @@ const ViewOrder = () => {
       ),
     },
   ];
-
-  console.log(filteredOrders);
 
   return (
     <div className="orderlist">

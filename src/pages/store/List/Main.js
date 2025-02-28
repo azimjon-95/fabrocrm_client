@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { Button, List, message } from "antd";
+import React, { useRef, useState, useEffect } from "react";
+import { Button, List, message, Select } from "antd";
 import { FiSend } from "react-icons/fi"; import { FaPlus } from "react-icons/fa";
 import { AiOutlineDelete } from "react-icons/ai";
 import { DeleteOutlined } from "@ant-design/icons";
 import ActiveOrders from "./ActiveOrders";
+import {
+  useGetWorkersQuery
+} from "../../../context/service/worker";
 import {
   useCreateMaterialMutation,
   useCreateOrderListMutation,
@@ -17,9 +20,9 @@ import SelectWarehouse from "../SelectWarehouse";
 import AddItems from "./AddItems";
 import socket from "../../../socket";
 
+
 const Main = () => {
   const [openOrderList, setOpenOrderList] = useState(false);
-  // const [setItems] = useState([]);
   const [inputValues, setInputValues] = useState({});
   const [createMaterial, { isLoading: isCreating }] =
     useCreateMaterialMutation();
@@ -28,11 +31,11 @@ const Main = () => {
   const [deleteMaterialById] = useDeleteMaterialByIdMutation();
   const [deleteOrderList] = useDeleteOrderListMutation();
   const [updateOrderList] = useUpdateOrderListMutation();
-
+  const [selectedDistributor, setSelectedDistributor] = useState(null);
   const { data: data = [], refetch } = useGetNewOrderListsQuery();
-
   const newLists = data?.innerData || null;
-  console.log(newLists);
+  const { data: workers = [] } = useGetWorkersQuery();
+  const distributor = workers?.innerData?.filter(i => i.role === "distributor");
 
   useEffect(() => {
     socket.on("newMaterial", refetch);
@@ -107,8 +110,8 @@ const Main = () => {
         const mewLists = {
           isNew: true,
           materials: [],
-          sentToAccountant: false,
-          approvedByAccountant: false,
+          sentToDistributor: false,
+          approvedByDistributor: false,
           addedToData: false,
           isPaid: false,
         };
@@ -130,33 +133,53 @@ const Main = () => {
     }
   };
 
-  const handleUpdateAccountantList = async (id) => {
+  const handleUpdateDistributor = async (id) => {
+    if (!selectedDistributor) {
+      message.error("Yetkazib beruvchi yoki Do'kon tanlanmagan!");
+      return;
+    }
     try {
       let res = await updateOrderList({
         id,
-        updateData: { sentToAccountant: true },
+        updateData: {
+          sentToDistributor: true,
+          distributorId: selectedDistributor,
+          shopsId: "0"
+        },
       }).unwrap();
       handleCloseOrder();
-      refetch()
+      refetch();
+      setSelectedDistributor(null);
       message.success(res.data.message);
     } catch (error) {
       message.error(error?.data?.message);
     }
   };
+
+  // =======================================
+
+
+  const onSecondCityChange = (value) => {
+    setSelectedDistributor(value);
+  };
+
+
   return (
     <div className="stor_container">
       <div className="stor_todolist-one">
         <div className="list-container-nav">
-
-          <Button
-            disabled={!newLists?._id || newLists?.sentToAccountant}
-            onClick={() => handleUpdateAccountantList(newLists?._id)}
-          >
-            <FiSend style={{ fontSize: "15px", marginTop: "1px" }} />{" "}
-            {newLists?.sentToAccountant
-              ? "Buhgalterga yuborilgan"
-              : "Buhgalterga yuborish"}
-          </Button>
+          {
+            newLists?._id &&
+            <Button
+              disabled={!newLists?._id || newLists?.sentToDistributor}
+              onClick={() => handleUpdateDistributor(newLists?._id)}
+            >
+              <FiSend style={{ fontSize: "15px", marginTop: "1px" }} />{" "}
+              {newLists?.sentToDistributor
+                ? "Yuborilgan"
+                : "Yuborish"}
+            </Button>
+          }
           {
             !newLists?._id &&
             <Button
@@ -167,15 +190,61 @@ const Main = () => {
               Yangi List
             </Button>
           }
-
-          <Button
-            disabled={!newLists?._id || newLists?.addedToData && newLists?.sentToAccountant}
-            onClick={() => handleDeleteList(newLists?._id)}
-            danger
-          >
-            <AiOutlineDelete style={{ fontSize: "17px" }} /> O‘chirish
-          </Button>
+          {/* <Select
+            placeholder="Do'konni tanlang yoki yarating"
+            loading={isLoading}
+            onChange={onSelectChange}
+            dropdownRender={(menu) => (
+              <div className="select-shops">
+                {menu}
+                <Divider
+                  style={{
+                    margin: "8px 0",
+                  }}
+                />
+                <Space
+                  style={{
+                    padding: "0 8px 4px",
+                  }}
+                >
+                  <Input
+                    placeholder="Yangi variant kiriting"
+                    ref={inputRef}
+                    value={name}
+                    onChange={onNameChange}
+                    onKeyDown={(e) => e.stopPropagation()}
+                  />
+                  <Button type="text" onClick={addItem}> <PlusOutlined /></Button>
+                </Space>
+              </div>
+            )}
+            options={computedOptions}
+            allowClear
+          /> */}
+          <Select
+            style={{
+              width: 150,
+            }}
+            placeholder="Yetkazib beruvchi"
+            value={selectedDistributor}
+            onChange={onSecondCityChange}
+            options={distributor?.map((i) => ({
+              label: i.firstName + " " + i.lastName,
+              value: i._id,
+            }))}
+          />
+          {
+            newLists?._id &&
+            <Button style={{ width: 24, padding: 0 }}
+              disabled={!newLists?._id || newLists?.addedToData && newLists?.sentToDistributor}
+              onClick={() => handleDeleteList(newLists?._id)}
+              danger
+            >
+              <AiOutlineDelete style={{ fontSize: "17px", marginLeft: 2.5 }} />
+            </Button>
+          }
         </div>
+
         <List
           bordered
           className="list-container"
@@ -205,7 +274,7 @@ const Main = () => {
                 type="text"
                 danger
                 className="delete-btn"
-                disabled={newLists?.sentToAccountant}
+                disabled={newLists?.sentToDistributor}
                 onClick={() => handleDelete(item.productId)}
               >
                 <DeleteOutlined />
@@ -213,8 +282,9 @@ const Main = () => {
             </List.Item>
           )}
         />
+
         <AddItems
-          sentAccountant={newLists?.sentToAccountant}
+          sentAccountant={newLists?.sentToDistributor}
           addedToData={newLists?.addedToData}
           openOrderList={openOrderList}
           setOpenOrderList={setOpenOrderList}
@@ -224,7 +294,7 @@ const Main = () => {
         openOrderList ? (
           <div className="stor_todolist">
             <SelectWarehouse
-              sentAccountant={newLists?.sentToAccountant}
+              sentAccountant={newLists?.sentToDistributor}
               addedToData={newLists?.addedToData}
               isCreating={isCreating}
               inputValues={inputValues}
@@ -241,7 +311,3 @@ const Main = () => {
 };
 
 export default Main;
-
-
-
-

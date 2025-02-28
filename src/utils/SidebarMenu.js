@@ -4,6 +4,7 @@ import { AppstoreAddOutlined, DashboardOutlined, MoneyCollectOutlined, ShoppingC
 import { MdChecklist, MdOutlineWarehouse } from "react-icons/md";
 import { FaWarehouse, FaClipboardList } from "react-icons/fa"; // Bo‘lim ikonkalari uchun
 import { VscChecklist } from "react-icons/vsc";
+import { FaTruck } from "react-icons/fa";
 import { TbHeartRateMonitor } from "react-icons/tb";
 import { TbReorder } from "react-icons/tb";
 
@@ -61,7 +62,13 @@ export const menuItems = {
                 { icon: <FileTextOutlined style={{ fontSize: 20 }} />, path: "/new/order/lists", label: "Buyurtmalar" },
             ]
         },
-
+        {
+            icon: <FaTruck size={20} />,
+            label: "Yetkazib beruvchi",
+            children: [
+                { icon: <FaClipboardList size={20} />, path: "/distributor", label: "Buyurtmalar" },
+            ]
+        },
     ],
 
     warehouseman: [
@@ -72,6 +79,9 @@ export const menuItems = {
             path: "/new/order/lists",
             label: "Buyurtmalar",
         },
+    ],
+    distributor: [
+        { icon: <FaClipboardList size={20} />, path: "/distributor", label: "Buyurtmalar" },
     ]
 };
 

@@ -173,11 +173,10 @@ const OrderMengement = () => {
   const createNewOrder = () => {
     closeAndSave();
     let order = JSON.parse(localStorage.getItem("order") || "{}");
-    order.fixed_price = budget;
-
     updateOrder({ id, updates: order })
       .then((res) => {
         if (res.data.state) {
+          console.log(">>>", res.data);
           navigate("/main/orders");
           localStorage.removeItem("order");
         }
@@ -204,7 +203,6 @@ const OrderMengement = () => {
   } catch (e) {
     findedOrder = {};
   }
-  console.log(order?.orders);
   return (
     <>
       <Form layout="vertical" className="order-form-main">

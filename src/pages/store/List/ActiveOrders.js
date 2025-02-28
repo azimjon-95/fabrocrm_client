@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useGetOrdersQuery } from "../../../context/service/orderApi";
-import { Select, Table, Spin, Input, Alert, Image } from "antd";
-import { Link, useNavigate } from "react-router-dom";
+import { Select, Table, Spin, Input, Alert } from "antd";
+import { Link } from "react-router-dom";
+import { EyeOutlined } from "@ant-design/icons";
 import { SearchOutlined } from "@ant-design/icons";
 import "./style.css";
 
 const ActiveOrders = () => {
-  const navigate = useNavigate();
   const { data: orders, error, isLoading } = useGetOrdersQuery();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegion, setSelectedRegion] = useState(null);
@@ -18,7 +18,7 @@ const ActiveOrders = () => {
 
   const filteredOrders = useMemo(() => {
     return newOrders?.filter((order) => {
-      const matchesSearch = order.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = order.orders?.map((i) => i.name?.toLowerCase().includes(searchTerm?.toLowerCase()));
       const matchesRegion = selectedRegion ? order?.address?.region === selectedRegion : true;
       return matchesSearch && matchesRegion;
     });
@@ -32,12 +32,9 @@ const ActiveOrders = () => {
 
   const columns = [
     {
-      title: "Rasimi",
-      dataIndex: "image",
-      key: "image",
-      render: (image) => <Image src={image} alt="Mebel" width={50} height={50} style={{ objectFit: "cover", borderRadius: "8px" }} preview={{ mask: "Kattalashtirish" }} />,
+      title: "Mebel nomi",
+      render: (_, record) => record?.orders?.map((i) => <p>{i.name}</p>)
     },
-    { title: "Nomi", dataIndex: "name", key: "name" },
     { title: "Sanasi", dataIndex: "date", key: "date", render: formatDateUzbek },
     {
       title: "Manzili",
@@ -48,10 +45,11 @@ const ActiveOrders = () => {
       title: "Materiallar",
       dataIndex: "materials",
       key: "materials",
+      align: "center",
       render: (_, record) => {
         return record ? (
           <Link to={`/store/materials/${record._id}`}>
-            Ko‘rish
+            <EyeOutlined style={{ marginRight: 5, fontSize: "20px", color: "#0A3D3A" }} />
           </Link>
         ) : (
           "Mavjud emas"
@@ -88,7 +86,7 @@ const ActiveOrders = () => {
 
       </div>
 
-      <div className="custom-table">
+      <div className="custom-tables" style={{ overflowX: 'auto' }}>
         <Table
           dataSource={filteredOrders}
           columns={columns}
@@ -99,10 +97,10 @@ const ActiveOrders = () => {
         />
       </div>
 
+
     </div>
   );
 };
 
 export default ActiveOrders;
-
 

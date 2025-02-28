@@ -5,6 +5,7 @@ import {
   useUpdateOrderListMutation,
 } from "../../context/service/listApi";
 import { useCreateExpenseMutation } from "../../context/service/expensesApi";
+import { useGetWorkersQuery } from "../../context/service/worker";
 import {
   useUpdateBalanceMutation,
   useGetBalanceQuery,
@@ -41,6 +42,7 @@ const NewOrderList = ({ filteredLists, list }) => {
   const [updateBalance] = useUpdateBalanceMutation();
   const { data: balanceData } = useGetBalanceQuery();
   const [updateManyStores] = useUpdateManyStoresMutation();
+  const { data: workersData } = useGetWorkersQuery();
 
   useEffect(() => {
     const handleUpdateOrder = (data) => refetch();
@@ -67,7 +69,7 @@ const NewOrderList = ({ filteredLists, list }) => {
       // Buyurtmani to'langan deb belgilash
       const response = await updateOrderList({
         id: record._id,
-        updateData: { isPaid: true, approvedByAccountant: false },
+        updateData: { isPaid: true, approvedByDistributor: false },
       }).unwrap();
 
       if (!response) throw new Error("Buyurtma holatini yangilashda xatolik!");
@@ -123,7 +125,7 @@ const NewOrderList = ({ filteredLists, list }) => {
     try {
       const response = await updateOrderList({
         id: record._id,
-        updateData: { approvedByAccountant: true },
+        updateData: { approvedByDistributor: true },
       });
       if (response) {
         message.success("To‘lov muvaffaqiyatli bajarildi!");
@@ -140,112 +142,115 @@ const NewOrderList = ({ filteredLists, list }) => {
       title: "Umumiy narx",
       dataIndex: "totalPrice",
       key: "totalPrice",
-      render: (price) => `${price.toLocaleString()} so'm`,
+      render: (price) => `${price?.toLocaleString()} so'm`,
     },
     ...(!list
       ? [
-          {
-            title: "Holat",
-            key: "status",
-            render: (_, record) =>
-              record.isPaid ? "To'langan" : "To'lanmagan",
-          },
-        ]
+        {
+          title: "Holat",
+          key: "status",
+          align: "center",
+          render: (_, record) =>
+            record.isPaid ? "To'langan" : "To'lanmagan",
+        },
+      ]
       : [
-          {
-            title: "To‘lovni kechiktirish",
-            key: "pay",
-            render: (record) =>
-              record.approvedByAccountant ? (
-                <span style={{ color: "red", fontWeight: "bold" }}>Qarz</span>
-              ) : (
-                <Button
-                  type="primary"
-                  onClick={() => handleDebtPayment(record)}
-                  style={{ background: "#0A3D3A" }}
-                >
-                  Qarzga olish
-                </Button>
-              ),
-          },
-        ]),
+        {
+          title: "To‘lovni kechiktirish",
+          key: "pay",
+          render: (record) =>
+            record.approvedByDistributor ? (
+              <span style={{ color: "red", fontWeight: "bold" }}>Qarz</span>
+            ) : (
+              <Button
+                type="primary"
+                onClick={() => handleDebtPayment(record)}
+                style={{ background: "#0A3D3A" }}
+              >
+                Qarzga olish
+              </Button>
+            ),
+        },
+      ]),
     ...(!list
       ? [
-          {
-            title: "Yangi",
-            dataIndex: "isNew",
-            key: "isNew",
-            render: (isNew) => (isNew ? "Ha" : "Yo'q"),
-          },
-        ]
+        {
+          title: "Yangi",
+          dataIndex: "isNew",
+          key: "isNew",
+          align: "center",
+          render: (isNew) => (isNew ? "Ha" : "Yo'q"),
+        },
+      ]
       : []),
     ...(!list
       ? [
-          {
-            title: "Buxgalterga yuborilgan",
-            dataIndex: "sentToAccountant",
-            key: "sentToAccountant",
-            render: (sentToAccountant) => (sentToAccountant ? "Ha" : "Yo'q"),
+        {
+          title: "Yetkazib beruvchiga",
+          align: "center",
+          render: (i) => {
+            const distributor = workersData?.innerData?.find(
+              (worker) => worker._id === i.distributorId
+            );
+            return distributor
+              ? `${distributor.firstName} ${distributor.lastName}`
+              : "Noma'lum";
           },
-        ]
+        },
+      ]
       : []),
 
     ...(list
       ? [
-          {
-            title: "To‘lov amali",
-            key: "pay",
-            render: (record) => (
-              <Button
-                type="primary"
-                onClick={() => handlePayment(record)}
-                style={{ background: "#0A3D3A" }}
-              >
-                To‘lash
-              </Button>
-            ),
-          },
-        ]
-      : [
-          {
-            title: "Buxgalter tasdiqladi",
-            dataIndex: "approvedByAccountant",
-            key: "approvedByAccountant",
-            render: (approvedByAccountant, item) =>
-              approvedByAccountant || item?.isPaid ? "Ha" : "Yo'q",
-          },
-        ]),
+        {
+          title: "To‘lov amali",
+          key: "pay",
+          align: "center",
+          render: (record) => (
+            <Button
+              type="primary"
+              onClick={() => handlePayment(record)}
+              style={{ background: "#0A3D3A" }}
+            >
+              To‘lash
+            </Button>
+          ),
+        },
+      ]
+      : []),
 
     ...(!list
       ? [
-          {
-            title: "Omborga qo'shildi",
-            dataIndex: "addedToData",
-            key: "addedToData",
-            render: (addedToData, record) => {
-              if (
-                (record.approvedByAccountant || record.isPaid) &&
-                !addedToData
-              ) {
-                return (
-                  <Button
-                    style={{ background: "#0A3D3A" }}
-                    type="primary"
-                    onClick={() => handleAddToWarehouse(record)}
-                  >
-                    Qo‘shish
-                  </Button>
-                );
-              }
-              return addedToData ? "Qo‘shilgan" : "Jarayonda";
-            },
+        {
+          title: "Omborga qo'shildi",
+          dataIndex: "addedToData",
+          key: "addedToData",
+          align: "center",
+          render: (addedToData, record) => {
+            if (
+              (record.approvedByDistributor) &&
+              !addedToData
+            ) {
+              return (
+                <Button
+                  style={{ background: "#0A3D3A" }}
+                  type="primary"
+                  onClick={() => handleAddToWarehouse(record)}
+                >
+                  Qo‘shish
+                </Button>
+              );
+            }
+            return addedToData ? "Qo‘shilgan" : "Jarayonda";
           },
-        ]
+        },
+      ]
       : []),
     {
       title: "Sanasi",
       dataIndex: "createdAt",
       key: "createdAt",
+      align: "center",
       render: (date) => {
         const d = dayjs(date);
         return `${d.date()}-${uzMonths[d.month()]} / ${d.format("HH:mm")}`;
@@ -254,20 +259,20 @@ const NewOrderList = ({ filteredLists, list }) => {
     // Agar `list` true bo'lsa, ushbu ustunni qo'shmaymiz
     ...(!list
       ? [
-          {
-            title: "Yuklab olish",
-            key: "download",
-            render: (record) => (
-              <Button
-                type="primary"
-                onClick={() => handleExport(record)}
-                style={{ background: "#0A3D3A" }}
-              >
-                <FileExcelOutlined /> Excel
-              </Button>
-            ),
-          },
-        ]
+        {
+          title: "Yuklab olish",
+          key: "download",
+          render: (record) => (
+            <Button
+              type="primary"
+              onClick={() => handleExport(record)}
+              style={{ background: "#0A3D3A" }}
+            >
+              <FileExcelOutlined /> Excel
+            </Button>
+          ),
+        },
+      ]
       : []),
   ];
 
@@ -287,7 +292,7 @@ const NewOrderList = ({ filteredLists, list }) => {
         title: "Narx (dona)",
         dataIndex: "pricePerUnit",
         key: "pricePerUnit",
-        render: (price) => `${price.toLocaleString()} so'm`,
+        render: (price) => `${price?.toLocaleString()} so'm`,
       },
       {
         title: "Miqdori",
@@ -333,14 +338,13 @@ const NewOrderList = ({ filteredLists, list }) => {
 
     // **Buyurtma ma'lumotlari**
     wsData.push([
-      order.totalPrice.toLocaleString() + " so'm",
+      order.totalPrice?.toLocaleString() + " so'm",
       order.isPaid ? "To'langan" : "To'lanmagan",
       order.isNew ? "Ha" : "Yo'q",
-      order.sentToAccountant ? "Ha" : "Yo'q",
-      order.approvedByAccountant ? "Ha" : "Yo'q",
+      order.sentToDistributor ? "Ha" : "Yo'q",
+      order.approvedByDistributor ? "Ha" : "Yo'q",
       order.addedToData ? "Ha" : "Yo'q",
-      `${dayjs(order.createdAt).date()}-${
-        uzMonths[dayjs(order.createdAt).month()]
+      `${dayjs(order.createdAt).date()}-${uzMonths[dayjs(order.createdAt).month()]
       } / ${dayjs(order.createdAt).format("HH:mm")}`,
     ]);
 
@@ -362,9 +366,9 @@ const NewOrderList = ({ filteredLists, list }) => {
       wsData.push([
         material.name,
         material.category,
-        material.pricePerUnit.toLocaleString() + " so'm",
+        material.pricePerUnit?.toLocaleString() + " so'm",
         `${material.quantity} ${material.unit}`,
-        totalPrice.toLocaleString() + " so'm",
+        totalPrice?.toLocaleString() + " so'm",
         material.supplier,
       ]);
     });
@@ -404,7 +408,7 @@ const NewOrderList = ({ filteredLists, list }) => {
       )}
       <Table
         columns={columns}
-        dataSource={filteredLists || data?.innerData}
+        dataSource={(filteredLists?.slice().reverse() || data?.innerData)?.slice().reverse()}
         rowKey="_id"
         pagination={false}
         loading={isLoading}

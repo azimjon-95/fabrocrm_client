@@ -271,9 +271,7 @@
   height: 38px !important;
 }
 
-.ant-input,
 .ant-input-number,
-.ant-select-selector,
 .ant-picker {
   height: 38px !important;
   border-radius: 0px !important;

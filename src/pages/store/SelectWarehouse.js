@@ -120,7 +120,7 @@ const SelectWarehouse = ({
         <Select
           placeholder="Kategoriya tanlang"
           allowClear
-          style={{ width: 230 }}
+          style={{ width: 230, height: 38 }}
           onChange={setSelectedCategory}
           size="large"
         >

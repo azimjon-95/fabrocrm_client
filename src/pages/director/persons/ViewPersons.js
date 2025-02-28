@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, Avatar, message, Input, Button, Popconfirm, Tabs } from "antd";
+import { Table, Avatar, message, Input, Space, Button, Popconfirm, Tabs } from "antd";
 import { useNavigate } from "react-router-dom";
 import {
     EyeOutlined,
@@ -74,10 +74,19 @@ const ViewPersons = () => {
         return { formattedDate, adjustedAge, birthdayMessage };
     };
 
-    const adminRoles = ["manager", "seller", "director", "accountant", "warehouseman", "deputy_director"];
+    const adminRoles = ["manager", "seller", "director", "accountant", "warehouseman", "deputy_director", "distributor"];
     const Admins = filteredWorkers.filter(worker => adminRoles.includes(worker.role));
     const Workers = filteredWorkers.filter(worker => !adminRoles.includes(worker.role));
 
+    const roleMapping = {
+        manager: "Menejer",
+        seller: "Sotuvchi",
+        director: "Direktor",
+        accountant: "Buxgalter",
+        warehouseman: "Omborchi",
+        deputy: "Direktor o‘rinbosari",
+        distributor: "Yetkazib beruvchi"
+    };
     const columns = [
         {
             title: "Rasm",
@@ -111,10 +120,23 @@ const ViewPersons = () => {
             },
         },
         {
-            title: "Pasport",
+            title: (
+                <Space>
+                    Pasport
+                    <Button
+                        type="text"
+                        icon={!visibleId ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+                        onClick={() => setVisibleId(!visibleId)}
+                    />
+                </Space>
+            ),
             dataIndex: "idNumber",
             key: "idNumber",
             render: (text) => visibleId ? text : "*********",
+        },
+        {
+            title: "Kasbi",
+            render: (val) => roleMapping[val.role] || val.workerType
         },
         {
             title: "Amallar",
@@ -141,10 +163,40 @@ const ViewPersons = () => {
             </div>
             <Tabs activeKey={activeTab} onChange={setActiveTab} size="large">
                 <Tabs.TabPane tab="Ishchilar" key="all">
-                    <Table columns={columns} dataSource={Workers} rowKey="_id" loading={isLoading} pagination={false} size="small" bordered />
+                    <Table
+                        columns={columns}
+                        dataSource={Workers}
+                        rowKey="_id"
+                        loading={isLoading}
+                        pagination={false}
+                        size="small"
+                        bordered
+                        scroll={{ y: 500 }}  // Scroll berish uchun
+                        style={{
+                            maxHeight: '650px',
+                            overflowY: 'auto',
+                            border: '1px solid #ddd',
+                            borderRadius: '5px'
+                        }}
+                    />
                 </Tabs.TabPane>
                 <Tabs.TabPane tab="Hodimlar" key="active">
-                    <Table columns={columns} dataSource={Admins} rowKey="_id" loading={isLoading} pagination={false} size="small" bordered />
+                    <Table
+                        columns={columns}
+                        dataSource={Admins}
+                        rowKey="_id"
+                        loading={isLoading}
+                        pagination={false}
+                        size="small"
+                        bordered
+                        scroll={{ y: 500 }}  // Scroll berish uchun
+                        style={{
+                            maxHeight: '650px',
+                            overflowY: 'auto',
+                            border: '1px solid #ddd',
+                            borderRadius: '5px'
+                        }}
+                    />
                 </Tabs.TabPane>
             </Tabs>
         </div>

@@ -15,11 +15,14 @@ function Layout() {
     }
   }, [role, navigate]);
 
+
   return (
     <div className="layout">
+
       <div className="layout_left">
         <Sidebar />
       </div>
+
       <div className="layout_right">
         <Header />
         <main className="main-content">
