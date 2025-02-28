@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useGetOrderByIdQuery, useGiveMaterialMutation, useGetMaterialByIdQuery } from "../../../context/service/orderApi";
+import { useGetOrderByIdQuery, useGiveMaterialMutation, useGetMaterialByIdQuery, useCreateAdditionalMaterialMutation } from "../../../context/service/orderApi";
 import { Card, Input, List, Spin, Button, message, Modal } from "antd";
 import { IoMdAdd } from "react-icons/io";
 import { AiOutlineColumnWidth, AiOutlineColumnHeight, AiOutlineBorder } from 'react-icons/ai';
@@ -20,23 +20,24 @@ const MaterialItem = ({ material, orderCardId, orderId, inputValues, loadingStat
         <List.Item key={material._id}>
             <Card title={material.name}>
                 <div className="material-stor-box">
-                    <p>Miqdori: {material.quantity} {material.unit}</p> /
-                    <p>{materialData?.totalQuantity || 0} {material.unit}</p>
+                    <div className="material-stor-box-value">
+                        <p>Miqdori: {material.quantity} {material.unit}</p> |
+                        <p>{materialData?.totalQuantity || 0} {material.unit}</p>
+                    </div>
                     <div className="material-stor">
                         <Input
-                            className="inp_add_pro"
+                            className="inp_add_pro-addit"
+                            size="small"
                             placeholder="Miqdori"
                             value={inputValues[material._id] || ""}
                             onChange={(e) => handleInputChange(e, material._id)}
-                            style={{ width: "75px", marginLeft: "25px", }}
                         />
                         <Button
-                            size="large"
-                            style={{ minWidth: "40px", padding: "5px" }}
+                            size="small"
                             loading={loadingStates[material._id] || false}
                             onClick={() => handleAddMaterial(material, orderCardId)}
                         >
-                            <TfiCheckBox style={{ fontSize: "20px", marginTop: "3px" }} />
+                            <TfiCheckBox />
                         </Button>
                     </div>
                 </div>
@@ -48,13 +49,11 @@ const MaterialItem = ({ material, orderCardId, orderId, inputValues, loadingStat
 const Material = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { data: orderData, isLoading: isOrderLoading } = useGetOrderByIdQuery(id);
+    const { data: orderData, refetch: refetchOrderData, isLoading: isOrderLoading } = useGetOrderByIdQuery(id);
     const [giveMaterial] = useGiveMaterialMutation();
     const [inputValues, setInputValues] = useState({});
     const [loadingStates, setLoadingStates] = useState({});
-    const [items, setItems] = useState([]);
-    // useCreateMaterialMutation
-    // const [createMaterial, { loading: isCreating }] = useCreateMaterialMutation();
+    const [createAdditionalMaterial, { loading: isCreating }] = useCreateAdditionalMaterialMutation();
 
 
     const handleInputChange = (e, materialId) => {
@@ -110,39 +109,38 @@ const Material = () => {
         setIsModalVisible(false);
     };
 
-    const handleAdd = async (record) => {
-        const quantityToAdd = inputValues[record._id] || 0;
-        const existingItemIndex = items.findIndex((item) => item.name === record.name);
-
-        if (existingItemIndex !== -1) {
-            // Mahsulot mavjud bo‘lsa, faqat quantity ni yangilaymiz
-            setItems((prevItems) =>
-                prevItems.map((item, index) =>
-                    index === existingItemIndex ? { ...item, quantity: quantityToAdd } : item
-                )
-            );
-        } else {
-            // Yangi mahsulot qo‘shamiz
-            const newItem = {
-                productId: record._id,
-                name: record.name,
-                category: record.category,
-                pricePerUnit: record.pricePerUnit,
-                quantity: quantityToAdd,
-                unit: record.unit,
-                supplier: record.supplier,
-            };
-
-            // await createMaterial({ orderId: newLists?._id, material: newItem }).unwrap();
-            message.success("Material qo‘shildi!");
-
-            setItems((prevItems) => [...prevItems, newItem]);
-        }
-
-        setInputValues({});
+    const [additionalInp, setAdditionalInp] = useState({})
+    const handleAdditionalChange = (record, value) => {
+        setAdditionalInp((prev) => ({ ...prev, [record?._id]: value }));
     };
 
+    const handleAdd = async (record) => {
+        const quantityToAdd = additionalInp[record._id] || 0;
 
+        if (!quantityToAdd > 0) {
+            return message.warning("Maxsulot miqdorini kiriting!");
+        }
+
+        const newAdditional = {
+            materialID: record?._id,
+            name: record?.name,
+            quantity: quantityToAdd,
+            unit: record?.unit,
+            price: record?.pricePerUnit,
+            orderId: selectedMaterial?.orderId,
+            orderCardId: selectedMaterial?.orderCardId,
+        };
+        try {
+            const response = await createAdditionalMaterial(newAdditional).unwrap();
+            message.success(response.message || "Material muvaffaqiyatli berildi!");
+            refetchOrderData()
+            setIsModalVisible(false);
+            setAdditionalInp({});
+        }
+        catch (error) {
+            message.error(error.message || "Xatolik yuz berdi, qayta urinb ko'ring!")
+        }
+    };
 
 
     if (isOrderLoading) return <Spin tip="Yuklanmoqda..." style={{ display: "block", margin: "20px auto" }} />;
@@ -188,7 +186,12 @@ const Material = () => {
                         >
                             <div className="material-name-box">
                                 <h4>{material.name}</h4>
-                                <Button className="add-button-matr" onClick={() => showModal(material)}><IoMdAdd /></Button>
+                                <Button className="add-button-matr" onClick={() => showModal(
+                                    {
+                                        orderId: order?._id,
+                                        orderCardId: material?._id
+                                    }
+                                )}><IoMdAdd /></Button>
 
                                 <span className="material-dimensions">
                                     <span className="dimension-item">
@@ -230,12 +233,13 @@ const Material = () => {
                 open={isModalVisible}
                 onOk={handleOk}
                 onCancel={handleCancel}
+                width={650}
             >
                 <AddMaterials
-                    isCreating={''}
-                    inputValues={inputValues}
+                    isCreating={isCreating}
+                    inputValues={additionalInp}
                     handleAdd={handleAdd}
-                    handleInputChange={handleInputChange}
+                    handleInputChange={handleAdditionalChange}
                 />
             </Modal>
         </div >
@@ -243,4 +247,5 @@ const Material = () => {
 };
 
 export default Material;
+
 

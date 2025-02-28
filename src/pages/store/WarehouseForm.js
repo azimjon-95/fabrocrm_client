@@ -84,7 +84,7 @@ const Warehouse = () => {
     if (isEditMode) {
       form.setFieldValue('quantity', undefined);
     }
-  }, [isModalOpen, isEditMode]);
+  }, [form, isEditMode]);
   const openModal = (record = null) => {
 
     if (record) {

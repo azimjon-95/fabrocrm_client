@@ -59,7 +59,7 @@
     background-color: #f9f9f9;
 }
 
-.item-info-shop {
+.item-info-dist {
     display: flex;
     gap: 5px;
     flex-wrap: wrap;
@@ -67,18 +67,18 @@
     width: 100%;
 }
 
-.item-name-shop {
+.item-name-dist {
     color: #0a3d3a;
     font-weight: bold;
     width: 26%;
 }
 
-.item-category-shop {
+.item-category-dist {
     color: #555;
     width: 20%;
 }
 
-.stor_todolist-shop {
+.stor_todolist-dist {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -91,38 +91,38 @@
     overflow-y: auto;
 }
 
-.stor_todolist-shop::-webkit-scrollbar {
+.stor_todolist-dist::-webkit-scrollbar {
     width: 6px !important;
 }
 
-.stor_todolist-shop::-webkit-scrollbar-track {
+.stor_todolist-dist::-webkit-scrollbar-track {
     background: #f1f1f1;
     /* Scroll yo'lining orqa fon rangi */
     border-radius: 4px;
 }
 
-.stor_todolist-shop::-webkit-scrollbar-thumb {
+.stor_todolist-dist::-webkit-scrollbar-thumb {
     background: #888;
     /* Scroll tugmachasining rangi */
     border-radius: 4px;
 }
 
-.stor_todolist-shop::-webkit-scrollbar-thumb:hover {
+.stor_todolist-dist::-webkit-scrollbar-thumb:hover {
     background: #555;
     /* Scroll tugmachasining hover holati */
 }
 
 
 
-.order-list-container-shop {
+.order-list-container-dist {
     width: 100%;
 }
 
-.list-container-shop {
+.list-container-dist {
     width: 100%;
 }
 
-.stor_todolist-shop .list-container .ant-list-item {
+.stor_todolist-dist .list-container .ant-list-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -130,22 +130,22 @@
     transition: background-color 0.3s;
 }
 
-.item-price-shop {
+.item-price-dist {
     color: #ff5722;
     width: 21%;
     font-weight: bold;
 }
 
-.item-quantity-shop {
+.item-quantity-dist {
     width: 15%;
     color: #673ab7;
 }
 
-.item-supplier-shop {
+.item-supplier-dist {
     color: #4caf50;
 }
 
-.editMode-shop {
+.editMode-dist {
     padding: 0;
     height: 30px;
     width: 34px;
@@ -192,24 +192,24 @@
         padding: 10px 12px;
     }
 
-    .item-info-shop {
+    .item-info-dist {
         flex-direction: column;
         gap: 8px;
     }
 
-    .item-name-shop,
-    .item-category-shop,
-    .item-price-shop,
-    .item-quantity-shop {
+    .item-name-dist,
+    .item-category-dist,
+    .item-price-dist,
+    .item-quantity-dist {
         width: 100%;
     }
 
-    .stor_todolist-shop {
+    .stor_todolist-dist {
         height: auto;
         padding-bottom: 20px;
     }
 
-    .editMode-shop {
+    .editMode-dist {
         width: 30px;
         height: 28px;
         font-size: 18px;
@@ -223,7 +223,7 @@
         gap: 8px;
     }
 
-    .stor_todolist-shop {
+    .stor_todolist-dist {
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
@@ -236,23 +236,23 @@
         overflow-y: auto;
     }
 
-    .stor_todolist-shop::-webkit-scrollbar {
+    .stor_todolist-dist::-webkit-scrollbar {
         width: 6px !important;
     }
 
-    .stor_todolist-shop::-webkit-scrollbar-track {
+    .stor_todolist-dist::-webkit-scrollbar-track {
         background: #f1f1f1;
         /* Scroll yo'lining orqa fon rangi */
         border-radius: 4px;
     }
 
-    .stor_todolist-shop::-webkit-scrollbar-thumb {
+    .stor_todolist-dist::-webkit-scrollbar-thumb {
         background: #888;
         /* Scroll tugmachasining rangi */
         border-radius: 4px;
     }
 
-    .stor_todolist-shop::-webkit-scrollbar-thumb:hover {
+    .stor_todolist-dist::-webkit-scrollbar-thumb:hover {
         background: #555;
         /* Scroll tugmachasining hover holati */
     }

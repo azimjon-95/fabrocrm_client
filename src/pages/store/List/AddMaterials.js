@@ -71,14 +71,10 @@ const AddMaterials = ({
               }}
               type="primary"
               onClick={() => handleAdd(record)}
-              disabled={isCreating[record?._id]}
-              loading={isCreating[record?._id]}
             >
-              {!isCreating[record?._id] && (
-                <IoMdCheckmarkCircleOutline
-                  style={{ fontSize: "20px", marginTop: "4px" }}
-                />
-              )}
+              <IoMdCheckmarkCircleOutline
+                style={{ fontSize: "20px", marginTop: "4px" }}
+              />
             </Button>
 
           </div>

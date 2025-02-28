@@ -346,21 +346,29 @@
 .material-stor-box {
   display: flex;
   gap: 10px;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   padding: 0px 5px;
 }
 
 :where(.css-dev-only-do-not-override-1drr2mu).ant-card .ant-card-body {
-  padding: 15px 5px;
+  padding: 8px 5px;
   border-radius: 0 0 8px 8px;
 }
 
 .material-stor {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0px 5px;
+  justify-content: center;
+}
+
+.inp_add_pro-addit {
+  height: 30px !important;
+  border-radius: 7px 0 0 7px !important;
+}
+
+.material-stor Button {
+  height: 30px !important;
+  border-radius: 0 7px 7px 0 !important;
 }
 
 :where(.css-dev-only-do-not-override-1drr2mu).ant-card .ant-card-head {
@@ -551,4 +559,11 @@
   background-color: #0A3D3A !important;
   color: #fff !important;
   border-color: #0A3D3A !important;
+}
+
+.material-stor-box-value {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
