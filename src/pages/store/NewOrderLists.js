@@ -142,7 +142,7 @@ const NewOrderList = ({ filteredLists, list }) => {
       title: "Umumiy narx",
       dataIndex: "totalPrice",
       key: "totalPrice",
-      render: (price) => `${price.toLocaleString()} so'm`,
+      render: (price) => `${price?.toLocaleString()} so'm`,
     },
     ...(!list
       ? [
@@ -292,7 +292,7 @@ const NewOrderList = ({ filteredLists, list }) => {
         title: "Narx (dona)",
         dataIndex: "pricePerUnit",
         key: "pricePerUnit",
-        render: (price) => `${price.toLocaleString()} so'm`,
+        render: (price) => `${price?.toLocaleString()} so'm`,
       },
       {
         title: "Miqdori",
@@ -338,7 +338,7 @@ const NewOrderList = ({ filteredLists, list }) => {
 
     // **Buyurtma ma'lumotlari**
     wsData.push([
-      order.totalPrice.toLocaleString() + " so'm",
+      order.totalPrice?.toLocaleString() + " so'm",
       order.isPaid ? "To'langan" : "To'lanmagan",
       order.isNew ? "Ha" : "Yo'q",
       order.sentToDistributor ? "Ha" : "Yo'q",
@@ -366,9 +366,9 @@ const NewOrderList = ({ filteredLists, list }) => {
       wsData.push([
         material.name,
         material.category,
-        material.pricePerUnit.toLocaleString() + " so'm",
+        material.pricePerUnit?.toLocaleString() + " so'm",
         `${material.quantity} ${material.unit}`,
-        totalPrice.toLocaleString() + " so'm",
+        totalPrice?.toLocaleString() + " so'm",
         material.supplier,
       ]);
     });

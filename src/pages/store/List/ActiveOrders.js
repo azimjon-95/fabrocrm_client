@@ -86,7 +86,7 @@ const ActiveOrders = () => {
 
       </div>
 
-      <div className="custom-tables">
+      <div className="custom-tables" style={{ overflowX: 'auto' }}>
         <Table
           dataSource={filteredOrders}
           columns={columns}
@@ -96,6 +96,7 @@ const ActiveOrders = () => {
           size="small"
         />
       </div>
+
 
     </div>
   );

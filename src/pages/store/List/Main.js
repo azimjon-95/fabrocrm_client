@@ -1,14 +1,9 @@
-import React, { useRef, useState, useEffect, useMemo } from "react";
-import { Button, List, message, Input, Select, Divider, Space } from "antd";
+import React, { useRef, useState, useEffect } from "react";
+import { Button, List, message, Select } from "antd";
 import { FiSend } from "react-icons/fi"; import { FaPlus } from "react-icons/fa";
 import { AiOutlineDelete } from "react-icons/ai";
-import { PlusOutlined, CloseOutlined } from "@ant-design/icons";
 import { DeleteOutlined } from "@ant-design/icons";
 import ActiveOrders from "./ActiveOrders";
-import {
-  useGetShopsQuery,
-  useAddShopMutation,
-} from "../../../context/service/shopsApi";
 import {
   useGetWorkersQuery
 } from "../../../context/service/worker";
@@ -26,7 +21,6 @@ import AddItems from "./AddItems";
 import socket from "../../../socket";
 
 
-let index = 0;
 const Main = () => {
   const [openOrderList, setOpenOrderList] = useState(false);
   const [inputValues, setInputValues] = useState({});
@@ -37,15 +31,9 @@ const Main = () => {
   const [deleteMaterialById] = useDeleteMaterialByIdMutation();
   const [deleteOrderList] = useDeleteOrderListMutation();
   const [updateOrderList] = useUpdateOrderListMutation();
-  const [name, setName] = useState("");
-  const inputRef = useRef(null);
-  const [selectedShop, setSelectedShop] = useState(null);
   const [selectedDistributor, setSelectedDistributor] = useState(null);
-  const { data: shops, isLoading } = useGetShopsQuery();
-  const [addShop] = useAddShopMutation();
   const { data: data = [], refetch } = useGetNewOrderListsQuery();
   const newLists = data?.innerData || null;
-  // useGetWorkersQuery
   const { data: workers = [] } = useGetWorkersQuery();
   const distributor = workers?.innerData?.filter(i => i.role === "distributor");
 
@@ -146,7 +134,7 @@ const Main = () => {
   };
 
   const handleUpdateDistributor = async (id) => {
-    if (!selectedDistributor || !selectedShop?.id) {
+    if (!selectedDistributor) {
       message.error("Yetkazib beruvchi yoki Do'kon tanlanmagan!");
       return;
     }
@@ -156,12 +144,11 @@ const Main = () => {
         updateData: {
           sentToDistributor: true,
           distributorId: selectedDistributor,
-          shopsId: selectedShop?.id
+          shopsId: "0"
         },
       }).unwrap();
       handleCloseOrder();
       refetch();
-      setSelectedShop(null);
       setSelectedDistributor(null);
       message.success(res.data.message);
     } catch (error) {
@@ -170,52 +157,6 @@ const Main = () => {
   };
 
   // =======================================
-  // Input qiymatini yangilash
-  const onNameChange = (event) => {
-    setName(event.target.value);
-  };
-
-  // Yangi shop qo'shish
-  const addItem = async (e) => {
-    e.preventDefault();
-    if (name && !shops?.innerData?.some((shop) => shop.name.toLowerCase() === name.toLowerCase())) {
-      await addShop({ name }).unwrap();
-      setName("");
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 0);
-    }
-  };
-
-  // Variantlarni qayta hisoblaydi
-  const computedOptions = useMemo(() => {
-    const isExisting = shops?.innerData?.some(
-      (item) => item.name.toLowerCase() === name.toLowerCase()
-    );
-
-    const newOptions = isExisting
-      ? shops?.innerData
-      : [...(shops?.innerData || []), { _id: null, name: name }];
-
-    return newOptions.map((item) => ({
-      value: JSON.stringify({ id: item._id, value: item.name }),  // JSON qilib uzatamiz
-      label: (
-        <Space>
-          {item.name}
-        </Space>
-      ),
-    }));
-  }, [name, shops]);
-
-  const onSelectChange = (value) => {
-    try {
-      const parsedValue = JSON.parse(value);
-      setSelectedShop(parsedValue);
-    } catch (error) {
-      // Agar JSON bo'lmasa, oddiy matn sifatida uzatiladi
-      setSelectedShop({ id: null, value: value });
-    }
-  }
 
 
   const onSecondCityChange = (value) => {
@@ -249,7 +190,7 @@ const Main = () => {
               Yangi List
             </Button>
           }
-          <Select
+          {/* <Select
             placeholder="Do'konni tanlang yoki yarating"
             loading={isLoading}
             onChange={onSelectChange}
@@ -279,7 +220,7 @@ const Main = () => {
             )}
             options={computedOptions}
             allowClear
-          />
+          /> */}
           <Select
             style={{
               width: 150,

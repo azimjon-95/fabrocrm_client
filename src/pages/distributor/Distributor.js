@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, List, Input, message, Modal, Popover, Select, Form } from "antd";
+import { Button, List, Input, message, Modal, Popover, Select, Form, Empty } from "antd";
 import { FaAngleLeft } from "react-icons/fa6";
 import { CiEdit } from "react-icons/ci";
 import { FaCheck, FaPlus } from "react-icons/fa6";
@@ -161,122 +161,126 @@ const Distributor = () => {
 
     return (
         <div className="stor_todolist-shop">
-            {filteredLists?.map((list) => (
-                <div key={list._id} className="order-list-container-shop">
-                    {!selectedListId && (
-                        <div className="order-header">
-                            <strong>{getShopName(list.shopsId)}</strong>
-                            <Button
-                                style={{ background: "#0A3D3A" }}
-                                type="primary"
-                                onClick={() => handleToggleList(list._id)}
-                            >
-                                Xomashyolar
-                            </Button>
-                        </div>
-                    )}
+            {filteredLists?.length > 0 ? (
+                filteredLists?.map((list) => (
+                    <div key={list._id} className="order-list-container-shop">
+                        {!selectedListId && (
+                            <div className="order-header">
+                                <strong>{getShopName(list.shopsId)}</strong>
+                                <Button
+                                    style={{ background: "#0A3D3A" }}
+                                    type="primary"
+                                    onClick={() => handleToggleList(list._id)}
+                                >
+                                    Xomashyolar
+                                </Button>
+                            </div>
+                        )}
 
-                    {selectedListId === list._id && (
-                        <div className="list-container-shop">
-                            <List
-                                bordered
-                                className="list-container"
-                                header={
-                                    <div className="list-market-name">
-                                        <Button
-                                            type="default"
-                                            onClick={() => handleToggleList(list._id)}
-                                        >
-                                            <FaAngleLeft />
-                                        </Button>
-
-                                        <strong>{getShopName(list.shopsId)}</strong>
-                                        <div className="showCloseShops-box">
-                                            <Popover
-                                                trigger="click"
-                                                content={renderPopoverContent(list)} // list ni argument sifatida o'tkazish
-                                                title="Savdoni yakunlash"
+                        {selectedListId === list._id && (
+                            <div className="list-container-shop">
+                                <List
+                                    bordered
+                                    className="list-container"
+                                    header={
+                                        <div className="list-market-name">
+                                            <Button
+                                                type="default"
+                                                onClick={() => handleToggleList(list._id)}
                                             >
-                                                <Button type="primary" className="showCloseShops">
+                                                <FaAngleLeft />
+                                            </Button>
+
+                                            <strong>{getShopName(list.shopsId)}</strong>
+                                            <div className="showCloseShops-box">
+                                                <Popover
+                                                    trigger="click"
+                                                    content={renderPopoverContent(list)}
+                                                    title="Savdoni yakunlash"
+                                                >
+                                                    <Button type="primary" className="showCloseShops">
+                                                        <FaCheck />
+                                                    </Button>
+                                                </Popover>
+                                                <Button
+                                                    type="dashed"
+                                                    onClick={showModal}
+                                                    icon={<FaPlus />}
+                                                >
+                                                    Material Qo'shish
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    }
+                                    dataSource={list?.materials}
+                                    renderItem={(item) => (
+                                        <List.Item key={item.productId} className="list-item-shop">
+                                            <div className="item-info-shop">
+                                                <span className="item-name-shop">{item.name}</span>
+                                                <span className="item-category-shop">{item.category}</span>
+
+                                                {editMode[item.productId] ? (
+                                                    <>
+                                                        <Input
+                                                            type="number"
+                                                            size="small"
+                                                            placeholder="Miqdor"
+                                                            value={editData[item.productId]?.quantity || item.quantity}
+                                                            onChange={(e) =>
+                                                                handleChange(item.productId, "quantity", e.target.value)
+                                                            }
+                                                            style={{ width: "100px", marginRight: "10px", height: "33px" }}
+                                                        />
+                                                        <Input
+                                                            type="number"
+                                                            placeholder="Narx"
+                                                            size="small"
+                                                            value={editData[item.productId]?.pricePerUnit || item?.pricePerUnit}
+                                                            onChange={(e) =>
+                                                                handleChange(item.productId, "pricePerUnit", e.target.value)
+                                                            }
+                                                            style={{ width: "100px", marginRight: "10px", height: "33px" }}
+                                                        />
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <span className="item-quantity-shop">
+                                                            {item.quantity} {item.unit}
+                                                        </span>
+                                                        <span className="item-price-shop">
+                                                            {item?.pricePerUnit?.toLocaleString("uz-UZ")} so‘m
+                                                        </span>
+                                                    </>
+                                                )}
+                                            </div>
+                                            {editMode[item.productId] && (
+                                                <Button
+                                                    className="editMode-shop"
+                                                    type="primary"
+                                                    onClick={() => handleUpdate(list._id, item.productId)}
+                                                >
                                                     <FaCheck />
                                                 </Button>
-                                            </Popover>
-                                            <Button
-                                                type="dashed"
-                                                onClick={showModal}
-                                                icon={<FaPlus />}
-                                            >
-                                                Material Qo'shish
-                                            </Button>
-                                        </div>
-                                    </div>
-                                }
-                                dataSource={list?.materials}
-                                renderItem={(item) => (
-                                    <List.Item key={item.productId} className="list-item-shop">
-                                        <div className="item-info-shop">
-                                            <span className="item-name-shop">{item.name}</span>
-                                            <span className="item-category-shop">{item.category}</span>
-
-                                            {editMode[item.productId] ? (
-                                                <>
-                                                    <Input
-                                                        type="number"
-                                                        size="small"
-                                                        placeholder="Miqdor"
-                                                        value={editData[item.productId]?.quantity || item.quantity}
-                                                        onChange={(e) =>
-                                                            handleChange(item.productId, "quantity", e.target.value)
-                                                        }
-                                                        style={{ width: "100px", marginRight: "10px", height: "33px" }}
-                                                    />
-                                                    <Input
-                                                        type="number"
-                                                        placeholder="Narx"
-                                                        size="small"
-                                                        value={editData[item.productId]?.pricePerUnit || item?.pricePerUnit}
-                                                        onChange={(e) =>
-                                                            handleChange(item.productId, "pricePerUnit", e.target.value)
-                                                        }
-                                                        style={{ width: "100px", marginRight: "10px", height: "33px" }}
-                                                    />
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <span className="item-quantity-shop">
-                                                        {item.quantity} {item.unit}
-                                                    </span>
-                                                    <span className="item-price-shop">
-                                                        {item?.pricePerUnit?.toLocaleString("uz-UZ")} so‘m
-                                                    </span>
-                                                </>
                                             )}
-                                        </div>
-                                        {editMode[item.productId] && (
-                                            <Button
-                                                className="editMode-shop"
-                                                type="primary"
-                                                onClick={() => handleUpdate(list._id, item.productId)}
-                                            >
-                                                <FaCheck />
-                                            </Button>
-                                        )}
-                                        {!editMode[item.productId] && (
-                                            <Button
-                                                className="editMode-shop"
-                                                type="primary"
-                                                onClick={() => handleEdit(item.productId, item)}
-                                            >
-                                                <CiEdit />
-                                            </Button>
-                                        )}
-                                    </List.Item>
-                                )}
-                            />
-                        </div>
-                    )}
-                </div>
-            ))}
+                                            {!editMode[item.productId] && (
+                                                <Button
+                                                    className="editMode-shop"
+                                                    type="primary"
+                                                    onClick={() => handleEdit(item.productId, item)}
+                                                >
+                                                    <CiEdit />
+                                                </Button>
+                                            )}
+                                        </List.Item>
+                                    )}
+                                />
+                            </div>
+                        )}
+                    </div>
+                ))
+            ) : (
+                <Empty description="Buyurtmalar mavjud emas!" />
+            )}
 
             <Modal
                 title="Yangi Material Qo'shish"

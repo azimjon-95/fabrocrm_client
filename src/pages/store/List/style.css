@@ -367,7 +367,7 @@
   display: flex;
   justify-content: center;
   flex-direction: column;
-  min-height: 56px;
+  min-height: 34px;
   margin-bottom: -1px;
   padding: 0 10px;
   background: #0a3d3a;
@@ -377,6 +377,33 @@
   border-bottom: 1px solid #0a3d3a;
   border-radius: 6px 6px 0 0;
 }
+
+.material-name-list {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  max-height: calc(100vh - 260px);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.store-material-box :where(.css-dev-only-do-not-override-1drr2mu).ant-list-grid .ant-col>.ant-list-item {
+  display: block;
+  max-width: 100%;
+  margin-block-end: 5px !important;
+  padding-block: 0;
+  border-block-end: none;
+}
+
+.material-name-list::-webkit-scrollbar {
+  width: 2px;
+}
+
+.material-name-list::-webkit-scrollbar-thumb {
+  background-color: #0a3d3a;
+  border-radius: 3px;
+}
+
 
 :where(.css-dev-only-do-not-override-1drr2mu).ant-card-bordered {
   border: 1px solid #0a3d3a;
@@ -416,4 +443,94 @@
 
 .select-shops Button svg {
   margin-right: 8px;
+}
+
+.custom-tables {
+  overflow-y: auto;
+  max-height: 610px;
+}
+
+.custom-tables::-webkit-scrollbar {
+  width: 4px !important;
+}
+
+.custom-tables::-webkit-scrollbar-thumb {
+  background-color: #0A3D3A;
+  border-radius: 4px;
+}
+
+.store-material-box {
+  width: 100%;
+  height: calc(100vh - 120px);
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+
+  overflow-y: auto;
+}
+
+.store-material-box::-webkit-scrollbar {
+  width: 2px;
+}
+
+.store-material-box::-webkit-scrollbar-thumb {
+  background-color: #0a3d3a;
+  border-radius: 3px;
+}
+
+
+:where(.css-dev-only-do-not-override-1drr2mu).ant-card-bordered {
+  border: 1px solid #0a3d3a;
+}
+
+.store-material-card {
+  width: 32.5%;
+  min-width: 350px;
+  padding: 6px;
+  box-shadow: 0 0 9px #0A3D3A;
+  border-radius: 8px;
+}
+
+.store-material-card {
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 5px 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.material-name-box {
+  margin-bottom: 5px;
+}
+
+.material-name-box>h4 {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  color: #0A3D3A;
+}
+
+.material-dimensions {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 14px;
+  color: #555;
+  margin-top: 5px;
+  padding: 5px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+}
+
+.dimension-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dimension-item svg {
+  color: #0A3D3A;
+  font-size: 18px;
 }
