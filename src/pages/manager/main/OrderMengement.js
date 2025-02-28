@@ -204,6 +204,7 @@ const OrderMengement = () => {
   } catch (e) {
     findedOrder = {};
   }
+  console.log(order?.orders);
   return (
     <>
       <Form layout="vertical" className="order-form-main">
@@ -452,7 +453,7 @@ const OrderMengement = () => {
                     />
                   </Form.Item>
                   <Form.Item label=" ">
-                    {orderState ? (
+                    {order?.orders?.length === 1 || orderState ? (
                       <Button
                         onClick={() => createNewOrder()}
                         style={{
@@ -472,7 +473,7 @@ const OrderMengement = () => {
                         disabled={!budget}
                         onClick={() => closeAndSave()}
                       >
-                        yopish
+                        Yopish
                       </button>
                     )}
                   </Form.Item>
