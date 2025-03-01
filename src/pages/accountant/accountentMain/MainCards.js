@@ -2,17 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import "./style.css";
 import { useGetBalanceQuery } from "../../../context/service/balanceApi";
 import { FaCalendarAlt } from "react-icons/fa";
-import {
-  FaCalculator,
-  FaHandHoldingUsd,
-} from "react-icons/fa";
+import { FaCalculator, FaHandHoldingUsd } from "react-icons/fa";
 import { MdMoneyOff } from "react-icons/md";
 import { useGetDebtQuery } from "../../../context/service/orderApi";
 import { BsArrowLeftRight } from "react-icons/bs";
 import socket from "../../../socket";
-import { Spin, Tooltip } from 'antd';
-import { FaMoneyBillWave, FaUniversity, FaDollarSign } from 'react-icons/fa';
-
+import { Spin, Tooltip } from "antd";
+import { FaMoneyBillWave, FaUniversity, FaDollarSign } from "react-icons/fa";
 
 const MainCards = ({
   isState,
@@ -29,6 +25,7 @@ const MainCards = ({
     refetch: refetchBalanceReport,
   } = useGetBalanceQuery();
   const [open, setOpen] = useState(false);
+  let balancValues = balance?.innerData || {};
 
   useEffect(() => {
     socket.on("balance", () => refetchBalanceReport());
@@ -55,6 +52,8 @@ const MainCards = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
+
+  console.log(balancValues);
 
   return (
     <div
@@ -128,7 +127,6 @@ const MainCards = ({
         </div>
       </div>
       <div className="card-balance">
-
         {isFetching ? (
           <Spin size="small" />
         ) : (
@@ -138,37 +136,37 @@ const MainCards = ({
               <Tooltip title="Naqd pul balansi">
                 <p className="balance-item">
                   <FaMoneyBillWave className="balance-icon" />
-                  {formatNumber(balance?.innerData?.cashBalance || 0)} so'm
+                  {formatNumber(balancValues?.cashBalance || 0)} so'm
                 </p>
               </Tooltip>
 
               <Tooltip title="Bank o'tkazmasi balansi">
                 <p className="balance-item">
                   <FaUniversity className="balance-icon" />
-                  {formatNumber(balance?.innerData?.bankTransferBalance || 0)} so'm
+                  {formatNumber(balancValues?.bankTransferBalance || 0)} so'm
                 </p>
               </Tooltip>
 
               <Tooltip title="Dollar balansi">
                 <p className="balance-item">
                   <FaDollarSign className="balance-icon" />
-                  {formatNumber(balance?.innerData?.dollarBalance || 0)} so'm
+                  {formatNumber(balancValues?.dollarBalance || 0)} so'm
                 </p>
               </Tooltip>
-              <Tooltip title="Jami balansi">
+              {/* <Tooltip title="Jami balansi">
                 <p className="balance-item total-balance">
                   <FaCalculator className="balance-icon" />
                   {formatNumber(
-                    (balance?.innerData?.cashBalance || 0) +
-                    (balance?.innerData?.bankTransferBalance || 0) +
-                    (balance?.innerData?.dollarBalance || 0)
-                  )} so'm
+                    (balancValues?.cashBalance || 0) +
+                      (balancValues?.bankTransferBalance || 0) +
+                      (balancValues?.dollarBalance || 0)
+                  )}{" "}
+                  so'm
                 </p>
-              </Tooltip>
+              </Tooltip> */}
             </div>
           </div>
         )}
-
       </div>
       <div className="card debt">
         <FaHandHoldingUsd className="icon" />

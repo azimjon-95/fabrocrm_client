@@ -50,6 +50,9 @@ const UpdateOrderForm = () => {
 
       let response = await updateOrder({ id, updates: values });
       message.success("Buyurtma muvaffaqiyatli yangilandi!");
+      if (response.data.state) {
+        navigate(-1);
+      }
     } catch (error) {
       message.error("Xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring!");
       console.error("Validation Failed:", error);

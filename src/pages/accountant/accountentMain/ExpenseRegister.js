@@ -42,27 +42,25 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
   const [activeBox, setActiveBox] = useState("expenses");
   const [activeDataset, setActiveDataset] = useState("allExpenses");
   const { data: orderLists } = useGetOrderListsQuery();
-  const filteredLists =
-    orderLists?.innerData?.filter((i) => i.sentToDistributor && !i.isPaid) || [];
   const [prevIds, setPrevIds] = useState(
     () => JSON.parse(localStorage.getItem("prevIds")) || []
   );
   const [notificationCount, setNotificationCount] = useState(0);
 
-  useEffect(() => {
-    const newIds = filteredLists.map((i) => i._id);
-    const newNotifications = newIds.filter((id) => !prevIds.includes(id));
-    if (newNotifications.length > 0) {
-      newNotifications.forEach(() => {
-        const audio = new Audio(soundFile);
-        audio.play().catch(console.error);
-        setTimeout(() => audio.play().catch(console.error), 500);
-      });
-      setNotificationCount(newNotifications.length);
-      setPrevIds(newIds);
-      localStorage.setItem("prevIds", JSON.stringify(newIds));
-    }
-  }, [filteredLists]);
+  // useEffect(() => {
+  //   const newIds = filteredLists.map((i) => i._id);
+  //   const newNotifications = newIds.filter((id) => !prevIds.includes(id));
+  //   if (newNotifications.length > 0) {
+  //     newNotifications.forEach(() => {
+  //       const audio = new Audio(soundFile);
+  //       audio.play().catch(console.error);
+  //       setTimeout(() => audio.play().catch(console.error), 500);
+  //     });
+  //     setNotificationCount(newNotifications.length);
+  //     setPrevIds(newIds);
+  //     localStorage.setItem("prevIds", JSON.stringify(newIds));
+  //   }
+  // }, [filteredLists]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -79,8 +77,8 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
       prev === "allExpenses"
         ? "outgoingExpenses"
         : prev === "outgoingExpenses"
-          ? "incomeExpenses"
-          : "allExpenses"
+        ? "incomeExpenses"
+        : "allExpenses"
     );
   }, []);
 
@@ -123,7 +121,8 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
       dataIndex: "date",
       key: "date",
       render: (date) =>
-        `${new Date(date).getDate()}-${oylar[new Date(date).getMonth()]
+        `${new Date(date).getDate()}-${
+          oylar[new Date(date).getMonth()]
         }/${new Date(date).toLocaleTimeString("uz-UZ", {
           hour: "2-digit",
           minute: "2-digit",
@@ -266,31 +265,35 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
       <div className="box_expense-register_menu">
         <button
           onClick={() => setActiveBox("notifications")}
-          className={`box_expense-register_btn ${activeBox === "notifications" ? "active" : ""
-            }`}
+          className={`box_expense-register_btn ${
+            activeBox === "notifications" ? "active" : ""
+          }`}
         >
           <BellOutlined />
           <Badge count={notificationCount} size="small" offset={[4, -4]} />
         </button>
         <button
           onClick={() => setActiveBox("info")}
-          className={`box_expense-register_btn ${activeBox === "info" ? "active" : ""
-            }`}
+          className={`box_expense-register_btn ${
+            activeBox === "info" ? "active" : ""
+          }`}
         >
           <RiFileList3Line size={20} />
         </button>
         <button
           onClick={() => setActiveBox("expenses")}
-          className={`box_expense-register_btn ${activeBox === "expenses" ? "active" : ""
-            }`}
+          className={`box_expense-register_btn ${
+            activeBox === "expenses" ? "active" : ""
+          }`}
         >
           <HiOutlinePencilSquare size={20} />
         </button>
         {activeBox === "info" && (
           <button
             onClick={exportToExcel}
-            className={`box_expense-register_btn ${activeBox === "expenses" ? "active" : ""
-              }`}
+            className={`box_expense-register_btn ${
+              activeBox === "expenses" ? "active" : ""
+            }`}
           >
             <LiaFileDownloadSolid />
           </button>
@@ -300,13 +303,11 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
         {activeBox === "notifications"
           ? "Bildirishnomalar"
           : activeBox === "info"
-            ? "Xarajatlar Ro'yxati"
-            : "Xarajatlar Qo'shish"}
+          ? "Xarajatlar Ro'yxati"
+          : "Xarajatlar Qo'shish"}
       </h3>
       <div className="box_expense-content">
-        {activeBox === "notifications" && (
-          <NewOrderList list filteredLists={filteredLists} />
-        )}
+        {activeBox === "notifications" && <NewOrderList />}
         {activeBox === "expenses" && <ExpenseForm />}
         {activeBox === "info" &&
           expenses?.innerData?.allExpenses?.length > 0 && (

@@ -137,7 +137,6 @@ const AccountentMain = () => {
   }, [open]);
   let zakazlar = ordersData?.innerData || [];
 
-  console.log(zakazlar);
   return (
     <div className="accountent-container">
       {/* Yuqori qismdagi kartalar */}
@@ -162,65 +161,67 @@ const AccountentMain = () => {
             <p>Yuklanmoqda...</p>
           ) : (
             <ul>
-              {zakazlar?.map((order, index) => (
-                <li key={index} className="order-item">
-                  <div className="order-info">
-                    <div>
-                      {index + 1}){" "}
-                      {order?.orders?.map((item, idx) => (
-                        <span
-                          key={idx}
-                          style={{ color: "#0A3D3A" }}
-                          className="order-name"
-                        >
-                          {item.name}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="order-box order-box_one">
+              {zakazlar
+                ?.filter((i) => i.isType === true)
+                ?.map((order, index) => (
+                  <li key={index} className="order-item">
+                    <div className="order-info">
                       <div>
-                        <span className="order-budget">
-                          Mijoz turi: {order.customer?.type}
-                        </span>
+                        {index + 1}){" "}
+                        {order?.orders?.map((item, idx) => (
+                          <span
+                            key={idx}
+                            style={{ color: "#0A3D3A" }}
+                            className="order-name"
+                          >
+                            {item.name}
+                          </span>
+                        ))}
                       </div>
+                      <div className="order-box order-box_one">
+                        <div>
+                          <span className="order-budget">
+                            Mijoz turi: {order.customer?.type}
+                          </span>
+                        </div>
 
-                      <div>
-                        <span className="order-budget">
-                          Byudjet:{" "}
-                          {order?.orders
-                            ?.reduce(
-                              (total, item) => total + (item.budget || 0),
-                              0
-                            )
-                            .toLocaleString()}{" "}
-                          so'm
-                        </span>
+                        <div>
+                          <span className="order-budget">
+                            Byudjet:{" "}
+                            {order?.orders
+                              ?.reduce(
+                                (total, item) => total + (item.budget || 0),
+                                0
+                              )
+                              .toLocaleString()}{" "}
+                            so'm
+                          </span>
+                        </div>
+                      </div>
+                      <div className="order-box">
+                        <div>
+                          <span className="order-budget">
+                            {formatDate(order.date)}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="order-budget">
+                            To'langan: {order.paid.toLocaleString()} so'm
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <div className="order-box">
-                      <div>
-                        <span className="order-budget">
-                          {formatDate(order.date)}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="order-budget">
-                          To'langan: {order.paid.toLocaleString()} so'm
-                        </span>
-                      </div>
+                    <div className="order-actions">
+                      <FaEye
+                        style={{ color: "#0A3D3A" }}
+                        className="eye-icon"
+                        onClick={() =>
+                          navigate(`/order/${order._id}`, { state: { order } })
+                        }
+                      />
                     </div>
-                  </div>
-                  <div className="order-actions">
-                    <FaEye
-                      style={{ color: "#0A3D3A" }}
-                      className="eye-icon"
-                      onClick={() =>
-                        navigate(`/order/${order._id}`, { state: { order } })
-                      }
-                    />
-                  </div>
-                </li>
-              ))}
+                  </li>
+                ))}
             </ul>
           )}
         </div>

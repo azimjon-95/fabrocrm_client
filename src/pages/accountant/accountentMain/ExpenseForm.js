@@ -8,24 +8,27 @@ import { useCreateExpenseMutation } from "../../../context/service/expensesApi";
 import { useUpdateBalanceMutation } from "../../../context/service/balanceApi";
 // workers
 import { useGetWorkersQuery } from "../../../context/service/worker";
-import { useGetDebtorsQuery, useUpdateOrderMutation } from "../../../context/service/orderApi";
+import {
+  useGetDebtorsQuery,
+  useUpdateOrderMutation,
+} from "../../../context/service/orderApi";
+import { useGetAllShopsQuery } from "../../../context/service/newOredShops";
 
 const ExpenseForm = () => {
-  const [expenseAmount, setExpenseAmount] = useState("");
-  const [expenseDescription, setExpenseDescription] = useState("");
-  const [isIncome, setIsIncome] = useState(false);
+  const [expensePaymentType, setExpensePaymentType] = useState(null); // to'lov turi
+  const [expenseAmount, setExpenseAmount] = useState(""); // pul miqdori
+  const [expenseDescription, setExpenseDescription] = useState(""); // tavsif
+  const [expenseCategory, setExpenseCategory] = useState(""); // xarajat turi
+  const [selectedCategory, setSelectedCategory] = useState(""); // tanlangan xarajat turi
+  const [selectedType, setSelectedType] = useState("income"); // tanlangan xarajat turi
+  const [selectedDate, setSelectedDate] = useState(dayjs()); // tanlangan xarajat turi
+
   const [createExpense] = useCreateExpenseMutation();
   const [updateBalance] = useUpdateBalanceMutation();
   const [updateOrder] = useUpdateOrderMutation();
-  const [expensePaymentType, setExpensePaymentType] = useState(null);
-  const [expenseCategory, setExpenseCategory] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedType, setSelectedType] = useState("income");
   const { data: workers } = useGetWorkersQuery();
   const { data: debtors } = useGetDebtorsQuery();
-
-  const [selectedDate, setSelectedDate] = useState(dayjs());
-
+  const { data: shopsData } = useGetAllShopsQuery();
 
   const roleTranslations = {
     manager: "Menejer",
@@ -35,28 +38,46 @@ const ExpenseForm = () => {
     warehouseman: "Omborchi",
     deputy: "O'rinbosar",
   };
+
+  // ISHCHILAR ROYHATI
   const workersLists = workers?.innerData.map((worker) => ({
     value: worker._id,
-    label: `${worker.firstName} ${worker.lastName} [${worker.workerType || roleTranslations[worker.role]}]`,
+    label: `${worker.firstName} ${worker.lastName} [${
+      worker.workerType || roleTranslations[worker.role]
+    }]`,
   }));
 
+  // QARZDORLAR ROYHATI
   const debtorLists = debtors?.innerData.map((debtor) => ({
     value: debtor._id,
-    label: debtor.name,
+    label: debtor.customer.fullName,
   }));
 
-  const shoops = [];
+  //  DO'KONLAR ROYHATI
+  const shops = shopsData?.innerData.map((i) => ({
+    value: i._id,
+    label: i.shopName,
+  }));
 
   let options = [];
-  if (selectedType !== "income" && (expenseCategory === "Ish haqi" || expenseCategory === "Avans")) {
+  if (
+    selectedType === "expense" &&
+    (expenseCategory === "Ish haqi" || expenseCategory === "Avans")
+  ) {
     options = workersLists;
-  } else if (selectedType === "income" && expenseCategory === "Mijoz to‘lovlari") {
+  } else if (
+    selectedType === "income" &&
+    expenseCategory === "Mijoz to‘lovlari"
+  ) {
     options = debtorLists;
-  } else if (selectedType !== "income" && expenseCategory === "Xomashyo") {
-    options = shoops;
+  } else if (
+    selectedType === "expense" &&
+    expenseCategory === "Do'kon qarzini to'lash"
+  ) {
+    options = shops;
   }
 
-  const incomeCategories = [
+  const kirim_royhati = [
     "Mijoz to‘lovlari",
     "Investor sarmoyasi",
     "Qaytgan mablag‘",
@@ -64,9 +85,10 @@ const ExpenseForm = () => {
     "Boshqa daromadlar",
   ];
 
-  const expenseCategories = [
+  const chiqim_royhati = [
     "Ish haqi",
     "Avans",
+    "Do'kon qarzini to'lash",
     "Ijara",
     "Mebel",
     "Kantselyariya",
@@ -79,42 +101,53 @@ const ExpenseForm = () => {
     "Boshqa chiqimlar",
   ];
 
+  // KIRIM CHIQIM turlari
+  const kirim_chiqim_royhati = (
+    selectedType === "income" ? kirim_royhati : chiqim_royhati
+  ).map((i) => ({ value: i, label: i }));
+
+  // malumotlarni yuborish
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    let amount = parseFloat(expenseAmount?.split(" ")?.join(""));
+
     const newData =
-      (expenseCategory === "Ish haqi" || expenseCategory === "Avans")
+      expenseCategory === "Ish haqi" || expenseCategory === "Avans"
         ? {
-          name: selectedCategory.label,
-          amount: parseFloat(expenseAmount),
-          type: "Chiqim",
-          category: expenseCategory,
-          description: expenseDescription,
-          paymentType: expensePaymentType,
-          relevantId: selectedCategory.value,
-          date: selectedDate.toDate(),
-        }
+            name: selectedCategory.label,
+            amount: amount,
+            type: "Chiqim",
+            category: expenseCategory,
+            description: expenseDescription,
+            paymentType: expensePaymentType,
+            relevantId: selectedCategory.value,
+            date: selectedDate.toDate(),
+          }
         : {
-          name: selectedCategory.label,
-          amount: parseFloat(expenseAmount),
-          type: isIncome ? "Kirim" : "Chiqim",
-          category: expenseCategory,
-          description: expenseDescription,
-          paymentType: expensePaymentType,
-          relevantId: selectedCategory.value,
-        };
+            name: selectedCategory.label || expenseCategory,
+            amount: amount,
+            type: selectedType === "income" ? "Kirim" : "Chiqim",
+            category: expenseCategory,
+            description: expenseDescription,
+            paymentType: expensePaymentType,
+            relevantId: selectedCategory.value,
+          };
 
     try {
       // `debtors?.innerData` ichidan `_id` `selectedCategory.value` ga teng bo'lgan elementni topamiz
-      const selectedDebtor = debtors?.innerData?.find(item => item._id === selectedCategory.value);
+      const selectedDebtor = debtors?.innerData?.find(
+        (item) => item._id === selectedCategory.value
+      );
       const currentPaid = selectedDebtor?.paid || 0;
       // Xarajat qo'shish
       const expenseResponse = await createExpense(newData).unwrap();
 
       // Balansni yangilash
       const balanceResponse = await updateBalance({
-        amount: parseFloat(expenseAmount),
-        type: expensePaymentType === "Kirim" ? "add" : "subtract",
-        payType: expensePaymentType
+        amount: amount,
+        type: selectedType === "income" ? "add" : "subtract",
+        payType: expensePaymentType,
       }).unwrap();
 
       // Faqat "Mijoz to‘lovlari" bo'lganda orderni yangilash
@@ -123,20 +156,23 @@ const ExpenseForm = () => {
         orderResponse = await updateOrder({
           id: selectedCategory.value,
           updates: {
-            paid: currentPaid + parseFloat(expenseAmount),
+            paid: currentPaid + amount,
             paidAt: new Date().toISOString(), // Hozirgi vaqtni yuborish
           },
         }).unwrap();
       }
 
       // Barcha operatsiyalar muvaffaqiyatli bo'lsa
-      if (expenseResponse?.state && balanceResponse?.state && orderResponse?.state) {
+      if (
+        expenseResponse?.state &&
+        balanceResponse?.state &&
+        orderResponse?.state
+      ) {
         message.success("Xarajat muvaffaqiyatli qo'shildi!");
 
         // Formani tozalash
         setExpenseAmount("");
         setExpenseDescription("");
-        setIsIncome(false);
         setExpenseCategory("");
       }
     } catch (err) {
@@ -148,9 +184,9 @@ const ExpenseForm = () => {
     }
   };
 
-  // AsyncSelect loadOptions funksiyasi
-  const loadCategoryOptions = (inputValue, callback) => {
-    const options = (isIncome ? incomeCategories : expenseCategories)
+  // kirim chiqim royhatidan qidirish
+  const kirim_chiqim_qidiruv = (inputValue, callback) => {
+    const options = kirim_chiqim_royhati
       .filter((cat) => cat.toLowerCase().includes(inputValue.toLowerCase()))
       .map((cat) => ({ value: cat, label: cat }));
     setTimeout(() => {
@@ -158,17 +194,20 @@ const ExpenseForm = () => {
     }, 300);
   };
 
-  // Default options uchun
-  const defaultCategoryOptions = (
-    selectedType === "income" ? incomeCategories : expenseCategories
-  ).map((cat) => ({ value: cat, label: cat }));
+  const kimga_nimaga_qidiruv = (inputValue, callback) => {
+    const options = kirim_chiqim_royhati
+      .filter((i) => i.label?.toLowerCase().includes(inputValue.toLowerCase()))
+      .map((i) => ({ value: i.value, label: i.label }));
+    setTimeout(() => {
+      callback(options);
+    }, 300);
+  };
 
   const paymentTypeControl = [
-    { label: "Naqd", value: "cash" },
-    { label: "Bank orqali", value: "bankTransfer" },
-    { label: "$ Dollar", value: "dollarBalance" },
+    { label: "Naqd", value: "Naqd" },
+    { label: "Bank orqali", value: "Bank orqali" },
+    { label: "$ Dollar", value: "dollar" },
   ];
-
 
   const loadPaymentTypeOptions = (inputValue, callback) => {
     const options = paymentTypeControl.filter((option) =>
@@ -191,13 +230,14 @@ const ExpenseForm = () => {
   // Handle input change and format value
   const handleChange = (e) => {
     const { value } = e.target;
+
     const formattedValue = formatNumber(value);
     setExpenseAmount(formattedValue);
   };
 
-
   return (
-    <form style={{ padding: "0 10px" }} onSubmit={handleSubmit}>
+    <form className="expense-form" onSubmit={handleSubmit}>
+      {/* Xarajat turi */}
       <Radio.Group
         optionType="button"
         buttonStyle="solid"
@@ -209,22 +249,15 @@ const ExpenseForm = () => {
         <Radio value="expense">Chiqim</Radio>
       </Radio.Group>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-        {/* QAYERGA | QAYERDAN */}
+      {/* QAYERGA | QAYERDAN */}
+      <div className="expense-form_select1">
         <AsyncSelect
           cacheOptions
-          defaultOptions={defaultCategoryOptions}
-          loadOptions={loadCategoryOptions}
-          value={
-            expenseCategory
-              ? { value: expenseCategory, label: expenseCategory }
-              : null
-          }
-          onChange={(selectedOption) =>
-            setExpenseCategory(selectedOption ? selectedOption.value : "")
-          }
+          defaultOptions={kirim_chiqim_royhati}
+          loadOptions={kirim_chiqim_qidiruv}
+          value={{ value: expenseCategory, label: expenseCategory } || null}
+          onChange={(e) => setExpenseCategory(e.value || "")}
           placeholder={selectedType === "income" ? "Qayerdan" : "Qayerga"}
-          // menuPlacement="top"
           classNamePrefix="custom-select"
           styles={{
             container: (provided) => ({
@@ -256,15 +289,14 @@ const ExpenseForm = () => {
             }),
           }}
         />
+
         {/* TO'LOV TURI */}
         <AsyncSelect
           cacheOptions
           defaultOptions={paymentTypeControl}
           loadOptions={loadPaymentTypeOptions}
           value={
-            expensePaymentType
-              ? { value: expensePaymentType, label: expensePaymentType }
-              : null
+            { value: expensePaymentType, label: expensePaymentType } || null
           }
           onChange={(selectedOption) =>
             setExpensePaymentType(selectedOption ? selectedOption.value : null)
@@ -298,76 +330,66 @@ const ExpenseForm = () => {
             }),
           }}
         />
-
       </div>
       {/* KIMGA | NIMAGA */}
-      {
-        options?.length ?
-          <div className="ish-haqi-avans">
-            {["Ish haqi", "Avans"].includes(expenseCategory) && (
-              <DatePicker
-                picker="month"
-                value={selectedDate}
-                onChange={(date) => setSelectedDate(dayjs(date))}
-              />
-            )}
-            <AsyncSelect
-              cacheOptions
-              defaultOptions={options}
-              loadOptions={loadCategoryOptions}
-              value={
-                selectedCategory?.value
-                  ? { value: selectedCategory?.value, label: selectedCategory.label }
-                  : null
-              }
-              onChange={(selectedOption) => {
-                if (selectedOption) {
-                  setSelectedCategory({
-                    value: selectedOption.value,
-                    label: selectedOption.label,
-                  });
-                } else {
-                  setSelectedCategory({ value: "", label: "" });
-                }
-              }}
-              placeholder={selectedType === "income" ? "Qayerdan" : "Qayerga"}
-              classNamePrefix="custom-select"
-              styles={{
-                container: (provided) => ({
-                  ...provided,
-                  width: "100%",
-                  marginBottom: "1rem",
-                }),
-                menu: (provided) => ({
-                  ...provided,
-                  maxHeight: "150px",
-                  backgroundColor: "#fff",
-                  borderRadius: "5px",
-                  marginTop: "0",
-                  boxShadow: "0 0 8px rgba(0, 0, 0, 0.1)",
-                }),
-                option: (provided, state) => ({
-                  ...provided,
-                  backgroundColor: state.isFocused ? "#f0f0f0" : "#fff",
-                  color: state.isFocused ? "#000" : "#333",
-                  cursor: "pointer",
-                  padding: "5px 12px",
-                }),
-                menuList: (provided) => ({
-                  ...provided,
-                  padding: "0",
-                }),
-              }}
+      {options?.length ? (
+        <div className="ish-haqi-avans">
+          {["Ish haqi", "Avans"].includes(expenseCategory) && (
+            <DatePicker
+              picker="month"
+              value={selectedDate}
+              onChange={(date) => setSelectedDate(dayjs(date))}
             />
-          </div>
-          : ""
-      }
+          )}
+          <AsyncSelect
+            cacheOptions
+            defaultOptions={options}
+            loadOptions={kimga_nimaga_qidiruv}
+            value={
+              {
+                value: selectedCategory?.value,
+                label: selectedCategory.label,
+              } || null
+            }
+            onChange={(e) => setSelectedCategory(e)}
+            placeholder={selectedType === "income" ? "Qayerdan" : "Qayerga"}
+            classNamePrefix="custom-select"
+            styles={{
+              container: (provided) => ({
+                ...provided,
+                width: "100%",
+                marginBottom: "1rem",
+              }),
+              menu: (provided) => ({
+                ...provided,
+                maxHeight: "150px",
+                backgroundColor: "#fff",
+                borderRadius: "5px",
+                marginTop: "0",
+                boxShadow: "0 0 8px rgba(0, 0, 0, 0.1)",
+              }),
+              option: (provided, state) => ({
+                ...provided,
+                backgroundColor: state.isFocused ? "#f0f0f0" : "#fff",
+                color: state.isFocused ? "#000" : "#333",
+                cursor: "pointer",
+                padding: "5px 12px",
+              }),
+              menuList: (provided) => ({
+                ...provided,
+                padding: "0",
+              }),
+            }}
+          />
+        </div>
+      ) : (
+        ""
+      )}
       <Input
         placeholder="Pul miqdori"
         value={expenseAmount}
         onChange={handleChange}
       />
-
 
       <Input.TextArea
         placeholder="Qo‘shimcha Ma'lumot"

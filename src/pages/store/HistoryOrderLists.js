@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/uz";
 import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
+import { useGetOrdersByisPaidQuery } from "../../context/service/newOredShops";
 
 dayjs.locale("uz");
 
@@ -26,9 +27,16 @@ const uzMonths = [
 
 const HistoryOrderLists = ({ list }) => {
   const navigator = useNavigate();
-  const { data, isLoading } = useGetOrderHistoryQuery();
+  const { data, isLoading } = useGetOrdersByisPaidQuery(false);
+  let shops = data?.innerData || [];
+  console.log(shops);
 
   const columns = [
+    {
+      title: "Umumiy narx",
+      dataIndex: "shopName",
+      key: "shopName",
+    },
     {
       title: "Umumiy narx",
       dataIndex: "totalPrice",
@@ -40,72 +48,25 @@ const HistoryOrderLists = ({ list }) => {
       key: "status",
       render: (_, record) => (record.isPaid ? "To'langan" : "To'lanmagan"),
     },
-    ...(!list
-      ? [
-        {
-          title: "Yangi",
-          dataIndex: "isNew",
-          key: "isNew",
-          render: (isNew) => (isNew ? "Ha" : "Yo'q"),
-        },
-      ]
-      : []),
-    ...(!list
-      ? [
-        {
-          title: "Buxgalterga yuborilgan",
-          dataIndex: "sentToDistributor",
-          key: "sentToDistributor",
-          render: (sentToDistributor) => (sentToDistributor ? "Ha" : "Yo'q"),
-        },
-      ]
-      : []),
-
     {
-      title: "Buxgalter tasdiqladi",
-      dataIndex: "approvedByDistributor",
-      key: "approvedByDistributor",
-      render: (approvedByDistributor) => {
-        return approvedByDistributor ? "Ha" : "Yo'q";
-      },
+      title: "Sana",
+      dataIndex: "date",
+      key: "date",
+      render: (date) => dayjs(date).format("YYYY-MM-DD"),
     },
-
-    ...(!list
-      ? [
-        {
-          title: "Omborga qo'shildi",
-          dataIndex: "addedToData",
-          key: "addedToData",
-          render: (addedToData) => (addedToData ? "Ha" : "Yo'q"),
-        },
-      ]
-      : []),
     {
-      title: "Sanasi",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      render: (date) => {
-        const d = dayjs(date);
-        return `${d.date()}-${uzMonths[d.month()]} / ${d.format("HH:mm")}`;
-      },
+      title: "Yuklab olish",
+      key: "download",
+      render: (record) => (
+        <Button
+          type="primary"
+          onClick={() => handleExport(record)}
+          style={{ background: "#0A3D3A" }}
+        >
+          <FileExcelOutlined /> Excel
+        </Button>
+      ),
     },
-    ...(!list
-      ? [
-        {
-          title: "Yuklab olish",
-          key: "download",
-          render: (record) => (
-            <Button
-              type="primary"
-              onClick={() => handleExport(record)}
-              style={{ background: "#0A3D3A" }}
-            >
-              <FileExcelOutlined /> Excel
-            </Button>
-          ),
-        },
-      ]
-      : []),
   ];
 
   const expandedRowRender = (record) => {
@@ -131,11 +92,11 @@ const HistoryOrderLists = ({ list }) => {
         key: "quantity_unit",
         render: (_, record) => `${record.quantity} ${record.unit}`,
       },
-      {
-        title: "Yetkazib beruvchi",
-        dataIndex: "supplier",
-        key: "supplier",
-      },
+      // {
+      //   title: "Yetkazib beruvchi",
+      //   dataIndex: "supplier",
+      //   key: "supplier",
+      // },
     ];
     return (
       <Table
@@ -176,7 +137,8 @@ const HistoryOrderLists = ({ list }) => {
       order.sentToDistributor ? "Ha" : "Yo'q",
       order.approvedByDistributor ? "Ha" : "Yo'q",
       order.addedToData ? "Ha" : "Yo'q",
-      `${dayjs(order.createdAt).date()}-${uzMonths[dayjs(order.createdAt).month()]
+      `${dayjs(order.createdAt).date()}-${
+        uzMonths[dayjs(order.createdAt).month()]
       } / ${dayjs(order.createdAt).format("HH:mm")}`,
     ]);
 
@@ -248,7 +210,7 @@ const HistoryOrderLists = ({ list }) => {
 
       <Table
         columns={columns}
-        dataSource={data?.innerData}
+        dataSource={shops}
         rowKey="_id"
         pagination={false}
         loading={isLoading}
