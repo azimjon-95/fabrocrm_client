@@ -36,14 +36,16 @@
   position: relative;
 }
 
-.back-btn {
+.back-btns {
   position: absolute;
   top: 0px;
   left: 20px;
-  width: 140px !important;
-  height: 30px !important;
-  background-color: #ddd;
+  width: 160px !important;
+  height: 35px !important;
+  color: #ddd;
   border-radius: 5px;
+  font-size: 16px;
+  text-wrap: nowrap;
   display: flex;
   gap: 5px;
   align-items: center;
