@@ -123,7 +123,7 @@ const RegisterWorker = () => {
       <div className="nav_add">
         <button
           style={{ background: "#0A3D3A", marginTop: "10px" }}
-          className="back-btn"
+          className="back-btns"
           onClick={() => navigate(-1)}
         >
           <ArrowLeftOutlined />
@@ -232,17 +232,18 @@ const RegisterWorker = () => {
               />
             </Form.Item>
           </Col>
-
-          <Col span={6}>
-            <Form.Item required label="Oylik maoshi">
-              <Controller
-                name="salary"
-                control={control}
-                rules={{ required: true }}
-                render={({ field }) => <Input {...field} />}
-              />
-            </Form.Item>
-          </Col>
+          {workerType !== "ishchilar" && (
+            <Col span={6}>
+              <Form.Item required label="Oylik maoshi">
+                <Controller
+                  name="salary"
+                  control={control}
+                  rules={{ required: true }}
+                  render={({ field }) => <Input {...field} />}
+                />
+              </Form.Item>
+            </Col>
+          )}
           {workerType !== "ishchilar" ? (
             <>
               <Col span={6}>
