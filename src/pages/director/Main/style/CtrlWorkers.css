@@ -1,166 +1,162 @@
 .ctrl-workers {
-    width: 100%;
-    height: 100px;
-    flex-wrap: wrap !important;
-    align-items: start;
+  width: 100%;
+  height: 100px;
+  flex-wrap: wrap !important;
+  align-items: flex-start;
 }
 
 .worker-list {
+  width: 100%;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 15px;
+  height: calc(100vh - 130px);
+  /* Adjust this to your desired height */
+  overflow-y: auto;
+  /* Enables vertical scrolling */
+}
+
+@media (max-width: 500px) {
+  .worker-list {
     width: 100%;
     display: flex !important;
     flex-wrap: wrap !important;
-    gap: 15px;
+    gap: 5px;
     height: calc(100vh - 130px);
     /* Adjust this to your desired height */
     overflow-y: auto;
     /* Enables vertical scrolling */
-}
-
-@media (max-width: 500px) {
-    .worker-list {
-        width: 100%;
-        display: flex !important;
-        flex-wrap: wrap !important;
-        gap: 5px;
-        height: calc(100vh - 130px);
-        /* Adjust this to your desired height */
-        overflow-y: auto;
-        /* Enables vertical scrolling */
-    }
+  }
 }
 
 /* Custom scrollbar styling */
 .worker-list::-webkit-scrollbar {
-    width: 3px;
-    /* Set width of the scrollbar */
+  width: 3px;
+  /* Set width of the scrollbar */
 }
 
 .worker-list::-webkit-scrollbar-thumb {
-    background-color: #0A3D3A;
-    /* Color of the scrollbar */
-    border-radius: 10px;
-    /* Rounded corners for the thumb */
+  background-color: #0a3d3a;
+  /* Color of the scrollbar */
+  border-radius: 10px;
+  /* Rounded corners for the thumb */
 }
 
-
 .worker-list::-webkit-scrollbar-track {
-    background-color: #f1f1f100;
-    /* Background color of the track */
+  background-color: #f1f1f100;
+  /* Background color of the track */
 }
 
 .worker-details {
-    display: flex;
-    flex-direction: column;
-    ;
+  display: flex;
+  flex-direction: column;
 }
 
-.worker-details>p {
-    position: absolute;
-    top: 0;
-    left: 0;
-    padding: 3px 6px 5px 6px;
-    border-radius: 8px 0 10px 0;
-    background: #0A3D3A;
-    color: #fff;
-    line-height: 13px;
-    font-size: 14px;
+.worker-details > p {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 3px 6px 5px 6px;
+  border-radius: 8px 0 10px 0;
+  background: #0a3d3a;
+  color: #fff;
+  line-height: 13px;
+  font-size: 14px;
 }
 
 .worker-fio {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .worker-phone,
 .worker-address {
-    color: #0A3D3A;
+  color: #0a3d3a;
 }
 
 .worker-id-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
 }
 
 .toggle-id-btn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
-
-
 .worker-card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 5px 8px;
-    background-color: #f9f9f9;
-    width: 32.5% !important;
-    min-width: 350px;
-    max-height: 170px;
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    position: relative;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 5px 8px;
+  background-color: #f9f9f9;
+  width: 32.5% !important;
+  min-width: 350px;
+  max-height: 170px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  position: relative;
 }
 
 .worker-card .worker-details {
-    font-size: 16px;
-    color: #0A3D3A;
+  font-size: 16px;
+  color: #0a3d3a;
 }
 
 .worker-card .worker-fio {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 4px;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 4px;
 }
 
 .worker-card .worker-phone,
 .worker-card .worker-address {
-    color: #0A3D3A;
-    font-size: 14px;
-    display: block;
-    margin-bottom: 4px;
+  color: #0a3d3a;
+  font-size: 14px;
+  display: block;
+  margin-bottom: 4px;
 }
 
 .worker-card .worker-birthdate {
-    font-size: 14px;
-    color: #0A3D3A;
+  font-size: 14px;
+  color: #0a3d3a;
 }
 
 .worker-card .birthday-message {
-    color: #ff4d4f;
-    margin-top: 6px;
+  color: #ff4d4f;
+  margin-top: 6px;
 }
 
 .worker-id-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
 }
 
 .worker-id-header button {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .worker-id-header span {
-    font-size: 14px;
-    color: #0A3D3A;
+  font-size: 14px;
+  color: #0a3d3a;
 }
 
 @media (max-width: 450px) {
-    .worker-card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 5px 16px;
-        background-color: #f9f9f9;
-        width: 100% !important;
-        min-width: 350px;
-        display: flex;
-        align-items: center;
-        gap: 18px;
-    }
+  .worker-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 5px 16px;
+    background-color: #f9f9f9;
+    width: 100% !important;
+    min-width: 350px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
 }

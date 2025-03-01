@@ -3,20 +3,12 @@ import "./style.css";
 import { FaEye } from "react-icons/fa";
 import {
   useGetExpensesByPeriodQuery,
-  useCreateExpenseMutation,
   useGetBalanceReportQuery,
 } from "../../../context/service/expensesApi";
-import {
-  useUpdateBalanceMutation,
-  useGetBalanceQuery,
-} from "../../../context/service/balanceApi";
 import { useNavigate } from "react-router-dom";
 import ExpenseRegister from "./ExpenseRegister";
 import MainCards from "./MainCards";
-import {
-  useGetOrdersQuery,
-  useGetDebtQuery,
-} from "../../../context/service/orderApi";
+import { useGetOrdersQuery } from "../../../context/service/orderApi";
 import moment from "moment"; // For handling date formatting
 import socket from "../../../socket";
 
@@ -28,10 +20,6 @@ const AccountentMain = () => {
     isLoading,
     refetch: refetchOrders,
   } = useGetOrdersQuery();
-  const { data: debtData } = useGetDebtQuery();
-  const [createExpense] = useCreateExpenseMutation();
-  const [updateBalance] = useUpdateBalanceMutation();
-  const { data: balance, isFetching } = useGetBalanceQuery();
   const [open, setOpen] = useState(false);
 
   const today = new Date();
@@ -65,7 +53,7 @@ const AccountentMain = () => {
       socket.off("newExpense", handleNewExpense);
       socket.off("newOrder", handleNewOrder);
     };
-  }, [socket, refetch, refetchOrders]);
+  }, [refetch, refetchOrders]);
 
   const [selectedReportDates, setSelectedReportDates] = useState([
     startOfMonth,
@@ -106,24 +94,13 @@ const AccountentMain = () => {
   };
 
   const cardRef = useRef(null);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     const card = cardRef.current;
     if (!card) return;
-
-    const updateDimensions = () => {
-      const { width, height } = card.getBoundingClientRect(); // Element hajmini olish
-      setDimensions({ width, height });
-    };
-
-    // ResizeObserver bilan element hajmini kuzatish
-    const resizeObserver = new ResizeObserver(() => updateDimensions());
+    const resizeObserver = new ResizeObserver(() => {});
     resizeObserver.observe(card);
-
-    updateDimensions(); // Dastlab hajmini olish
-
-    return () => resizeObserver.disconnect(); // Tozalash
+    return () => resizeObserver.disconnect();
   }, []);
 
   useEffect(() => {

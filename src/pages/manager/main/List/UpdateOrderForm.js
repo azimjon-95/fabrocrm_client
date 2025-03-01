@@ -29,11 +29,25 @@ const UpdateOrderForm = () => {
   const [updateOrder, { isLoading }] = useUpdateOrderMutation();
   const { data: order, isFetching } = useGetOrderByIdQuery(id);
 
+  // useEffect(() => {
+  //   if (order?.innerData) {
+  //     form.setFieldsValue({
+  //       ...order.innerData,
+  //       date: order.date ? dayjs(order.innerData) : null,
+  //       customer: {
+  //         ...order.innerData.customer,
+  //       },
+  //       dimensions: {
+  //         ...order.innerData.dimensions,
+  //       },
+  //     });
+  //   }
+  // }, [order?.innerData, form]);
   useEffect(() => {
     if (order?.innerData) {
       form.setFieldsValue({
         ...order.innerData,
-        date: order.date ? dayjs(order.innerData) : null,
+        date: order.date ? dayjs(order.date) : null, // order.innerData o‘rniga order.date ishlatish kerak
         customer: {
           ...order.innerData.customer,
         },
@@ -42,7 +56,7 @@ const UpdateOrderForm = () => {
         },
       });
     }
-  }, [order?.innerData, form]);
+  }, [order?.innerData, order?.date, form]);
 
   const handleSubmit = async () => {
     try {

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "./style.css";
 import { useGetBalanceQuery } from "../../../context/service/balanceApi";
 import { FaCalendarAlt } from "react-icons/fa";
-import { FaCalculator, FaHandHoldingUsd } from "react-icons/fa";
+import { FaHandHoldingUsd } from "react-icons/fa";
 import { MdMoneyOff } from "react-icons/md";
 import { useGetDebtQuery } from "../../../context/service/orderApi";
 import { BsArrowLeftRight } from "react-icons/bs";

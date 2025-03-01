@@ -1,8 +1,5 @@
 import React, { useState } from "react";
-import {
-  Table,
-  Spin, DatePicker, Empty
-} from "antd";
+import { Table, Spin, DatePicker, Empty } from "antd";
 import {
   ClockCircleOutlined,
   DollarOutlined,
@@ -17,7 +14,6 @@ import { useGetRelevantExpensesQuery } from "../../../context/service/expensesAp
 import "./style.css";
 import Exsel from "./Exsel";
 
-
 const Salary = () => {
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const { data: dataSalary } = useGetAllWorkingHoursQuery();
@@ -26,8 +22,17 @@ const Salary = () => {
   const year = selectedDate.year();
   const month = String(selectedDate.month() + 1).padStart(2, "0");
   const { data: dataWorkers } = useGetWorkersQuery();
-  const adminRoles = ["manager", "seller", "director", "accountant", "warehouseman", "deputy_director"];
-  const Workers = dataWorkers?.innerData.filter(worker => !adminRoles.includes(worker.role));
+  const adminRoles = [
+    "manager",
+    "seller",
+    "director",
+    "accountant",
+    "warehouseman",
+    "deputy_director",
+  ];
+  const Workers = dataWorkers?.innerData.filter(
+    (worker) => !adminRoles.includes(worker.role)
+  );
 
   const { data, isLoading, error } = useGetMonthlyAttendanceQuery({
     year,
@@ -35,7 +40,8 @@ const Salary = () => {
   });
 
   const groupedData = data?.innerData?.reduce((acc, curr) => {
-    const { workerId, workerName, workingHours, nightWorkingHours, status } = curr;
+    const { workerId, workerName, workingHours, nightWorkingHours, status } =
+      curr;
     const hours = +workingHours || 0;
     const nightHours = +nightWorkingHours || 0;
     const location = status?.loc?.toLowerCase();
@@ -64,12 +70,20 @@ const Salary = () => {
 
   // Agar groupedData mavjud bo'lmasa, bo'sh massiv qaytariladi
   const tableData = Object.values(groupedData || {}).map((worker) => {
-    const { voxa, toshkent, workingHours, nightWorkingHours, workerId } = worker;
-    const { wages, overtimeWages, voxa: voxaPercent = 0, toshkent: toshkentPercent = 0 } = salaryDataObj || {};
+    const { voxa, toshkent, workingHours, nightWorkingHours, workerId } =
+      worker;
+    const {
+      wages,
+      overtimeWages,
+      voxa: voxaPercent = 0,
+      toshkent: toshkentPercent = 0,
+    } = salaryDataObj || {};
 
     // Worker ma'lumotlarini Workers massividan olish
-    const matchingWorker = Workers?.find(w => w._id === workerId);
-    const workerName = matchingWorker ? `${matchingWorker.firstName} ${matchingWorker.lastName}` : worker.workerName;
+    const matchingWorker = Workers?.find((w) => w._id === workerId);
+    const workerName = matchingWorker
+      ? `${matchingWorker.firstName} ${matchingWorker.lastName}`
+      : worker.workerName;
 
     const baseSalary = workingHours * (wages || 0);
     const extraSalary = nightWorkingHours * (overtimeWages || 0);
@@ -90,22 +104,26 @@ const Salary = () => {
 
   // Agar groupedData mavjud bo'lmasa, bo'sh massiv qaytariladi
 
-
   // Custom Hook
   const UserExpenses = ({ record }) => {
-    const { data: expensesData, isLoading } = useGetRelevantExpensesQuery({
+    const { data: expensesData } = useGetRelevantExpensesQuery({
       relevantId: [record.workerId],
       date: selectedDate.toISOString(),
     });
 
     // Avans va Ish haqi bo'yicha filterlash
-    const avansExpenses = expensesData?.innerData?.filter(
-      (expense) => expense.category === "Avans" && expense.relevantId === record.workerId
-    ) || [];
+    const avansExpenses =
+      expensesData?.innerData?.filter(
+        (expense) =>
+          expense.category === "Avans" && expense.relevantId === record.workerId
+      ) || [];
 
-    const ishHaqiExpenses = expensesData?.innerData?.filter(
-      (expense) => expense.category === "Ish haqi" && expense.relevantId === record.workerId
-    ) || [];
+    const ishHaqiExpenses =
+      expensesData?.innerData?.filter(
+        (expense) =>
+          expense.category === "Ish haqi" &&
+          expense.relevantId === record.workerId
+      ) || [];
 
     // Har birini alohida reduce qilish
     const totalAvans = avansExpenses.reduce(
@@ -130,19 +148,24 @@ const Salary = () => {
   };
   // Custom Hook
   const UserSalary = ({ record }) => {
-    const { data: expensesData, isLoading } = useGetRelevantExpensesQuery({
+    const { data: expensesData } = useGetRelevantExpensesQuery({
       relevantId: [record.workerId],
       date: selectedDate.toISOString(),
     });
 
     // Avans va Ish haqi bo'yicha filterlash
-    const avansExpenses = expensesData?.innerData?.filter(
-      (expense) => expense.category === "Avans" && expense.relevantId === record.workerId
-    ) || [];
+    const avansExpenses =
+      expensesData?.innerData?.filter(
+        (expense) =>
+          expense.category === "Avans" && expense.relevantId === record.workerId
+      ) || [];
 
-    const ishHaqiExpenses = expensesData?.innerData?.filter(
-      (expense) => expense.category === "Ish haqi" && expense.relevantId === record.workerId
-    ) || [];
+    const ishHaqiExpenses =
+      expensesData?.innerData?.filter(
+        (expense) =>
+          expense.category === "Ish haqi" &&
+          expense.relevantId === record.workerId
+      ) || [];
 
     // Har birini alohida reduce qilish
     const totalAvans = avansExpenses.reduce(
@@ -179,8 +202,7 @@ const Salary = () => {
       render: (_, record) => (
         <>
           <div>
-            <ClockCircleOutlined /> <strong>{record.workingHours}</strong>{" "}
-            soat
+            <ClockCircleOutlined /> <strong>{record.workingHours}</strong> soat
           </div>
           <div>
             <DollarOutlined /> <strong>{record.salary.toLocaleString()}</strong>{" "}
@@ -246,14 +268,14 @@ const Salary = () => {
       title: "Berilgan maosh", // Umumiy ish haqi va qoldiq summa
       key: "finalSalary",
       render: (_, record) => {
-        return <UserExpenses record={record} />
+        return <UserExpenses record={record} />;
       },
     },
     {
       title: "Qoldiq maosh", // Umumiy ish haqi va qoldiq summa
       key: "finalSalary",
       render: (_, record) => {
-        return <UserSalary record={record} />
+        return <UserSalary record={record} />;
       },
     },
   ];
@@ -262,15 +284,11 @@ const Salary = () => {
     return (
       <Spin size="large" style={{ display: "block", margin: "20px auto" }} />
     );
-  if (error)
-    return (
-      <Empty description="Ma'lumotlar topilmadi" />
-    );
+  if (error) return <Empty description="Ma'lumotlar topilmadi" />;
 
   return (
     <div className="salary-container">
       <div className="Salary_nav">
-
         <DatePicker
           picker="month"
           value={selectedDate}
@@ -278,7 +296,6 @@ const Salary = () => {
         />
         <h2>Xodimlar Ish Haqqi</h2>
         <Exsel selectedDate={selectedDate} />
-
       </div>
       <Table
         columns={columns}

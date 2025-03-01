@@ -13,20 +13,16 @@ import {
   Spin,
   Input,
   Alert,
-  Popconfirm,
   Modal,
   Button,
-  Image,
   Progress,
   message,
-  Avatar,
 } from "antd";
 import {
   MoreOutlined,
   EditOutlined,
   DeleteOutlined,
   CheckOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
 import { BookOutlined } from "@ant-design/icons";
 import { EyeOutlined } from "@ant-design/icons";
@@ -37,7 +33,6 @@ import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom"; // Sahifaga yo‘naltirish uchun
 import socket from "../../../../socket";
 
-const { Search } = Input;
 const ViewOrder = () => {
   const navigate = useNavigate();
   const {

@@ -1,20 +1,28 @@
 import React, { useState, useMemo } from "react";
-import { Table, Spin, Alert, Input, Modal, Select, DatePicker, Button, message } from "antd";
-import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
+import {
+  Table,
+  Spin,
+  Input,
+  Modal,
+  Select,
+  DatePicker,
+  Button,
+  message,
+} from "antd";
+import { useSearchParams, useLocation } from "react-router-dom";
 import {
   useGetMonthlyAttendanceQuery,
   useUpdateAttendanceMutation,
 } from "../../../context/service/attendance";
-import { ArrowLeftOutlined, FileExcelOutlined } from "@ant-design/icons";
+import { FileExcelOutlined } from "@ant-design/icons";
 import { useGetWorkersQuery } from "../../../context/service/worker";
 import { useGetAllWorkingHoursQuery } from "../../../context/service/workingHours";
 import { useGetOrdersQuery } from "../../../context/service/orderApi";
 import dayjs from "dayjs";
 import * as XLSX from "xlsx";
-import './style.css';
+import "./style.css";
 
 const Attendance = () => {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const workerId = searchParams.get("workerId");
   const [selectedDate, setSelectedDate] = useState(dayjs());
@@ -26,12 +34,22 @@ const Attendance = () => {
   const { data, isLoading } = useGetMonthlyAttendanceQuery({ year, month });
   const { data: ordersData } = useGetOrdersQuery();
   const activeOrders = ordersData?.innerData?.filter((i) => i.isType);
-  // useGetAllWorkingHoursQuery 
+  // useGetAllWorkingHoursQuery
   const { data: workingHoursData } = useGetAllWorkingHoursQuery();
 
   const months = [
-    "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
-    "Iyul", "Avgust", "Sentabr", "Oktyabr", "Noyabr", "Dekabr"
+    "Yanvar",
+    "Fevral",
+    "Mart",
+    "Aprel",
+    "May",
+    "Iyun",
+    "Iyul",
+    "Avgust",
+    "Sentabr",
+    "Oktyabr",
+    "Noyabr",
+    "Dekabr",
   ];
   const monthName = months[selectedDate.month()];
   const [modalVisible, setModalVisible] = useState(false);
@@ -46,40 +64,58 @@ const Attendance = () => {
   const {
     data: workersData,
     isLoading: workersLoading,
-    refetch: workersRefetch
+    refetch: workersRefetch,
   } = useGetWorkersQuery();
-  const adminRoles = ["manager", "seller", "director", "accountant", "warehouseman", "deputy_director"];
-  const Workers = workersData?.innerData.filter(worker => !adminRoles.includes(worker.role));
+  const adminRoles = [
+    "manager",
+    "seller",
+    "director",
+    "accountant",
+    "warehouseman",
+    "deputy_director",
+  ];
+  const Workers = workersData?.innerData.filter(
+    (worker) => !adminRoles.includes(worker.role)
+  );
 
   // Filterlangan ma'lumotlar
   const filteredData = useMemo(() => {
-    return workerId ? data?.innerData?.filter(item => item.workerId === workerId) : data?.innerData;
+    return workerId
+      ? data?.innerData?.filter((item) => item.workerId === workerId)
+      : data?.innerData;
   }, [data, workerId]);
 
   // Ishchilarni workersData dan olish va davomat bilan birlashtirish
   const combinedData = Workers?.map((worker) => {
-    const attendanceData = filteredData?.filter(item => item.workerId === worker._id) || [];
+    const attendanceData =
+      filteredData?.filter((item) => item.workerId === worker._id) || [];
 
-    const dates = attendanceData.reduce((acc, { date, workingHours, nightWorkingHours }) => {
-      acc[date] = {
-        workingHours: Number(workingHours) || 0,
-        nightWorkingHours: Number(nightWorkingHours) || 0
-      };
-      return acc;
-    }, {});
+    const dates = attendanceData.reduce(
+      (acc, { date, workingHours, nightWorkingHours }) => {
+        acc[date] = {
+          workingHours: Number(workingHours) || 0,
+          nightWorkingHours: Number(nightWorkingHours) || 0,
+        };
+        return acc;
+      },
+      {}
+    );
 
-    const { voxa, toshkent, umumiyWorkingHours } = attendanceData.reduce((acc, item) => {
-      const hours = Number(item.workingHours) || 0;
-      const loc = item.status?.loc?.toLowerCase(); // loc ni kichik harfda olamiz
-      if (loc === 'voxa') {
-        acc.voxa += hours;
-      } else if (loc === 'toshkent') {
-        acc.toshkent += hours;
-      } else {
-        acc.umumiyWorkingHours += hours;
-      }
-      return acc;
-    }, { voxa: 0, toshkent: 0, umumiyWorkingHours: 0 });
+    const { voxa, toshkent, umumiyWorkingHours } = attendanceData.reduce(
+      (acc, item) => {
+        const hours = Number(item.workingHours) || 0;
+        const loc = item.status?.loc?.toLowerCase(); // loc ni kichik harfda olamiz
+        if (loc === "voxa") {
+          acc.voxa += hours;
+        } else if (loc === "toshkent") {
+          acc.toshkent += hours;
+        } else {
+          acc.umumiyWorkingHours += hours;
+        }
+        return acc;
+      },
+      { voxa: 0, toshkent: 0, umumiyWorkingHours: 0 }
+    );
 
     return {
       workerId: worker._id,
@@ -88,10 +124,12 @@ const Attendance = () => {
       voxa,
       toshkent,
       workingHours: umumiyWorkingHours,
-      nightWorkingHours: attendanceData.reduce((sum, item) => sum + (Number(item.nightWorkingHours) || 0), 0),
+      nightWorkingHours: attendanceData.reduce(
+        (sum, item) => sum + (Number(item.nightWorkingHours) || 0),
+        0
+      ),
     };
   });
-
 
   const daysInMonth = dayjs(`${year}-${month}`).daysInMonth();
   const currentDate = dayjs().format("YYYY-MM-DD");
@@ -120,7 +158,7 @@ const Attendance = () => {
 
   const handleSave = async () => {
     // workingHoursData ichidan location ga mos keluvchi prosentni olish
-    const selectedData = workingHoursData?.innerData.find(item => {
+    const selectedData = workingHoursData?.innerData.find((item) => {
       return item[modalData.location.toLowerCase()] !== undefined;
     });
 
@@ -128,7 +166,9 @@ const Attendance = () => {
       workerId: modalData.workerId,
       date: modalData.date,
       location: modalData.location,
-      prosent: selectedData ? selectedData[modalData.location.toLowerCase()] : 0,
+      prosent: selectedData
+        ? selectedData[modalData.location.toLowerCase()]
+        : 0,
       workingHours: modalData.workingHours,
       nightWorkingHours: modalData.nightWorkingHours,
     };
@@ -143,7 +183,6 @@ const Attendance = () => {
 
     handleCloseModal();
   };
-
 
   const [selectedCell, setSelectedCell] = useState(null);
   const onCellClick = (record, date) => {
@@ -161,7 +200,9 @@ const Attendance = () => {
       title: monthName,
       children: Array.from({ length: daysInMonth }, (_, index) => {
         const day = index + 1;
-        const date = dayjs(`${year}-${month}-${String(day).padStart(2, "0")}`).format("YYYY-MM-DD");
+        const date = dayjs(
+          `${year}-${month}-${String(day).padStart(2, "0")}`
+        ).format("YYYY-MM-DD");
         const isFutureDate = dayjs(date).isAfter(currentDate);
 
         return {
@@ -173,12 +214,14 @@ const Attendance = () => {
               backgroundColor: isFutureDate
                 ? "transparent"
                 : record.dates[date]
-                  ? "#4CAF50"
-                  : "#FF5733",
+                ? "#4CAF50"
+                : "#FF5733",
               color: "#fff",
               textAlign: "center",
               cursor: isFutureDate ? "not-allowed" : "pointer",
-              borderColor: selectedCell === `${record.workerId}-${date}` && "2px solid #1890ff",
+              borderColor:
+                selectedCell === `${record.workerId}-${date}` &&
+                "2px solid #1890ff",
             },
             onClick: () => {
               if (!isFutureDate) {
@@ -227,7 +270,6 @@ const Attendance = () => {
           key: "workingHours",
           align: "center",
           fixed: "right",
-
         },
         {
           title: "Tungi",
@@ -235,11 +277,9 @@ const Attendance = () => {
           key: "nightWorkingHours",
           align: "center",
           fixed: "right",
-
         },
       ],
       fixed: "right",
-
     },
     {
       title: "Xizmat safari",
@@ -269,19 +309,22 @@ const Attendance = () => {
         FIO: row.workerName,
         "Ish Soati": row.workingHours,
         "Tungi Soat": row.nightWorkingHours,
-        "Voxa Soati": row.voxa,        // Voxa ish soatlari
-        "Toshkent Soati": row.toshkent // Toshkent ish soatlari
+        "Voxa Soati": row.voxa, // Voxa ish soatlari
+        "Toshkent Soati": row.toshkent, // Toshkent ish soatlari
       };
 
       for (let i = 1; i <= daysInMonth; i++) {
-        const date = dayjs(`${year}-${month}-${String(i).padStart(2, "0")}`).format("YYYY-MM-DD");
+        const date = dayjs(
+          `${year}-${month}-${String(i).padStart(2, "0")}`
+        ).format("YYYY-MM-DD");
         const dayData = row.dates[date] || {};
         const workingHours = dayData.workingHours || 0;
         const nightWorkingHours = dayData.nightWorkingHours || 0;
 
-        rowData[` ${i}`] = workingHours || nightWorkingHours
-          ? `${workingHours} / ${nightWorkingHours}`
-          : "";
+        rowData[` ${i}`] =
+          workingHours || nightWorkingHours
+            ? `${workingHours} / ${nightWorkingHours}`
+            : "";
       }
 
       return rowData;
@@ -293,19 +336,34 @@ const Attendance = () => {
 
     // Avtomatik kenglikni o'rnatish
     const columnWidths = Object.keys(excelData[0]).map((key) => ({
-      wch: Math.max(...excelData.map((row) => (row[key] || "").toString().length)) + 5,
+      wch:
+        Math.max(
+          ...excelData.map((row) => (row[key] || "").toString().length)
+        ) + 5,
     }));
     worksheet["!cols"] = columnWidths;
 
     XLSX.writeFile(workbook, `Davomat_${monthName}_${year}.xlsx`);
   };
 
-  const workerName = Workers?.find((worker) => worker._id === modalData.workerId)?.firstName + " " +
+  const workerName =
+    Workers?.find((worker) => worker._id === modalData.workerId)?.firstName +
+    " " +
     Workers?.find((worker) => worker._id === modalData.workerId)?.lastName;
 
   const uzMonths = [
-    "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
-    "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"
+    "Yanvar",
+    "Fevral",
+    "Mart",
+    "Aprel",
+    "May",
+    "Iyun",
+    "Iyul",
+    "Avgust",
+    "Sentabr",
+    "Oktabr",
+    "Noyabr",
+    "Dekabr",
   ];
 
   const formatUzbekDate = (dateString) => {
@@ -315,16 +373,17 @@ const Attendance = () => {
     return `${day}-${month}`;
   };
 
-
-  if (isLoading || workersLoading) return <Spin size="large" style={{ display: "block", margin: "20px auto" }} />;
+  if (isLoading || workersLoading)
+    return (
+      <Spin size="large" style={{ display: "block", margin: "20px auto" }} />
+    );
   return (
     <div className="story_table">
       <div className="story_nav">
-
-
         <DatePicker
           className="datePicker_nav"
-          picker="month" size="large"
+          picker="month"
+          size="large"
           value={selectedDate}
           onChange={(date) => setSelectedDate(dayjs(date))}
         />
@@ -336,7 +395,6 @@ const Attendance = () => {
         >
           Excel
         </Button>
-
       </div>
       <Table
         columns={columns}
@@ -347,10 +405,8 @@ const Attendance = () => {
         bordered
         scroll={{ x: "max-content" }}
         className="custom-table-scroll-view" // Add this class to the Table component
-
       />
-      {
-        !attendance &&
+      {!attendance && (
         <Modal
           title={
             <div className="modal-title">
@@ -372,7 +428,9 @@ const Attendance = () => {
                 className="updateAttendance-inp"
                 min={0}
                 value={modalData.workingHours}
-                onChange={(e) => setModalData({ ...modalData, workingHours: e.target.value })}
+                onChange={(e) =>
+                  setModalData({ ...modalData, workingHours: e.target.value })
+                }
               />
             </div>
             <div>
@@ -382,7 +440,12 @@ const Attendance = () => {
                 className="updateAttendance-inp"
                 min={0}
                 value={modalData.nightWorkingHours}
-                onChange={(e) => setModalData({ ...modalData, nightWorkingHours: e.target.value })}
+                onChange={(e) =>
+                  setModalData({
+                    ...modalData,
+                    nightWorkingHours: e.target.value,
+                  })
+                }
               />
             </div>
           </div>
@@ -395,12 +458,14 @@ const Attendance = () => {
               placeholder="Komandirovka joyi"
               value={modalData.location}
               onChange={(value) => {
-                const selectedData = activeOrders.find(item => item.location === value);
+                const selectedData = activeOrders.find(
+                  (item) => item.location === value
+                );
                 setModalData({
                   ...modalData,
                   location: value,
-                  region: selectedData ? selectedData.region : '',
-                  district: selectedData ? selectedData.district : ''
+                  region: selectedData ? selectedData.region : "",
+                  district: selectedData ? selectedData.district : "",
                 });
               }}
             >
@@ -411,10 +476,8 @@ const Attendance = () => {
               ))}
             </Select>
           </div>
-
-
         </Modal>
-      }
+      )}
     </div>
   );
 };

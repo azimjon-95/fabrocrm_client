@@ -4,18 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { message } from "antd";
 import axios from "../../api";
 import "./Login.css";
-import login_bg from './login-bg.png'
+import login_bg from "./login-bg.png";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(false)
-
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const { register, handleSubmit, reset } = useForm();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -24,7 +19,8 @@ const Login = () => {
       const res = await axios.post("/worker/login", data);
       message.success(res.data.message);
       console.log(res.data?.innerData?.admin?.role);
-      const { firstName = "", lastName = "" } = res.data?.innerData?.admin || {};
+      const { firstName = "", lastName = "" } =
+        res.data?.innerData?.admin || {};
       localStorage.setItem("admin_fullname", `${firstName} ${lastName}`.trim());
       localStorage.setItem("token", res.data?.innerData?.token);
       localStorage.setItem("role", res.data?.innerData?.admin?.role);
@@ -61,15 +57,16 @@ const Login = () => {
               className="login__input"
               {...register("password")}
             />
-            <i className={`fas ${isPasswordVisible ? "fa-eye-slash" : "fa-eye"}`}
+            <i
+              className={`fas ${isPasswordVisible ? "fa-eye-slash" : "fa-eye"}`}
               onClick={() => setIsPasswordVisible(!isPasswordVisible)}
             ></i>
           </div>
         </div>
-        <div className="login__check">
-
-        </div>
-        <button type="submit" disabled={loading} className="login__button">{loading ? "Loading..." : "Kirish"}</button>
+        <div className="login__check"></div>
+        <button type="submit" disabled={loading} className="login__button">
+          {loading ? "Loading..." : "Kirish"}
+        </button>
         <div className="login__register">
           Mebel zavodini avtomatlashtirish tizimiga xush kelibsiz!
         </div>

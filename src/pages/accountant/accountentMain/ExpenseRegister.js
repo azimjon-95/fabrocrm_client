@@ -11,9 +11,7 @@ import {
 import { Badge, Table, Tooltip } from "antd";
 import * as XLSX from "xlsx";
 import { IoMdRadioButtonOn } from "react-icons/io";
-import { useGetOrderListsQuery } from "../../../context/service/listApi";
-import NewOrderList from "../../store/NewOrderLists";
-import soundFile from "../../../assets/sound.mp3";
+// import soundFile from "../../../assets/sound.mp3";
 import { MdHistory } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import ExpenseForm from "./ExpenseForm";
@@ -42,10 +40,9 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
   const [open, setOpen] = useState(false);
   const [activeBox, setActiveBox] = useState("expenses");
   const [activeDataset, setActiveDataset] = useState("allExpenses");
-  const { data: orderLists } = useGetOrderListsQuery();
-  const [prevIds, setPrevIds] = useState(
-    () => JSON.parse(localStorage.getItem("prevIds")) || []
-  );
+  // const [prevIds, setPrevIds] = useState(
+  //   () => JSON.parse(localStorage.getItem("prevIds")) || []
+  // );
   const [notificationCount, setNotificationCount] = useState(0);
 
   // useEffect(() => {

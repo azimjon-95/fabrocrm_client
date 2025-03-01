@@ -19,7 +19,7 @@ const CtrlWorkers = () => {
   useEffect(() => {
     socket.on("new_worker", () => refetch());
     return () => socket.off("new_worker");
-  }, [socket]);
+  }, [refetch]);
 
   const workers = workersData?.innerData || [];
   const adminRoles = [
@@ -47,9 +47,9 @@ const CtrlWorkers = () => {
     const formattedPhone = phone.replace(/[^\d]/g, "");
     return formattedPhone.length === 9
       ? `+998 ${formattedPhone.slice(0, 2)} ${formattedPhone.slice(
-        2,
-        5
-      )} ${formattedPhone.slice(5, 7)} ${formattedPhone.slice(7, 9)}`
+          2,
+          5
+        )} ${formattedPhone.slice(5, 7)} ${formattedPhone.slice(7, 9)}`
       : phone;
   };
 
@@ -94,7 +94,7 @@ const CtrlWorkers = () => {
     accountant: "Buxgalter",
     warehouseman: "Omborchi",
     deputy: "Direktor o‘rinbosari",
-    distributor: "Yetkazib beruvchi"
+    distributor: "Yetkazib beruvchi",
   };
   return (
     <div className="ctrl-workers">

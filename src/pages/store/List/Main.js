@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Button, List, message, Select } from "antd";
-import { FiSend } from "react-icons/fi"; import { FaPlus } from "react-icons/fa";
+import { FiSend } from "react-icons/fi";
+import { FaPlus } from "react-icons/fa";
 import { AiOutlineDelete } from "react-icons/ai";
 import { DeleteOutlined } from "@ant-design/icons";
 import ActiveOrders from "./ActiveOrders";
-import {
-  useGetWorkersQuery
-} from "../../../context/service/worker";
+import { useGetWorkersQuery } from "../../../context/service/worker";
 import {
   useCreateMaterialMutation,
   useCreateOrderListMutation,
@@ -25,16 +24,18 @@ const Main = () => {
   const [inputValues, setInputValues] = useState({});
   const [createMaterial, { isLoading: isCreating }] =
     useCreateMaterialMutation();
-  const [createOrderList] =
-    useCreateOrderListMutation();
+  const [createOrderList] = useCreateOrderListMutation();
   const [deleteMaterialById] = useDeleteMaterialByIdMutation();
   const [deleteOrderList] = useDeleteOrderListMutation();
   const [updateOrderList] = useUpdateOrderListMutation();
   const [selectedDistributor, setSelectedDistributor] = useState(null);
-  const { data: data = [], refetch } = useGetNewOrderListsQuery();
+  // const { data: data = [], refetch } = useGetNewOrderListsQuery();
+  const { data = [], refetch } = useGetNewOrderListsQuery();
   const newLists = data?.innerData || null;
   const { data: workers = [] } = useGetWorkersQuery();
-  const distributor = workers?.innerData?.filter(i => i.role === "distributor");
+  const distributor = workers?.innerData?.filter(
+    (i) => i.role === "distributor"
+  );
 
   useEffect(() => {
     socket.on("newMaterial", refetch);
@@ -54,13 +55,17 @@ const Main = () => {
     }
 
     const quantityToAdd = inputValues[record._id] || 0;
-    const existingItemIndex = items.findIndex((item) => item.name === record.name);
+    const existingItemIndex = items.findIndex(
+      (item) => item.name === record.name
+    );
 
     if (existingItemIndex !== -1) {
       // Mahsulot mavjud bo‘lsa, faqat quantity ni yangilaymiz
       setItems((prevItems) =>
         prevItems.map((item, index) =>
-          index === existingItemIndex ? { ...item, quantity: quantityToAdd } : item
+          index === existingItemIndex
+            ? { ...item, quantity: quantityToAdd }
+            : item
         )
       );
     } else {
@@ -75,7 +80,10 @@ const Main = () => {
         supplier: record.supplier,
       };
 
-      await createMaterial({ orderId: newLists?._id, material: newItem }).unwrap();
+      await createMaterial({
+        orderId: newLists?._id,
+        material: newItem,
+      }).unwrap();
       message.success("Material qo‘shildi!");
 
       setItems((prevItems) => [...prevItems, newItem]);
@@ -97,10 +105,9 @@ const Main = () => {
     }
   };
 
-
   const handleCloseOrder = async () => {
     try {
-      // 
+      //
       try {
         const mewLists = {
           isNew: true,
@@ -110,7 +117,10 @@ const Main = () => {
         await createOrderList(mewLists).unwrap();
         refetch();
         if (newLists?._id) {
-          await updateOrderList({ id: newLists?._id, updateData: { isNew: false } }).unwrap();
+          await updateOrderList({
+            id: newLists?._id,
+            updateData: { isNew: false },
+          }).unwrap();
         }
 
         message.success("Yangi buyurtma yaratildi!");
@@ -136,7 +146,7 @@ const Main = () => {
         id,
         updateData: {
           sentToDistributor: true,
-          distributorId: selectedDistributor
+          distributorId: selectedDistributor,
         },
       }).unwrap();
       handleCloseOrder();
@@ -156,28 +166,23 @@ const Main = () => {
     <div className="stor_container">
       <div className="stor_todolist-one">
         <div className="list-container-nav">
-          {
-            newLists?._id &&
+          {newLists?._id && (
             <Button
               disabled={!newLists?._id || newLists?.sentToDistributor}
               onClick={() => handleUpdateDistributor(newLists?._id)}
             >
               <FiSend style={{ fontSize: "15px", marginTop: "1px" }} />{" "}
-              {newLists?.sentToDistributor
-                ? "Yuborilgan"
-                : "Yuborish"}
+              {newLists?.sentToDistributor ? "Yuborilgan" : "Yuborish"}
             </Button>
-          }
-          {
-            !newLists?._id &&
+          )}
+          {!newLists?._id && (
             <Button
               disabled={newLists?.addedToData}
               onClick={() => handleCloseOrder(newLists?._id)}
             >
-              <FaPlus style={{ fontSize: "17px" }} />{" "}
-              Yangi List
+              <FaPlus style={{ fontSize: "17px" }} /> Yangi List
             </Button>
-          }
+          )}
           <Select
             style={{
               width: 150,
@@ -190,16 +195,19 @@ const Main = () => {
               value: i._id,
             }))}
           />
-          {
-            newLists?._id &&
-            <Button style={{ width: 24, padding: 0 }}
-              disabled={!newLists?._id || newLists?.addedToData && newLists?.sentToDistributor}
+          {newLists?._id && (
+            <Button
+              style={{ width: 24, padding: 0 }}
+              disabled={
+                !newLists?._id ||
+                (newLists?.addedToData && newLists?.sentToDistributor)
+              }
               onClick={() => handleDeleteList(newLists?._id)}
               danger
             >
               <AiOutlineDelete style={{ fontSize: "17px", marginLeft: 2.5 }} />
             </Button>
-          }
+          )}
         </div>
 
         <List
@@ -247,23 +255,21 @@ const Main = () => {
           setOpenOrderList={setOpenOrderList}
         />
       </div>
-      {
-        openOrderList ? (
-          <div className="stor_todolist">
-            <SelectWarehouse
-              sentAccountant={newLists?.sentToDistributor}
-              addedToData={newLists?.addedToData}
-              isCreating={isCreating}
-              inputValues={inputValues}
-              handleAdd={handleAdd}
-              handleInputChange={handleInputChange}
-            />
-          </div>
-        ) : (
-          <ActiveOrders />
-        )
-      }
-    </div >
+      {openOrderList ? (
+        <div className="stor_todolist">
+          <SelectWarehouse
+            sentAccountant={newLists?.sentToDistributor}
+            addedToData={newLists?.addedToData}
+            isCreating={isCreating}
+            inputValues={inputValues}
+            handleAdd={handleAdd}
+            handleInputChange={handleInputChange}
+          />
+        </div>
+      ) : (
+        <ActiveOrders />
+      )}
+    </div>
   );
 };
 

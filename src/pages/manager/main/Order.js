@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import {
   Input,
@@ -10,7 +10,6 @@ import {
   Radio,
   Select,
   Form,
-  Upload,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { HiArrowSmRight } from "react-icons/hi";
@@ -28,9 +27,9 @@ const Order = () => {
   const [savedFurniture, setSavedFurniture] = useState([]);
   const [createOrder, { isLoading }] = useCreateOrderMutation();
 
-  const [image, setImage] = useState(null);
+  // const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
-  const { control, handleSubmit, watch, reset } = useForm({
+  const { control, handleSubmit, watch } = useForm({
     defaultValues: {
       paymentType: "Naqd",
       customerType: "Yuridik shaxs",
@@ -220,7 +219,7 @@ const Order = () => {
           message.error("Xatolik yuz berdi! Iltimos, qaytadan urinib ko'ring.");
         });
     },
-    [savedFurniture, navigate]
+    [savedFurniture, navigate, createOrder]
   );
 
   const options = [
@@ -256,7 +255,7 @@ const Order = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImage(URL.createObjectURL(file));
+      // setImage(URL.createObjectURL(file));
       setFile(file);
     }
   };

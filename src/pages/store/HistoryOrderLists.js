@@ -1,6 +1,5 @@
 import React from "react";
 import { Table, Button } from "antd";
-import { useGetOrderHistoryQuery } from "../../context/service/listApi";
 import { FileExcelOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import "dayjs/locale/uz";
