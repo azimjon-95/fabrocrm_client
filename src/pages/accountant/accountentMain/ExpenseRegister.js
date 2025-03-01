@@ -18,6 +18,7 @@ import { MdHistory } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import ExpenseForm from "./ExpenseForm";
 import { LiaFileDownloadSolid } from "react-icons/lia";
+import ShopsNotification from "../../store/ShopsNotification";
 
 const formatDate = (date) => date.toISOString().split("T")[0];
 const oylar = [
@@ -307,7 +308,7 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
           : "Xarajatlar Qo'shish"}
       </h3>
       <div className="box_expense-content">
-        {activeBox === "notifications" && <NewOrderList />}
+        {activeBox === "notifications" && <ShopsNotification />}
         {activeBox === "expenses" && <ExpenseForm />}
         {activeBox === "info" &&
           expenses?.innerData?.allExpenses?.length > 0 && (

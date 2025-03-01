@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, List, message, Select } from "antd";
 import { FiSend } from "react-icons/fi"; import { FaPlus } from "react-icons/fa";
 import { AiOutlineDelete } from "react-icons/ai";
@@ -19,7 +19,6 @@ import "./style.css";
 import SelectWarehouse from "../SelectWarehouse";
 import AddItems from "./AddItems";
 import socket from "../../../socket";
-
 
 const Main = () => {
   const [openOrderList, setOpenOrderList] = useState(false);
@@ -47,7 +46,6 @@ const Main = () => {
   const handleInputChange = (record, value) => {
     setInputValues((prev) => ({ ...prev, [record?._id]: value }));
   };
-
   const [items, setItems] = useState([]);
 
   const handleAdd = async (record) => {
@@ -82,11 +80,8 @@ const Main = () => {
 
       setItems((prevItems) => [...prevItems, newItem]);
     }
-
     setInputValues({});
   };
-
-
 
   const handleDelete = (id) => {
     deleteMaterialById({ orderId: newLists?._id, materialId: id }).unwrap();
@@ -111,11 +106,9 @@ const Main = () => {
           isNew: true,
           materials: [],
           sentToDistributor: false,
-          approvedByDistributor: false,
-          addedToData: false,
-          isPaid: false,
         };
         await createOrderList(mewLists).unwrap();
+        refetch();
         if (newLists?._id) {
           await updateOrderList({ id: newLists?._id, updateData: { isNew: false } }).unwrap();
         }
@@ -135,7 +128,7 @@ const Main = () => {
 
   const handleUpdateDistributor = async (id) => {
     if (!selectedDistributor) {
-      message.error("Yetkazib beruvchi yoki Do'kon tanlanmagan!");
+      message.error("Yetkazib beruvchi tanlanmagan!");
       return;
     }
     try {
@@ -143,8 +136,7 @@ const Main = () => {
         id,
         updateData: {
           sentToDistributor: true,
-          distributorId: selectedDistributor,
-          shopsId: "0"
+          distributorId: selectedDistributor
         },
       }).unwrap();
       handleCloseOrder();
@@ -156,13 +148,9 @@ const Main = () => {
     }
   };
 
-  // =======================================
-
-
   const onSecondCityChange = (value) => {
     setSelectedDistributor(value);
   };
-
 
   return (
     <div className="stor_container">
@@ -190,37 +178,6 @@ const Main = () => {
               Yangi List
             </Button>
           }
-          {/* <Select
-            placeholder="Do'konni tanlang yoki yarating"
-            loading={isLoading}
-            onChange={onSelectChange}
-            dropdownRender={(menu) => (
-              <div className="select-shops">
-                {menu}
-                <Divider
-                  style={{
-                    margin: "8px 0",
-                  }}
-                />
-                <Space
-                  style={{
-                    padding: "0 8px 4px",
-                  }}
-                >
-                  <Input
-                    placeholder="Yangi variant kiriting"
-                    ref={inputRef}
-                    value={name}
-                    onChange={onNameChange}
-                    onKeyDown={(e) => e.stopPropagation()}
-                  />
-                  <Button type="text" onClick={addItem}> <PlusOutlined /></Button>
-                </Space>
-              </div>
-            )}
-            options={computedOptions}
-            allowClear
-          /> */}
           <Select
             style={{
               width: 150,

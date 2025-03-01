@@ -25,6 +25,15 @@ export const orderApi = api.injectEndpoints({
       }),
     }),
 
+    // Create a new additional material
+    createAdditionalMaterial: builder.mutation({
+      query: (newAdditional) => ({
+        url: "/order/additional/material/",
+        method: "POST",
+        body: newAdditional,
+      }),
+    }),
+
     // Update an existing order
     updateOrder: builder.mutation({
       query: ({ id, updates }) => ({
@@ -92,10 +101,12 @@ export const {
   useUpdateOrderMutation,
   useDeleteOrderMutation,
   useCreateOrderMutation,
+  useCreateAdditionalMaterialMutation,
   useGiveMaterialMutation,
   useOrderProgressQuery,
   useGetMaterialByIdQuery,
   useGetAllMaterialByIdQuery,
   useGetDebtQuery,
   useGetDebtorsQuery,
+
 } = orderApi;
