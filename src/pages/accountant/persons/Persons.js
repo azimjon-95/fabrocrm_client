@@ -31,7 +31,13 @@ const RegisterWorker = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const userData = location.state?.userData;
-  const { control, handleSubmit, reset, setValue } = useForm();
+  const {
+    control,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm();
 
   const [createWorker, { isLoading: isCreateLoading }] =
     useCreateWorkerMutation();
@@ -311,13 +317,28 @@ const RegisterWorker = () => {
               <Controller
                 name="phone"
                 control={control}
-                rules={{ required: "Majburiy maydon" }}
+                rules={{
+                  required: "Majburiy maydon",
+                  pattern: {
+                    value: /^[0-9]{9}$/,
+                    message: "Faqat 9 ta raqam kiriting",
+                  },
+                }}
                 render={({ field }) => (
-                  <Input
-                    size="large"
-                    {...field}
-                    placeholder="Введите номер телефона (xx xxx xx xx)"
-                  />
+                  <>
+                    <Input
+                      size="large"
+                      {...field}
+                      placeholder="Введите номер телефона (xx xxx xx xx)"
+                      maxLength={9}
+                      onInput={(e) =>
+                        (e.target.value = e.target.value.replace(/\D/g, ""))
+                      } // Faqat raqam kiritishga ruxsat
+                    />
+                    {errors.phone && (
+                      <p style={{ color: "red" }}>{errors.phone.message}</p>
+                    )}
+                  </>
                 )}
               />
             </Form.Item>
