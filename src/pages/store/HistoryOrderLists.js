@@ -136,8 +136,7 @@ const HistoryOrderLists = ({ list }) => {
       order.sentToDistributor ? "Ha" : "Yo'q",
       order.approvedByDistributor ? "Ha" : "Yo'q",
       order.addedToData ? "Ha" : "Yo'q",
-      `${dayjs(order.createdAt).date()}-${
-        uzMonths[dayjs(order.createdAt).month()]
+      `${dayjs(order.createdAt).date()}-${uzMonths[dayjs(order.createdAt).month()]
       } / ${dayjs(order.createdAt).format("HH:mm")}`,
     ]);
 
