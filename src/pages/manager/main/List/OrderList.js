@@ -2,8 +2,8 @@ import React, { useState, useMemo, useEffect } from "react";
 import {
   useGetOrdersQuery,
   useOrderProgressQuery,
-  useUpdateOrderMutation,
   useDeleteOrderMutation,
+  useCompleteOrderMutation,
 } from "../../../../context/service/orderApi";
 import {
   Dropdown,
@@ -44,10 +44,11 @@ const ViewOrder = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const newOrders = orders?.innerData?.filter((order) => order.isType === true);
-  const [updateOrder] = useUpdateOrderMutation();
   const [deleteOrder] = useDeleteOrderMutation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegion, setSelectedRegion] = useState(null);
+  // useCompleteOrderMutation
+  const [completeOrder] = useCompleteOrderMutation();
 
   // let newOrders2 = [];
   // orders?.innerData.map((i) => {
@@ -79,8 +80,9 @@ const ViewOrder = () => {
 
   const handleClick = async (orderId) => {
     try {
-      await updateOrder({ id: orderId, updates: { isType: false } });
+      await completeOrder({ orderId }).unwrap();
       message.success("Buyurtma yopildi");
+      refetchOrders();
     } catch (error) {
       message.error(error.message || "Buyurtma yopishda xatolik yuz berdi");
       console.error("Xatolik yuz berdi:", error);
@@ -91,6 +93,7 @@ const ViewOrder = () => {
     try {
       await deleteOrder(orderId).unwrap();
       message.success("Buyurtma o‘chirildi");
+      refetchOrders();
     } catch (error) {
       console.error("Xatolik yuz berdi:", error);
       message.error(error.message || "Buyurtma o‘chirishda xatolik yuz berdi");

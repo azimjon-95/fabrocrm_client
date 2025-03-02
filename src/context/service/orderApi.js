@@ -92,6 +92,15 @@ export const orderApi = api.injectEndpoints({
     getDebtors: builder.query({
       query: () => "/ordergetdebtors",
     }),
+
+
+    completeOrder: builder.mutation({
+      query: (data) => ({
+        url: "/complete-order",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -108,5 +117,6 @@ export const {
   useGetAllMaterialByIdQuery,
   useGetDebtQuery,
   useGetDebtorsQuery,
+  useCompleteOrderMutation
 
 } = orderApi;

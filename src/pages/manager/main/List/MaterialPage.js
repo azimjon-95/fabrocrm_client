@@ -41,13 +41,13 @@ const MaterialItem = ({ material, orderId }) => {
                 Miqdori: {material.quantity} {material.unit}
               </p>
               <p>
-                Jami: {materialData?.totalQuantity || 0} {material.unit}
+                Jami: {materialData?.totalQuantity || 0} {materialData.unit}
               </p>
             </div>
             <div>
               <p>Narxi: {material.price.toLocaleString()} so‘m</p>
               <p>
-                Jami: {(material.price * material.quantity).toLocaleString()}{" "}
+                Jami: {(material.price * materialData?.totalQuantity).toLocaleString()}{" "}
                 so‘m
               </p>
             </div>
