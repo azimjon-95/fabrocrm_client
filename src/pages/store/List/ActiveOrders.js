@@ -13,19 +13,40 @@ const ActiveOrders = () => {
   const newOrders = orders?.innerData?.filter((order) => order.isType === true);
 
   const uniqueRegions = useMemo(() => {
-    return [...new Set(newOrders?.map((order) => order?.address?.region).filter(Boolean))];
+    return [
+      ...new Set(
+        newOrders?.map((order) => order?.address?.region).filter(Boolean)
+      ),
+    ];
   }, [newOrders]);
 
   const filteredOrders = useMemo(() => {
     return newOrders?.filter((order) => {
-      const matchesSearch = order.orders?.map((i) => i.name?.toLowerCase().includes(searchTerm?.toLowerCase()));
-      const matchesRegion = selectedRegion ? order?.address?.region === selectedRegion : true;
+      const matchesSearch = order.orders?.map((i) =>
+        i.name?.toLowerCase().includes(searchTerm?.toLowerCase())
+      );
+      const matchesRegion = selectedRegion
+        ? order?.address?.region === selectedRegion
+        : true;
       return matchesSearch && matchesRegion;
     });
   }, [newOrders, searchTerm, selectedRegion]);
 
   const formatDateUzbek = (date) => {
-    const months = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"];
+    const months = [
+      "Yanvar",
+      "Fevral",
+      "Mart",
+      "Aprel",
+      "May",
+      "Iyun",
+      "Iyul",
+      "Avgust",
+      "Sentabr",
+      "Oktabr",
+      "Noyabr",
+      "Dekabr",
+    ];
     const d = new Date(date);
     return `${d.getDate()}-${months[d.getMonth()]}`;
   };
@@ -33,13 +54,23 @@ const ActiveOrders = () => {
   const columns = [
     {
       title: "Mebel nomi",
-      render: (_, record) => record?.orders?.map((i) => <p>{i.name}</p>)
+      render: (_, record) =>
+        record?.orders?.map((i, index) => <p key={index}>{i.name}</p>),
     },
-    { title: "Sanasi", dataIndex: "date", key: "date", render: formatDateUzbek },
+    {
+      title: "Sanasi",
+      dataIndex: "date",
+      key: "date",
+      render: formatDateUzbek,
+    },
     {
       title: "Manzili",
       key: "address",
-      render: (_, record) => <span>{record.address.region}, {record.address.district}</span>,
+      render: (_, record) => (
+        <span>
+          {record.address.region}, {record.address.district}
+        </span>
+      ),
     },
     {
       title: "Materiallar",
@@ -49,7 +80,9 @@ const ActiveOrders = () => {
       render: (_, record) => {
         return record ? (
           <Link to={`/store/materials/${record._id}`}>
-            <EyeOutlined style={{ marginRight: 5, fontSize: "20px", color: "#0A3D3A" }} />
+            <EyeOutlined
+              style={{ marginRight: 5, fontSize: "20px", color: "#0A3D3A" }}
+            />
           </Link>
         ) : (
           "Mavjud emas"
@@ -63,7 +96,7 @@ const ActiveOrders = () => {
 
   return (
     <div className="stor_todolist">
-      <div className="customer-navbar" >
+      <div className="customer-navbar">
         <Input
           size="small"
           placeholder="Mijozni qidirish..."
@@ -79,28 +112,26 @@ const ActiveOrders = () => {
           style={{ width: 200, height: 40 }}
           onChange={setSelectedRegion}
         >
-          {uniqueRegions.map((region) => (
-            <Select.Option key={region} value={region}>{region}</Select.Option>
+          {uniqueRegions.map((region, index) => (
+            <Select.Option key={index} value={region}>
+              {region}
+            </Select.Option>
           ))}
         </Select>
-
       </div>
 
-      <div className="custom-tables" style={{ overflowX: 'auto' }}>
+      <div className="custom-tables" style={{ overflowX: "auto" }}>
         <Table
           dataSource={filteredOrders}
           columns={columns}
-          rowKey="_id"
+          rowKey={"_id"}
           bordered
           pagination={false}
           size="small"
         />
       </div>
-
-
     </div>
   );
 };
 
 export default ActiveOrders;
-

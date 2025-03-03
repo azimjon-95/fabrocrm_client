@@ -53,8 +53,6 @@ const MainCards = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
-  console.log(balancValues);
-
   return (
     <div
       style={{ marginBottom: isState ? 10 : 20 }}

@@ -22,6 +22,8 @@ const ExpenseForm = () => {
   const [selectedCategory, setSelectedCategory] = useState(""); // tanlangan xarajat turi
   const [selectedType, setSelectedType] = useState("income"); // tanlangan xarajat turi
   const [selectedDate, setSelectedDate] = useState(dayjs()); // tanlangan xarajat turi
+  const [soldoFrom, setSoldoFrom] = useState(dayjs());
+  const [soldoTo, setSoldoTo] = useState(dayjs());
 
   const [createExpense] = useCreateExpenseMutation();
   const [updateBalance] = useUpdateBalanceMutation();
@@ -83,6 +85,7 @@ const ExpenseForm = () => {
     "Qaytgan mablag‘",
     "Davlat subsidiyasi",
     "Boshqa daromadlar",
+    "Soldo",
   ];
 
   const chiqim_royhati = [
@@ -230,7 +233,6 @@ const ExpenseForm = () => {
   // Handle input change and format value
   const handleChange = (e) => {
     const { value } = e.target;
-
     const formattedValue = formatNumber(value);
     setExpenseAmount(formattedValue);
   };
@@ -331,6 +333,7 @@ const ExpenseForm = () => {
           }}
         />
       </div>
+
       {/* KIMGA | NIMAGA */}
       {options?.length ? (
         <div className="ish-haqi-avans">
@@ -341,6 +344,7 @@ const ExpenseForm = () => {
               onChange={(date) => setSelectedDate(dayjs(date))}
             />
           )}
+
           <AsyncSelect
             cacheOptions
             defaultOptions={options}
@@ -385,11 +389,45 @@ const ExpenseForm = () => {
       ) : (
         ""
       )}
-      <Input
-        placeholder="Pul miqdori"
-        value={expenseAmount}
-        onChange={handleChange}
-      />
+      {["Soldo"]?.includes(expenseCategory) && (
+        <div style={{ display: "flex", gap: "10px" }}>
+          <DatePicker
+            // picker="date"
+            value={soldoFrom}
+            onChange={(date) => {
+              if (date) {
+                setSoldoFrom(dayjs(date));
+              }
+            }}
+            format="YYYY-MM-DD"
+            placeholder="Dan"
+          />
+          <DatePicker
+            // picker="date"
+            value={soldoTo}
+            onChange={(date) => {
+              if (date) {
+                setSoldoTo(dayjs(date));
+              }
+            }}
+            format="YYYY-MM-DD"
+            placeholder="Gacha"
+          />
+
+          <Input
+            placeholder="Pul miqdori"
+            value={expenseAmount}
+            onChange={handleChange}
+          />
+        </div>
+      )}
+      {!["Soldo"]?.includes(expenseCategory) && (
+        <Input
+          placeholder="Pul miqdori"
+          value={expenseAmount}
+          onChange={handleChange}
+        />
+      )}
 
       <Input.TextArea
         placeholder="Qo‘shimcha Ma'lumot"
