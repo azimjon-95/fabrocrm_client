@@ -327,10 +327,8 @@ const ViewOrder = () => {
     {
       title: "Budjet",
       render: (paid, item) => {
-        let totalBudget = item?.orders?.reduce(
-          (total, order) => total + order.budget,
-          0
-        );
+        const totalBudget = item?.orders?.reduce((sum, item) => sum + (item.budget * (item.quantity || 1)), 0) || 0;
+
         return (
           <div className="text-green-500">
             {item?.paymentType ? <p>Tulov turi: {item?.paymentType} </p> : ""}

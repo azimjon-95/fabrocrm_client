@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Input, Select, Button, Form } from "antd";
+import { Input, Select, Button, message, Form } from "antd";
 import {
   SearchOutlined,
-  ArrowLeftOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
+import { TbArrowBackUpDouble } from "react-icons/tb";
 import { useGetAllStoresQuery } from "../../../context/service/storeApi";
 import { GiTakeMyMoney } from "react-icons/gi";
 import { useNavigate, useParams } from "react-router-dom";
 import { IoCheckmarkSharp } from "react-icons/io5";
 import { MdOutlineAdd, MdOutlineAddShoppingCart } from "react-icons/md";
 import {
-  useGetOrderByIdQuery,
-  useUpdateOrderMutation,
+  useGetOrderByIdQuery, useCreateAdditionalMaterialMutation
 } from "../../../context/service/orderApi";
 import "./style.css";
 
@@ -30,21 +29,27 @@ const OrderMengement = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMaterials, setSelectedMaterials] = useState([]);
-  const [openBudget, setOpenBudget] = useState(true);
+  const [createAdditionalMaterial, { loading: isCreating }] = useCreateAdditionalMaterialMutation();
   const [orderId, setOrderID] = useState(null);
-
-  const [updateOrder] = useUpdateOrderMutation();
+  const [materials, setMaterials] = useState([]);
+  const [isForm, setIsForm] = useState(false);
   const { data: allStores = [] } = useGetAllStoresQuery();
   const { data: orderData } = useGetOrderByIdQuery(id);
   let order = orderData?.innerData;
+  const Price = materials?.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0) || 0;
+  const totalPrice = selectedMaterials?.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0) || 0;
+
+
+  useEffect(() => {
+    if (order?.orders) {
+      setMaterials(order.orders.flatMap(orderItem => orderItem.materials || []));
+    }
+  }, [order]);
 
   useEffect(() => {
     localStorage.setItem("order", JSON.stringify(order));
   }, [order]);
 
-  useEffect(() => {
-    setOpenBudget(selectedMaterials.length === 0);
-  }, [selectedMaterials]);
 
   useEffect(() => {
     const storedOrder = localStorage.getItem("order");
@@ -78,11 +83,11 @@ const OrderMengement = () => {
 
   const handleAddMaterialNew = () => {
     // Generate a unique ID using random string + length
-    const uniqueId = `67d${Math.random().toString(36).substr(2, 9)}new${selectedMaterials.length + 1
-      }`;
+    const uniqueId = `67d${Math.random().toString(36).substr(2, 9)}new${selectedMaterials.length + 1}`;
 
     const newMaterial = {
       id: uniqueId,
+      orderId,
       name: formDataNew?.name,
       price: formDataNew?.price,
       quantity: formDataNew?.quantity,
@@ -119,40 +124,62 @@ const OrderMengement = () => {
   };
 
   // Tanlangan materialni qo'shish
-  const handleAddMaterial = (mat) => {
-    setSelectedMaterials((prevState) => {
-      const existingMaterial = prevState.find((item) => item.id === mat._id);
-      const quantity = inputValues[mat._id] || 1; // Agar input bo'sh bo'lsa, 1 qiymatini oladi
+  const handleAddMaterial = async (mat) => {
+    const quantity = inputValues[mat._id] || 1;
 
-      if (existingMaterial) {
-        return prevState.map((item) =>
-          item.id === mat._id ? { ...item, quantity: Number(quantity) } : item
-        );
-      } else {
-        return [
-          ...prevState,
-          {
-            id: mat._id,
-            name: mat.name,
-            quantity: Number(quantity),
-            unit: mat.unit,
-            price: mat.pricePerUnit,
-            materialID: mat._id,
-          },
-        ];
-      }
-    });
+    // Use the mat object to get the material data directly
+    const newAdditional = {
+      materialID: mat._id,
+      name: mat.name,
+      quantity: quantity,
+      unit: mat.unit,
+      price: mat.pricePerUnit,
+      orderId: id,
+      orderCardId: orderId,
+    };
 
-    setInputValues((prevState) => ({
-      ...prevState,
-      [mat._id]: "", // Inputni tozalash
-    }));
+    try {
+      // Create the material via the API call
+      const response = await createAdditionalMaterial(newAdditional).unwrap();
+      message.success(response.message || "Material muvaffaqiyatli berildi!");
+
+      // Now update the state after the successful creation of the material
+      setSelectedMaterials((prevState) => {
+        const existingMaterial = prevState.find((item) => item.id === mat._id);
+
+        let updatedMaterials;
+        if (existingMaterial) {
+          updatedMaterials = prevState.map((item) =>
+            item.id === mat._id ? { ...item, quantity: Number(quantity) } : item
+          );
+        } else {
+          updatedMaterials = [
+            ...prevState,
+            {
+              id: mat._id,
+              name: mat.name,
+              quantity: Number(quantity),
+              orderId,
+              unit: mat.unit,
+              price: mat.pricePerUnit,
+              materialID: mat._id,
+            },
+          ];
+        }
+        return updatedMaterials;
+      });
+
+      // Clear the input field after adding the material
+      setInputValues((prevState) => ({
+        ...prevState,
+        [mat._id]: "", // Inputni tozalash
+      }));
+
+    } catch (error) {
+      message.error(error.message || "Xatolik yuz berdi, qayta urinib ko'ring!");
+    }
   };
 
-  const totalPrice = selectedMaterials.reduce(
-    (sum, mat) => sum + mat.price * mat.quantity,
-    0
-  );
 
   const closeAndSave = () => {
     let order = JSON.parse(localStorage.getItem("order"));
@@ -168,43 +195,18 @@ const OrderMengement = () => {
   };
   const createNewOrder = () => {
     closeAndSave();
-    let order = JSON.parse(localStorage.getItem("order") || "{}");
-    updateOrder({ id, updates: order })
-      .then((res) => {
-        if (res.data.state) {
-          navigate("/main/orders");
-          localStorage.removeItem("order");
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    navigate("/main/orders");
+    localStorage.removeItem("order");
   };
 
-  let orderState;
-  try {
-    orderState = JSON.parse(localStorage.getItem("order"))?.orders?.some(
-      (i) => i.materials.length > 0
-    );
-  } catch (e) {
-    orderState = false;
-  }
-
-  let findedOrder;
-  try {
-    findedOrder = JSON.parse(localStorage.getItem("order"))?.orders?.find(
-      (i) => i._id === orderId
-    );
-  } catch (e) {
-    findedOrder = {};
-  }
+  const allMaterials = orderId ? selectedMaterials : materials;
   return (
     <>
       <Form layout="vertical" className="order-form-main">
         <div className="create_order_box">
           {!orderId ? (
             <div className="create_order_left">
-              <h3>Buyurtmalar</h3>
+              <h3 style={{ textAlign: "center" }}>Buyurtmalar</h3>
               <div className="create_order_left-box">
                 {order?.orders?.map((item, index) => (
                   <div
@@ -236,8 +238,10 @@ const OrderMengement = () => {
                         cursor: "pointer",
                         borderRadius: "5px",
                       }}
-                      onClick={() => setOrderID(item._id)}
-                    >
+                      onClick={() => {
+                        setOrderID(item._id)
+                        setSelectedMaterials(item?.materials)
+                      }}>
                       Materiallar
                     </button>
                   </div>
@@ -246,25 +250,22 @@ const OrderMengement = () => {
             </div>
           ) : (
             <div className="create_order_right">
+              <Input
+                placeholder="Mahsulotlarni qidiring..."
+                onChange={(e) => setSearchQuery(e.target.value)}
+                prefix={<SearchOutlined />}
+                style={{ width: "100%" }}
+                className="warehouse-navbar_inp"
+              />
               <div className="form-data-container">
-                <div className="backnext">
-                  <Button
-                    type="primary"
-                    icon={<ArrowLeftOutlined />}
-                    onClick={() => navigate(-1)}
-                    style={{ width: "30px", background: "#0A3D3A" }}
-                    size="large"
-                  />
-                </div>
-                <Input
-                  placeholder="Mahsulotlarni qidiring..."
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  prefix={<SearchOutlined />}
-                  style={{ width: "100%" }}
-                  className="warehouse-navbar_inp"
-                />
+                <h3>Ombor</h3>
+                <Button
+                  type="primary"
+                  onClick={() => closeAndSave()}
+                >
+                  <TbArrowBackUpDouble />
+                </Button>
               </div>
-              <h3>Ombor</h3>
               <div className="create_order_right-box">
                 {filteredData?.map((mat) => (
                   <div key={mat._id} className="material-item">
@@ -292,7 +293,7 @@ const OrderMengement = () => {
                       className="full-width"
                       placeholder="Miqdori"
                     />
-                    <Button onClick={() => handleAddMaterial(mat)}>
+                    <Button loading={isCreating} onClick={() => handleAddMaterial(mat)}>
                       <IoCheckmarkSharp />
                     </Button>
                   </div>
@@ -302,9 +303,9 @@ const OrderMengement = () => {
           )}
 
           <div className="create_order_main">
-            <h3>{findedOrder?.name} uchun mahsulotlar!</h3>
+            <h3>Tanlangan mahsulotlar!</h3>
             <div className="inp_add_pro_myorder">
-              {selectedMaterials.map((mat, inx) => (
+              {allMaterials?.map((mat, inx) => (
                 <div key={inx} className="selected-material-item">
                   <p>
                     <strong style={{ color: "#333" }}>{inx + 1})</strong>{" "}
@@ -326,17 +327,17 @@ const OrderMengement = () => {
 
             <div className="inp_add_pro_cont">
               <Button
-                onClick={() => setOpenBudget(!openBudget)}
+                onClick={() => setIsForm(!isForm)}
                 className="inp_add_pro_btn"
               >
-                {openBudget ? <GiTakeMyMoney /> : <MdOutlineAddShoppingCart />}
+                {isForm ? <GiTakeMyMoney /> : <MdOutlineAddShoppingCart />}
               </Button>
               <p>
-                {openBudget
+                {isForm
                   ? "Omborda mavjud bo‘lmagan mahsulotni qo‘shish!"
                   : "Mebel uchun sarflanadigan mahsulotlarning umumiy narxi!"}
               </p>
-              {openBudget ? (
+              {isForm ? (
                 <div className="inp_add_pro_box">
                   <Form layout="vertical" className="inp_add_pro_boxnewForm">
                     <Form.Item
@@ -436,37 +437,23 @@ const OrderMengement = () => {
                         color: "#0A3D3A",
                       }}
                     >
-                      {totalPrice.toLocaleString()} so'm
+                      {totalPrice === 0 ? Price.toLocaleString() : totalPrice.toLocaleString()} so'm
                     </p>
                   </Form.Item>
 
                   <Form.Item label=" ">
-                    {order?.orders?.length === 1 || orderState ? (
-                      <Button
-                        onClick={() => createNewOrder()}
-                        style={{
-                          width: "200px",
-                          height: "40px",
-                          background: "#0A3D3A",
-                        }}
-                        type="primary"
-                        htmlType="button"
-                      >
-                        Buyurtmani yaratish
-                      </Button>
-                    ) : (
-                      <Button
-                        style={{
-                          width: "200px",
-                          height: "40px",
-                          background: "#0A3D3A",
-                        }}
-                        type="primary"
-                        onClick={() => closeAndSave()}
-                      >
-                        Yopish
-                      </Button>
-                    )}
+                    <Button
+                      onClick={() => createNewOrder()}
+                      style={{
+                        width: "200px",
+                        height: "40px",
+                        background: "#0A3D3A",
+                      }}
+                      type="primary"
+                      htmlType="button"
+                    >
+                      Buyurtmani yaratish
+                    </Button>
                   </Form.Item>
                 </div>
               )}
