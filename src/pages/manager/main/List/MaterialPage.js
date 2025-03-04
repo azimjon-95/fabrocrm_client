@@ -14,6 +14,8 @@ const MaterialItem = ({ material, orderId }) => {
     useGetStoreByCustomerIdQuery(material?.materialID);
   const { data: materialData, isLoading: isMaterialLoading } =
     useGetMaterialByIdQuery({ orderId, materialId: material._id });
+  console.log(material);
+
   return (
     <List.Item key={material._id}>
       <Card
@@ -41,13 +43,16 @@ const MaterialItem = ({ material, orderId }) => {
                 Miqdori: {material.quantity} {material.unit}
               </p>
               <p>
-                Jami: {materialData?.totalQuantity || 0} {materialData.unit}
+                Jami: {materialData?.totalQuantity || 0} {materialData?.unit}
               </p>
             </div>
             <div>
               <p>Narxi: {material.price.toLocaleString()} so‘m</p>
               <p>
-                Jami: {(material.price * materialData?.totalQuantity).toLocaleString()}{" "}
+                Jami:{" "}
+                {(
+                  +material.price * +materialData?.totalQuantity || 0
+                ).toLocaleString()}{" "}
                 so‘m
               </p>
             </div>
