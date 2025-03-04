@@ -10,7 +10,7 @@ const ActiveOrders = () => {
   const { data: orders, error, isLoading } = useGetOrdersQuery();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegion, setSelectedRegion] = useState(null);
-  const newOrders = orders?.innerData?.filter((order) => order.isType === true);
+  const newOrders = orders?.innerData?.filter((order) => order.isType === true && order.isActive === true);
 
   const uniqueRegions = useMemo(() => {
     return [...new Set(newOrders?.map((order) => order?.address?.region).filter(Boolean))];
@@ -83,7 +83,6 @@ const ActiveOrders = () => {
             <Select.Option key={region} value={region}>{region}</Select.Option>
           ))}
         </Select>
-
       </div>
 
       <div className="custom-tables" style={{ overflowX: 'auto' }}>

@@ -29,7 +29,6 @@ const OrderMengement = () => {
   let id = useParams().id;
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [budget, setBudget] = useState("");
   const [selectedMaterials, setSelectedMaterials] = useState([]);
   const [openBudget, setOpenBudget] = useState(true);
   const [orderId, setOrderID] = useState(null);
@@ -59,7 +58,6 @@ const OrderMengement = () => {
         setSelectedMaterials(foundOrder.materials);
       }
 
-      setBudget(order.budget);
     } catch (error) {
       console.error("JSON parse error:", error);
     }
@@ -80,9 +78,8 @@ const OrderMengement = () => {
 
   const handleAddMaterialNew = () => {
     // Generate a unique ID using random string + length
-    const uniqueId = `67d${Math.random().toString(36).substr(2, 9)}new${
-      selectedMaterials.length + 1
-    }`;
+    const uniqueId = `67d${Math.random().toString(36).substr(2, 9)}new${selectedMaterials.length + 1
+      }`;
 
     const newMaterial = {
       id: uniqueId,
@@ -161,14 +158,13 @@ const OrderMengement = () => {
     let order = JSON.parse(localStorage.getItem("order"));
     order.orders = order.orders?.map((i) =>
       i._id === orderId
-        ? { ...i, materials: selectedMaterials, budget: +budget }
+        ? { ...i, materials: selectedMaterials }
         : i
     );
 
     localStorage.setItem("order", JSON.stringify(order));
     setOrderID(null);
     setSelectedMaterials([]);
-    setBudget(0);
   };
   const createNewOrder = () => {
     closeAndSave();
@@ -176,7 +172,6 @@ const OrderMengement = () => {
     updateOrder({ id, updates: order })
       .then((res) => {
         if (res.data.state) {
-          console.log(">>>", res.data);
           navigate("/main/orders");
           localStorage.removeItem("order");
         }
@@ -228,7 +223,9 @@ const OrderMengement = () => {
                       src={item.image}
                       alt=""
                     />
-                    <b style={{ flex: 1 }}>{item.name}</b>{" "}
+                    <b style={{ width: "30%" }}>{item.name}</b>{" "}
+                    <b style={{ width: "30%" }}>{item.quantity}-ta</b>{" "}
+                    <b style={{ width: "30%" }}>{item.budget.toLocaleString()} so'm</b>{" "}
                     <button
                       style={{
                         background: "#0A3D3A",
@@ -241,7 +238,7 @@ const OrderMengement = () => {
                       }}
                       onClick={() => setOrderID(item._id)}
                     >
-                      tanlash
+                      Materiallar
                     </button>
                   </div>
                 ))}
@@ -442,14 +439,7 @@ const OrderMengement = () => {
                       {totalPrice.toLocaleString()} so'm
                     </p>
                   </Form.Item>
-                  <Form.Item label="Buyurtma budjeti (so'm)">
-                    <Input
-                      style={{ width: "200px" }}
-                      value={budget}
-                      onChange={(e) => setBudget(e.target.value)}
-                      placeholder="Бюджет заказа"
-                    />
-                  </Form.Item>
+
                   <Form.Item label=" ">
                     {order?.orders?.length === 1 || orderState ? (
                       <Button
@@ -461,18 +451,21 @@ const OrderMengement = () => {
                         }}
                         type="primary"
                         htmlType="button"
-                        disabled={!budget}
                       >
                         Buyurtmani yaratish
                       </Button>
                     ) : (
-                      <button
-                        type="button"
-                        disabled={!budget}
+                      <Button
+                        style={{
+                          width: "200px",
+                          height: "40px",
+                          background: "#0A3D3A",
+                        }}
+                        type="primary"
                         onClick={() => closeAndSave()}
                       >
                         Yopish
-                      </button>
+                      </Button>
                     )}
                   </Form.Item>
                 </div>

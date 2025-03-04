@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Form, Input, InputNumber, Button, Table, message, Space, Row, Col } from 'antd';
+import { Form, Input, InputNumber, Divider, Button, Table, message, Space, Row, Col } from 'antd';
 import { useCreateWorkingHoursMutation, useGetAllWorkingHoursQuery, useUpdateWorkingHoursMutation, useDeleteWorkingHoursMutation } from '../../../context/service/workingHours';
 
 const SettingsPage = () => {
     // Hooks for CRUD operations
-    const { data, isLoading, error } = useGetAllWorkingHoursQuery();
+    const { data, isLoading, error, refetch } = useGetAllWorkingHoursQuery();
     const [createWorkingHours] = useCreateWorkingHoursMutation();
     const [updateWorkingHours] = useUpdateWorkingHoursMutation();
     const [deleteWorkingHours] = useDeleteWorkingHoursMutation();
@@ -14,15 +14,18 @@ const SettingsPage = () => {
 
     // Handle form submission
     const onFinish = async (values) => {
+
         try {
             if (editingId) {
                 // Update existing entry
                 await updateWorkingHours({ id: editingId, ...values });
                 message.success('Ish Haqqi va Ish Vaqti yangilandi!');
+                refetch()
             } else {
                 // Create new entry
                 await createWorkingHours(values);
                 message.success('Ish Haqqi va Ish Vaqti qo\'shildi!');
+                refetch()
             }
             form.resetFields();
             setEditingId(null); // Reset editing state
@@ -34,63 +37,84 @@ const SettingsPage = () => {
     // Handle editing an existing item
     const handleEdit = (record) => {
         form.setFieldsValue({
-            wages: record.wages,
-            workingHours: record.workingHours,
-            overtimeWages: record.overtimeWages,
-            commanderLocation: record.commanderLocation,
             voxa: record.voxa,
             toshkent: record.toshkent,
             vodiy: record.vodiy,
+            companyName: record.companyName,
+            address: record.address,
+            INN: record.INN,
+            MFO: record.MFO,
+            accountNumber: record.accountNumber,
+            phoneNumber: record.phoneNumber,
         });
-        setEditingId(record.id);
+        setEditingId(record._id);
     };
 
     // Handle delete operation
     const handleDelete = async (id) => {
         try {
             await deleteWorkingHours(id);
-            message.success('Ma\'lumot muvaffaqiyatli o\'chirildi!');
+            message.success('Данные успешно удалены!');
+            refetch();
         } catch (err) {
-            message.error('Xatolik yuz berdi, qaytadan urinib ko\'ring.');
+            message.error('Произошла ошибка, попробуйте снова.');
         }
     };
 
     // Table columns definition
     const columns = [
         {
-            title: 'Ish Haqqi (soatda)',
-            dataIndex: 'wages',
-            key: 'wages',
-            render: (text) => new Intl.NumberFormat('uz-UZ').format(text) + ' Sum',
+            title: 'Kompaniya nomi',
+            dataIndex: 'companyName',
+            key: 'companyName',
         },
         {
-            title: 'Oshiqcha Soat Uchun:  Ish Haqqi',
-            dataIndex: 'overtimeWages',
-            key: 'overtimeWages',
-            render: (text) => new Intl.NumberFormat('uz-UZ').format(text) + ' Sum',
+            title: 'Manzil',
+            dataIndex: 'address',
+            key: 'address',
         },
         {
-            title: 'Ish Vaqti',
-            dataIndex: 'workingHours',
-            key: 'workingHours',
+            title: 'STIR',
+            dataIndex: 'INN',
+            key: 'INN',
         },
         {
-            title: 'Voxa',
-            dataIndex: 'voxa',
-            key: 'voxa',
-            render: (text) => `${text}%`,
+            title: 'MFO',
+            dataIndex: 'MFO',
+            key: 'MFO',
         },
         {
-            title: 'Toshkent',
-            dataIndex: 'toshkent',
-            key: 'toshkent',
-            render: (text) => `${text}%`,
+            title: 'Hisob raqami',
+            dataIndex: 'accountNumber',
+            key: 'accountNumber',
         },
         {
-            title: 'Vodiy',
-            dataIndex: 'vodiy',
-            key: 'vodiy',
-            render: (text) => `${text}%`,
+            title: 'Telefon raqami',
+            dataIndex: 'phoneNumber',
+            key: 'phoneNumber',
+        },
+        {
+            title: "Qo'shimcha foizlar",
+            children: [
+                {
+                    title: 'Voxa',
+                    dataIndex: 'voxa',
+                    key: 'voxa',
+                    render: (text) => `${text}%`,
+                },
+                {
+                    title: 'Toshkent',
+                    dataIndex: 'toshkent',
+                    key: 'toshkent',
+                    render: (text) => `${text}%`,
+                },
+                {
+                    title: 'Vodiy',
+                    dataIndex: 'vodiy',
+                    key: 'vodiy',
+                    render: (text) => `${text}%`,
+                },
+            ]
         },
         {
             title: 'Amallar',
@@ -100,85 +124,101 @@ const SettingsPage = () => {
                     <Button style={{ background: "#0A3D3A" }} type="primary" onClick={() => handleEdit(record)}>
                         Tahrirlash
                     </Button>
-                    <Button style={{ color: "#0A3D3A" }} type="danger" onClick={() => handleDelete(record.id)}>
-                        O\'chirish
+                    <Button style={{ color: "#0A3D3A" }} type="danger" onClick={() => handleDelete(record._id)}>
+                        O‘chirish
                     </Button>
                 </Space>
             ),
         },
     ];
 
+
     // If data is loading or there’s an error
-    if (isLoading) return <p>Ma'lumotlar yuklanmoqda...</p>;
-    if (error) return <p>Xatolik yuz berdi!</p>;
+    if (error) return <p>Произошла ошибка!</p>;
 
     return (
         <div style={{ background: '#fff', borderRadius: '8px' }}>
-            <h2 style={{ textAlign: 'center', color: '#0A3D3A' }}>Ish Haqqi va Ish Vaqti Sozlamalari</h2>
+            <h2 style={{ textAlign: 'center', color: '#0A3D3A' }}>Kompaniya malumotlari</h2>
 
             {/* Form for creating and editing */}
             <Form
                 form={form}
                 layout="vertical"
                 onFinish={onFinish}
-                initialValues={{
-                    wages: 0,
-                    workingHours: '09:00 - 18:00',
-                    commanderLocation: { voxa: 0, toshkent: 0, vodiy: 0 }
-                }} // Default values
             >
                 <Row gutter={16}>
-                    <Col span={8}>
+                    <Col span={12}>
                         <Form.Item
-                            name="wages"
-                            label="Ish Haqqi (soatda)"
-                            rules={[{ required: true, message: 'Ish haqini kiriting!' }]}
+                            name="companyName"
+                            label="Kompaniya Nomi"
+                            rules={[{ required: true, message: 'Введите название компании!' }]}
                         >
-                            <InputNumber
-                                style={{ width: '100%' }}
-                                min={0}
-                                placeholder="Masalan: 15,000"
-                                addonAfter="UZS"
-                            />
+                            <Input placeholder="Введите название компании" />
                         </Form.Item>
                     </Col>
 
-                    <Col span={8}>
+                    <Col span={12}>
                         <Form.Item
-                            name="overtimeWages"
-                            label="Oshiqcha Soat Uchun:  Ish Haqqi"
-                            rules={[{ required: true, message: 'Overtime haqqini kiriting!' }]}
+                            name="address"
+                            label="Manzil"
+                            rules={[{ required: true, message: 'Введите адрес!' }]}
                         >
-                            <InputNumber
-                                style={{ width: '100%' }}
-                                min={0}
-                                placeholder="Masalan: 20,000"
-                                addonAfter="UZS"
-                            />
-                        </Form.Item>
-                    </Col>
-
-                    <Col span={8}>
-                        <Form.Item
-                            name="workingHours"
-                            label="Ish Vaqti"
-                            rules={[{ required: true, message: 'Ish vaqtini kiriting!' }]}
-                        >
-                            <Input placeholder="Masalan: 09:00 - 18:00" />
+                            <Input placeholder="Введите адрес" />
                         </Form.Item>
                     </Col>
                 </Row>
+                <Row gutter={16}>
+                    <Col span={6}>
+                        <Form.Item
+                            name="INN"
+                            label="INN"
+                            rules={[{ required: true, message: 'Введите ИНН!' }]}
+                        >
+                            <Input placeholder="Введите ИНН" />
+                        </Form.Item>
+                    </Col>
 
+                    <Col span={6}>
+                        <Form.Item
+                            name="MFO"
+                            label="MFO"
+                            rules={[{ required: true, message: 'Введите МФО!' }]}
+                        >
+                            <Input placeholder="Введите МФО" />
+                        </Form.Item>
+                    </Col>
+
+                    <Col span={6}>
+                        <Form.Item
+                            name="accountNumber"
+                            label="Hisob Raqami"
+                            rules={[{ required: true, message: 'Введите номер счета!' }]}
+                        >
+                            <Input placeholder="Введите номер счета" />
+                        </Form.Item>
+                    </Col>
+
+                    <Col span={6}>
+                        <Form.Item
+                            name="phoneNumber"
+                            label="Telefon Raqami"
+                            rules={[{ required: true, message: 'Введите номер телефона!' }]}
+                        >
+                            <Input placeholder="Введите номер телефона" />
+                        </Form.Item>
+                    </Col>
+                </Row>
+                <Divider>Kamanderovka ish soati foizlari</Divider>
                 <Row gutter={16}>
                     <Col span={8}>
                         <Form.Item
                             name="voxa"
-                            label="Voxa (Latitude)"
-                            rules={[{ required: true, message: 'Voxa joylashuvini kiriting!' }]}
+                            label="Voxa"
+                            rules={[{ required: true, message: 'Введите значение для Вокзала!' }]}
                         >
                             <InputNumber
                                 style={{ width: '100%' }}
-                                placeholder="Masalan: 20%"
+                                placeholder="Например: 20%"
                             />
                         </Form.Item>
                     </Col>
@@ -186,12 +226,12 @@ const SettingsPage = () => {
                     <Col span={8}>
                         <Form.Item
                             name="toshkent"
-                            label="Toshkent (Longitude)"
-                            rules={[{ required: true, message: 'Toshkent joylashuvini kiriting!' }]}
+                            label="Toshkent"
+                            rules={[{ required: true, message: 'Введите значение для Ташкента!' }]}
                         >
                             <InputNumber
                                 style={{ width: '100%' }}
-                                placeholder="Masalan: 15%"
+                                placeholder="Например: 15%"
                             />
                         </Form.Item>
                     </Col>
@@ -199,12 +239,12 @@ const SettingsPage = () => {
                     <Col span={8}>
                         <Form.Item
                             name="vodiy"
-                            label="Vodiy (Altitude)"
-                            rules={[{ required: true, message: 'Vodiy joylashuvini kiriting!' }]}
+                            label="Vodiy"
+                            rules={[{ required: true, message: 'Введите значение для Долины!' }]}
                         >
                             <InputNumber
                                 style={{ width: '100%' }}
-                                placeholder="Masalan: 0%"
+                                placeholder="Например: 0%"
                             />
                         </Form.Item>
                     </Col>
@@ -221,14 +261,15 @@ const SettingsPage = () => {
             <Table
                 columns={columns}
                 dataSource={data?.innerData || []}
-                rowKey="id"
+                rowKey="_id"
                 pagination={false}
                 style={{ marginTop: '20px' }}
+                loading={isLoading}
+                bordered
+                size="small"
             />
         </div>
     );
 };
 
 export default SettingsPage;
-
-

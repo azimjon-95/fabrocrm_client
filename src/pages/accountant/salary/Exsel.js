@@ -1,142 +1,128 @@
-import React, { useMemo } from "react";
+import React, { useState } from "react";
 import { Button } from "antd";
-import { FileExcelOutlined } from "@ant-design/icons";
-import * as XLSX from "xlsx";
-import { useGetMonthlyAttendanceQuery } from "../../../context/service/attendance";
+import dayjs from "dayjs";
 import { useGetAllWorkingHoursQuery } from "../../../context/service/workingHours";
-import { useGetRelevantExpensesQuery } from "../../../context/service/expensesApi";
-import "./style.css";
+import { FileExcelOutlined } from "@ant-design/icons";
+import { useGetWorkersQuery } from "../../../context/service/worker";
+import { useGetMonthlyAttendanceQuery } from "../../../context/service/attendance";
+import "./style.css"; import * as XLSX from "xlsx";
 
-const Exsel = ({ selectedDate }) => {
-  const year = selectedDate.year();
-  const month = String(selectedDate.month() + 1).padStart(2, "0");
-
-  // Ma'lumotlarni olish
+const Exsel = () => {
+  const [selectedDate] = useState(dayjs());
   const { data: dataSalary } = useGetAllWorkingHoursQuery();
   const salaryDataObj = dataSalary?.innerData?.[0] || {};
 
-  const { data } = useGetMonthlyAttendanceQuery({ year, month });
+  const year = selectedDate.year();
+  const month = String(selectedDate.month() + 1).padStart(2, "0");
+  const { data: dataWorkers } = useGetWorkersQuery();
+  const adminRoles = [
+    "manager",
+    "seller",
+    "director",
+    "accountant",
+    "warehouseman",
+    "deputy_director",
+  ];
+  const Workers = dataWorkers?.innerData.filter(
+    (worker) => !adminRoles.includes(worker.role)
+  );
 
-  // Bu yerda hookdan foydalanamiz
-  const { data: allExpensesData, isLoading } = useGetRelevantExpensesQuery({
-    date: selectedDate.toISOString(),
+  const { data, isLoading } = useGetMonthlyAttendanceQuery({
+    year,
+    month,
   });
 
-  // Ma'lumotlarni guruhlash va qayta ishlash
-  const tableData = useMemo(() => {
-    const groupedData = {};
+  const groupedData = data?.innerData?.reduce((acc, curr) => {
+    const { workerId, workerName, workingHours, nightWorkingHours, status } =
+      curr;
+    const hours = +workingHours || 0;
+    const nightHours = +nightWorkingHours || 0;
+    const location = status?.loc?.toLowerCase();
 
-    data?.innerData?.forEach(({ workerId, workerName, workingHours, status }) => {
-      if (!groupedData[workerId]) {
-        groupedData[workerId] = {
-          workerId,
-          workerName,
-          hoursFrom1To10: 0,
-          hoursAbove10: 0,
-          voxa: 0,
-          toshkent: 0,
-        };
-      }
-      const hours = +workingHours;
-      if (status?.loc === "voxa") groupedData[workerId].voxa += hours;
-      else if (status?.loc === "toshkent") groupedData[workerId].toshkent += hours;
-      else {
-        if (hours > 10) {
-          groupedData[workerId].hoursFrom1To10 += 10;
-          groupedData[workerId].hoursAbove10 += hours - 10;
-        } else {
-          groupedData[workerId].hoursFrom1To10 += hours;
-        }
-      }
-    });
+    acc[workerId] = acc[workerId] || {
+      workerId,
+      workerName,
+      workingHours: 0,
+      nightWorkingHours: 0,
+      voxa: 0,
+      toshkent: 0,
+    };
 
-    return Object.values(groupedData).map((worker) => {
-      const workerExpenses =
-        allExpensesData?.innerData?.filter(
-          (expense) => expense.relevantId === worker.workerId
-        ) || [];
+    acc[workerId].nightWorkingHours += nightHours;
 
-      const totalAvans = workerExpenses
-        .filter((expense) => expense.category === "Avans")
-        .reduce((sum, expense) => sum + (expense.amount || 0), 0);
+    if (location === "voxa") {
+      acc[workerId].voxa += hours;
+    } else if (location === "toshkent") {
+      acc[workerId].toshkent += hours;
+    } else {
+      acc[workerId].workingHours += hours;
+    }
 
-      const totalIshHaqi = workerExpenses
-        .filter((expense) => expense.category === "Ish haqi")
-        .reduce((sum, expense) => sum + (expense.amount || 0), 0);
+    return acc;
+  }, {});
 
-      const remainingSalary =
-        worker.hoursFrom1To10 * salaryDataObj.wages +
-        worker.hoursAbove10 * salaryDataObj.overtimeWages -
-        totalIshHaqi -
-        totalAvans;
+  // Agar groupedData mavjud bo'lmasa, bo'sh massiv qaytariladi
+  const tableData = Object.values(groupedData || {}).map((worker) => {
+    const { voxa, toshkent, workingHours, nightWorkingHours, workerId } =
+      worker;
 
-      const totalVoxa =
-        worker.voxa *
-        (salaryDataObj.wages +
-          (salaryDataObj.wages * (salaryDataObj.voxa || 0)) / 100);
-      const totalToshkent =
-        worker.toshkent *
-        (salaryDataObj.wages +
-          (salaryDataObj.wages * (salaryDataObj.toshkent || 0)) / 100);
+    const {
+      voxa: voxaPercent = 0,
+      toshkent: toshkentPercent = 0,
+    } = salaryDataObj || {};
+    // Worker ma'lumotlarini Workers massividan olish
+    const matchingWorker = Workers?.find((w) => w._id === workerId);
+    const workerName = matchingWorker
+      ? `${matchingWorker.firstName} ${matchingWorker.lastName}`
+      : worker.workerName;
 
-      return {
-        ...worker,
-        salary: worker.hoursFrom1To10 * salaryDataObj.wages,
-        extraSalary: worker.hoursAbove10 * salaryDataObj.overtimeWages,
-        totalVoxa,
-        totalToshkent,
-        maosh: {
-          totalIshHaqi,
-          totalAvans,
-          remainingSalary,
-        },
-        totalSalary:
-          worker.hoursFrom1To10 * salaryDataObj.wages +
-          worker.hoursAbove10 * salaryDataObj.overtimeWages +
-          totalVoxa +
-          totalToshkent,
-      };
-    });
-  }, [data, salaryDataObj, allExpensesData]);
+    const wages = +matchingWorker?.hourlySalary;
+    const overtimeWages = +matchingWorker?.hourlySalary * 2;
+
+    const baseSalary = workingHours * (wages || 0);
+    const extraSalary = nightWorkingHours * (overtimeWages || 0);
+
+    const monthlySalary = +matchingWorker?.salary;
+    const totalVoxa = voxa * (wages + (wages * voxaPercent) / 100);
+    const totalToshkent = toshkent * (wages + (wages * toshkentPercent) / 100);
+
+    return {
+      ...worker,
+      workerName, // Yangilangan ism va familya
+      salary: baseSalary,
+      extraSalary,
+      monthlySalary,
+      totalVoxa,
+      totalToshkent,
+      totalSalary: baseSalary + extraSalary + totalVoxa + totalToshkent,
+    };
+  });
 
   const handleExport = () => {
-    const formattedData = tableData.map((record) => ({
-      "Ism Familya": record.workerName,
-      "Ish soat va Haqi": `${record.hoursFrom1To10} soat\n${record.salary.toLocaleString()} so‘m`,
-      "+ Ish soat va Haqi": `${record.hoursAbove10} soat\n${record.extraSalary.toLocaleString()} so‘m`,
-      "Toshkent 15%": `${record.toshkent} soat\n${record.totalToshkent.toLocaleString()} so‘m`,
-      "Voxa 20%": `${record.voxa} soat\n${record.totalVoxa.toLocaleString()} so‘m`,
-      "Jami maosh": `${record.totalSalary.toLocaleString()} so'm`,
+    const wsData = tableData.map((worker) => ({
+      "Ism Familya": worker.workerName,
+      "Ish soat va Haqi": `${worker.workingHours} soat / ${worker.salary.toLocaleString()} so‘m`,
+      "+ Ish soat va Haqi": `${worker.nightWorkingHours} soat / ${worker.extraSalary.toLocaleString()} so‘m`,
+      [`Toshkent ${salaryDataObj.toshkent || 0}%`]: `${worker.toshkent} soat / ${worker.totalToshkent.toLocaleString()} so‘m`,
+      [`Voxa ${salaryDataObj.voxa || 0}%`]: `${worker.voxa} soat / ${worker.totalVoxa.toLocaleString()} so‘m`,
+      "Jami maosh": `${worker.totalSalary.toLocaleString()} so‘m`,
+      "Berilgan maosh": `${worker.totalSalary.toLocaleString()} so‘m`,
+      "Qoldiq": `${worker.totalSalary.toLocaleString()} so‘m`,
+      "Maosh": `${worker.monthlySalary.toLocaleString()} so‘m`,
     }));
 
-    const worksheet = XLSX.utils.json_to_sheet(formattedData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Maosh malumotlari");
+    // Create worksheet from the data
+    const ws = XLSX.utils.json_to_sheet(wsData);
 
-    const columnWidths = Object.keys(formattedData[0] || {}).map((key) => {
-      const maxLength = Math.max(
-        ...formattedData.map((item) => item[key]?.toString().length || 0)
-      );
-      return { wch: maxLength + 5 };
-    });
-    worksheet["!cols"] = columnWidths;
+    // Apply autofilter to headers
+    ws["!autofilter"] = { ref: ws['!ref'] };
 
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-    const blob = new Blob([excelBuffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
+    // Create a new workbook and append the worksheet
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Salary Data");
 
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "maosh_malumotlari.xlsx";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    // Trigger file download
+    XLSX.writeFile(wb, "salary_data.xlsx");
   };
 
   return (

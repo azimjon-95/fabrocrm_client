@@ -74,9 +74,7 @@ const ViewPersons = () => {
         return { formattedDate, adjustedAge, birthdayMessage };
     };
 
-    const adminRoles = ["manager", "seller", "director", "accountant", "warehouseman", "deputy_director", "distributor"];
-    const Admins = filteredWorkers.filter(worker => adminRoles.includes(worker.role));
-    const Workers = filteredWorkers.filter(worker => !adminRoles.includes(worker.role));
+
 
     const roleMapping = {
         manager: "Menejer",
@@ -157,48 +155,28 @@ const ViewPersons = () => {
             <div style={{ display: "flex", gap: "10px" }}>
                 <Input placeholder="Qidirish..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} size="small" prefix={<SearchOutlined style={{ color: "#cdcdcd" }} />} />
                 <Button size="large" type="primary" style={{ background: "#0A3D3A" }} icon={<PlusOutlined />} onClick={() => navigate(activeTab === "active" ? "/director/add/worker" : "/worker/add")}>
-                    {activeTab === "active" ? "Hodimlarni qabul qilish" : "Ishchilarni qabul qilish"}
+                    Hodimlarni qabul qilish
                 </Button>
                 <Button size="large" type="default" icon={<DownloadOutlined />}>Excel</Button>
             </div>
-            <Tabs activeKey={activeTab} onChange={setActiveTab} size="large">
-                <Tabs.TabPane tab="Ishchilar" key="all">
-                    <Table
-                        columns={columns}
-                        dataSource={Workers}
-                        rowKey="_id"
-                        loading={isLoading}
-                        pagination={false}
-                        size="small"
-                        bordered
-                        scroll={{ y: 500 }}  // Scroll berish uchun
-                        style={{
-                            maxHeight: '650px',
-                            overflowY: 'auto',
-                            border: '1px solid #ddd',
-                            borderRadius: '5px'
-                        }}
-                    />
-                </Tabs.TabPane>
-                <Tabs.TabPane tab="Hodimlar" key="active">
-                    <Table
-                        columns={columns}
-                        dataSource={Admins}
-                        rowKey="_id"
-                        loading={isLoading}
-                        pagination={false}
-                        size="small"
-                        bordered
-                        scroll={{ y: 500 }}  // Scroll berish uchun
-                        style={{
-                            maxHeight: '650px',
-                            overflowY: 'auto',
-                            border: '1px solid #ddd',
-                            borderRadius: '5px'
-                        }}
-                    />
-                </Tabs.TabPane>
-            </Tabs>
+
+            <Table
+                columns={columns}
+                dataSource={filteredWorkers}
+                rowKey="_id"
+                loading={isLoading}
+                pagination={false}
+                size="small"
+                bordered
+                scroll={{ y: 500 }}  // Scroll berish uchun
+                style={{
+                    maxHeight: '650px',
+                    overflowY: 'auto',
+                    border: '1px solid #ddd',
+                    borderRadius: '5px',
+                    marginTop: "5px"
+                }}
+            />
         </div>
     );
 };

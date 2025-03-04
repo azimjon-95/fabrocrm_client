@@ -4,6 +4,7 @@ import {
   useOrderProgressQuery,
   useDeleteOrderMutation,
   useCompleteOrderMutation,
+  useUpdateOrderMutation,
 } from "../../../../context/service/orderApi";
 import {
   Dropdown,
@@ -27,9 +28,11 @@ import {
 import { BookOutlined } from "@ant-design/icons";
 import { EyeOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
+import { FaToggleOn, } from 'react-icons/fa'
 import { SearchOutlined } from "@ant-design/icons";
 import "./style.css";
 import dayjs from "dayjs";
+import { FaFileDownload } from "react-icons/fa";
 import { useNavigate } from "react-router-dom"; // Sahifaga yo‘naltirish uchun
 import socket from "../../../../socket";
 
@@ -47,16 +50,9 @@ const ViewOrder = () => {
   const [deleteOrder] = useDeleteOrderMutation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegion, setSelectedRegion] = useState(null);
-  // useCompleteOrderMutation
+  //   useUpdateOrderMutation
+  const [updateOrder] = useUpdateOrderMutation();
   const [completeOrder] = useCompleteOrderMutation();
-
-  // let newOrders2 = [];
-  // orders?.innerData.map((i) => {
-  //   let { orders, ...qolgani } = i;
-  //   orders.map((j) => {
-  //     newOrders2.push({ ...j, ...qolgani });
-  //   });
-  // });
 
   useEffect(() => {
     socket.on("newOrder", () => {
@@ -237,6 +233,23 @@ const ViewOrder = () => {
       >
         Zakazni yopish
       </Menu.Item>
+
+      <Menu.Item
+        key="update"
+        onClick={() => navigate(`/orders/update/${record._id}`)}
+        icon={<EditOutlined />}
+      >
+        Yangilash
+      </Menu.Item>
+      <Menu.Item
+        key="active"
+        style={{ color: record?.isActive && "green" }}
+        icon={<FaToggleOn />}
+        onClick={() => handleIsActive(record._id)}
+      >
+        {record?.isActive ? "Faol" : "Faollashtirish"}
+      </Menu.Item>
+
       <Menu.Item
         key="delete"
         onClick={() => handleDelete(record._id)}
@@ -245,15 +258,19 @@ const ViewOrder = () => {
       >
         Zakazni o‘chirish
       </Menu.Item>
-      <Menu.Item
-        key="update"
-        onClick={() => navigate(`/orders/update/${record._id}`)}
-        icon={<EditOutlined />}
-      >
-        Yangilash
-      </Menu.Item>
     </Menu>
   );
+
+  const handleIsActive = async (id) => {
+    try {
+      await updateOrder({ id, updates: { isActive: true } }).unwrap();
+      message.success("Buyurtma Faollashtirildi");
+      refetchOrders();
+    } catch (error) {
+      console.error("Xatolik yuz berdi:", error);
+      message.error(error.message || "Buyurtma o‘chirishda xatolik yuz berdi");
+    }
+  };
 
   const columns = [
     // {
@@ -277,10 +294,35 @@ const ViewOrder = () => {
     //   },
     // },
     {
+      title: "Holati",
+      dataIndex: "isActive",
+      key: "isActive",
+      align: "center",
+      render: (isActive) => (
+        <span
+          style={{
+            display: "inline-block",
+            width: 10,
+            height: 10,
+            borderRadius: "50%",
+            backgroundColor: isActive ? "green" : "red",
+            boxShadow: `0 0 5px ${isActive ? "green" : "red"}`,
+            animation: "pulse 1.5s infinite"
+          }}
+        />
+      ),
+    },
+    {
       title: "Nomi",
       dataIndex: "name",
       key: "name",
-      render: (i, item) => item.orders?.map((i) => <p key={i._id}>{i.name}</p>),
+      render: (_, item) => (
+        <div className="order-names">
+          {item.orders?.map((order) => (
+            <p key={order._id} className="order-name">{order.name} - {order.quantity}</p>
+          ))}
+        </div>
+      ),
     },
     {
       title: "Budjet",
@@ -353,18 +395,28 @@ const ViewOrder = () => {
       title: "Materiallar",
       dataIndex: "materials",
       key: "materials",
+      align: "center",
       render: (_, record) => (
-        <Link to={`/orders/materials/${record._id}`}>Ko‘rish</Link>
+        <Link style={{ color: "#0A3D3A" }} to={`/orders/materials/${record._id}`}>Ko‘rish</Link>
+      ),
+    },
+    {
+      title: "Tijorat Taklifi",
+      align: "center",
+      render: (_, record) => (
+        <Link to={`/order-list/${record._id}`} style={{ fontSize: "20px", color: "#0A3D3A" }}><FaFileDownload /></Link>
       ),
     },
     {
       title: "Amallar",
       key: "actions",
+      align: "center",
       render: (_, record) => (
         <Dropdown overlay={menu(record)} trigger={["click"]}>
           <Button icon={<MoreOutlined />} />
         </Dropdown>
       ),
+
     },
   ];
 

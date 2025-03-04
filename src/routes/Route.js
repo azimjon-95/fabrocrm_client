@@ -24,6 +24,7 @@ import WarehouseView from "../pages/director/Main/WarehouseView";
 import CtrlWorkers from "../pages/director/Main/CtrlWorkers";
 import ViewOrder from "../pages/director/Main/ViewOrder";
 import Distributor from "../pages/distributor/Distributor";
+import PdfList from "../components/pdf/PdfList";
 
 export const routes = [
   {
@@ -71,6 +72,12 @@ export const routes = [
   {
     path: "/order/givn/material/:id",
     element: <GivnMaterial />,
+    private: true,
+    role: ["manager", "deputy"],
+  },
+  {
+    path: "/order-list/:id",
+    element: <PdfList />,
     private: true,
     role: ["manager", "deputy"],
   },

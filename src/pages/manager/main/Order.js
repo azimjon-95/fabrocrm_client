@@ -48,86 +48,6 @@ const Order = () => {
 
   const customerType = watch("customerType");
 
-  // const onSubmit = useCallback(
-  //   (data) => {
-  //     // Agar barcha majburiy maydonlar to'ldirilmagan bo'lsa, funksiyani to'xtatish
-  //     if (!data.customerType || !data.fullName || !data.phone || !data.address) {
-  //       message.warning("Iltimos, barcha majburiy maydonlarni to'ldiring!");
-  //       return;
-  //     }
-
-  //     const myData = {
-  //       customerType: data.customerType,
-  //       fullName: data.fullName,
-  //       paid: +0,
-  //       address: {
-  //         region: data.address.region,
-  //         district: data.address.district,
-  //         street: data.address.street,
-  //         location: sessionStorage.getItem("location"),
-  //       },
-  //       description: data.description,
-  //       date: moment(data.date).toISOString(),
-  //       estimatedDays: data.estimatedDays,
-  //       customer: {
-  //         type: data.customerType,
-  //         fullName: data.fullName,
-  //         phone: data.phone,
-  //         companyName: data.companyName,
-  //         director: data.director,
-  //         inn: +data.inn,
-  //         paymentType: data.paymentType,
-  //       },
-  //       orders: savedFurniture, // savedFurniture qo'shildi
-  //     };
-
-  //     const formData = new FormData();
-
-  //     formData.append("date", myData.date);
-  //     formData.append("estimatedDays", myData.estimatedDays);
-  //     formData.append("customerType", myData.customerType);
-  //     formData.append("paid", myData.paid);
-
-  //     // Mijoz ma'lumotlarini qo'shish
-  //     formData.append("customer[type]", myData.customer.type);
-  //     formData.append("customer[fullName]", myData.customer.fullName);
-  //     formData.append("customer[phone]", myData.customer.phone);
-  //     formData.append("customer[companyName]", myData.customer.companyName);
-  //     formData.append("customer[director]", myData.customer.director);
-  //     formData.append("customer[inn]", myData.customer.inn);
-
-  //     // **Saved Furniture ma'lumotlarini qo'shish**
-  //     savedFurniture.forEach((item, index) => {
-  //       formData.append(`savedFurniture[${index}][name]`, item.name);
-  //       formData.append(`savedFurniture[${index}][dimensions][length]`, item.dimensions.length);
-  //       formData.append(`savedFurniture[${index}][dimensions][width]`, item.dimensions.width);
-  //       formData.append(`savedFurniture[${index}][dimensions][height]`, item.dimensions.height);
-
-  //       // Rasmlarni qo'shish (agar mavjud bo'lsa)
-  //       if (item.images && item.images.length > 0) {
-  //         item.images.forEach((image, imgIndex) => {
-  //           formData.append(`savedFurniture[${index}][images][${imgIndex}]`, image);
-  //         });
-  //       }
-  //     });
-
-  //     // Manzilni optimallashtirib qo'shish
-  //     Object.entries(myData.address).forEach(([key, value]) => {
-  //       formData.append(`address[${key}]`, value);
-  //     });
-
-  //     createOrder(formData)
-  //       .then((res) => {
-  //         console.log(res);
-  //         message.success("Buyurtma muvaffaqiyatli yaratildi!");
-  //         navigate("/order/mengement", { state: res?._id });
-  //       })
-  //       .catch((err) => {
-  //         message.error("Xatolik yuz berdi! Iltimos, qaytadan urinib ko'ring.");
-  //       });
-  //   },
-  //   [savedFurniture, navigate]
-  // );
   const onSubmit = useCallback(
     (data) => {
       if (
@@ -140,31 +60,30 @@ const Order = () => {
         return;
       }
 
-      const myData = {
-        fullName: data.fullName,
-        paid: 0,
-        address: {
-          region: data.address.region,
-          district: data.address.district,
-          street: data.address.street,
-          location: sessionStorage.getItem("location"),
-        },
-        description: data.description,
-        date: moment(data.date).toISOString(),
-        estimatedDays: data.estimatedDays,
-        customer: {
-          type: data.customerType,
-          fullName: data.fullName,
-          phone: data.phone,
-          companyName: data.companyName,
-          director: data.director,
-          inn: data.inn || "",
-          paymentType: data.paymentType,
-        },
-        isType: true,
-        orders: savedFurniture,
-      };
-      console.log(myData);
+      // const myData = {
+      //   fullName: data.fullName,
+      //   paid: 0,
+      //   address: {
+      //     region: data.address.region,
+      //     district: data.address.district,
+      //     street: data.address.street,
+      //     location: sessionStorage.getItem("location"),
+      //   },
+      //   description: data.description,
+      //   date: moment(data.date).toISOString(),
+      //   estimatedDays: data.estimatedDays,
+      //   customer: {
+      //     type: data.customerType,
+      //     fullName: data.fullName,
+      //     phone: data.phone,
+      //     companyName: data.companyName,
+      //     director: data.director,
+      //     inn: data.inn || "",
+      //     paymentType: data.paymentType,
+      //   },
+      //   isType: true,
+      //   orders: savedFurniture,
+      // };
 
       const formData = new FormData();
       formData.append("fullName", data.fullName);
@@ -201,6 +120,7 @@ const Order = () => {
           item.dimensions.height
         );
         formData.append(`orders[${index}][budget]`, item.budget);
+        formData.append(`orders[${index}][quantity]`, item.quantity);
 
         if (item.image) {
           formData.append("images", item.image);
@@ -235,22 +155,32 @@ const Order = () => {
       width: "",
       height: "",
     },
+    budget: "",
+    quantity: 1,
   });
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === "name") {
-      setFormData({ ...formData, name: value });
-    } else {
-      setFormData({
-        ...formData,
+
+    if (["length", "width", "height"].includes(name)) {
+      // O'lchamlar (dimensions) obyektini yangilash
+      setFormData((prevData) => ({
+        ...prevData,
         dimensions: {
-          ...formData.dimensions,
+          ...prevData.dimensions,
           [name]: value,
         },
-      });
+      }));
+    } else {
+      // Barcha boshqa maydonlarni (name, budget, quantity) yangilash
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
     }
   };
+
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -265,7 +195,8 @@ const Order = () => {
       formData.name &&
       formData.dimensions.length &&
       formData.dimensions.width &&
-      formData.dimensions.height &&
+      formData.budget &&
+      formData.quantity &&
       file
     ) {
       const newFurniture = {
@@ -276,8 +207,10 @@ const Order = () => {
           height: formData.dimensions.height,
         },
         image: file,
-        budget: 0,
+        quantity: +formData.quantity,
+        budget: (+formData.budget * +formData.quantity),
       };
+
       setSavedFurniture([...savedFurniture, newFurniture]);
       setFormData({
         name: "",
@@ -286,6 +219,8 @@ const Order = () => {
           width: "",
           height: "",
         },
+        quantity: 0,
+        budget: ""
       });
       setFile(null);
     }
@@ -459,13 +394,33 @@ const Order = () => {
         </Row>
 
         <Row gutter={12}>
-          <Col span={12}>
+          <Col span={6}>
             <Form.Item label="Mebel nomi">
               <Input
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Mebel nomini kiriting"
+              />
+            </Form.Item>
+          </Col>
+          <Col span={3}>
+            <Form.Item label="Miqdori">
+              <Input
+                name="quantity"
+                value={formData.quantity}
+                onChange={handleChange}
+                placeholder="Mebel sonini kiriting"
+              />
+            </Form.Item>
+          </Col>
+          <Col span={3}>
+            <Form.Item label="Budjeti">
+              <Input
+                name="budget"
+                value={formData.budget}
+                onChange={handleChange}
+                placeholder="Mebel narxini kiriting"
               />
             </Form.Item>
           </Col>
@@ -520,7 +475,7 @@ const Order = () => {
             <Form.Item label="Qo'shish">
               <Button
                 type="primary"
-                onClick={handleSaveFurniture}
+                onClick={() => handleSaveFurniture()}
                 className="saveButton"
               >
                 <GrAdd />
@@ -541,32 +496,53 @@ const Order = () => {
                 <List.Item>
                   <div
                     style={{
+                      width: "100%",
                       display: "flex",
-                      justifyContent: "space-between",
                       alignItems: "center",
+                      justifyContent: "space-between"
                     }}
                   >
-                    <div>
-                      <strong>Nomi:</strong> {item.name}
-                      <br />
-                      <strong>Razmerlar:</strong> {item.dimensions.length}sm (U)
-                      × {item.dimensions.width}sm (E) × {item.dimensions.height}
-                      sm (B)
+                    <div style={{
+                      display: "flex",
+                      alignItems: "center",
+                      flexDirection: "column",
+                    }}>
+                      <div style={{
+                        width: "100%",
+                        display: "flex",
+                        gap: "12px"
+                      }}>
+                        <div><strong>Nomi:</strong> {item.name}</div>
+                        <div><strong>Miqdori:</strong> {item.quantity}</div>
+                        <div><strong>Narxi:</strong> {item.budget}</div>
+                        <div><strong>Jami:</strong> {+item.budget * +item.quantity}</div>
+                      </div>
+
+                      <div style={{
+                        width: "100%",
+                        display: "flex",
+                        gap: "12px"
+                      }}>
+                        <div>
+                          <strong>Razmerlar:</strong> {item.dimensions.length}sm (U)
+                          × {item.dimensions.width}sm (E) × {item.dimensions.height}
+                          sm (B)
+                        </div>
+
+                      </div>
                     </div>
-                    <div>
-                      {item.image && (
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          style={{
-                            width: "50px",
-                            height: "50px",
-                            objectFit: "cover",
-                            borderRadius: "4px",
-                          }}
-                        />
-                      )}
-                    </div>
+                    {item.image && (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          objectFit: "cover",
+                          borderRadius: "4px",
+                        }}
+                      />
+                    )}
                   </div>
                 </List.Item>
               )}

@@ -98,7 +98,7 @@ const AccountentMain = () => {
   useEffect(() => {
     const card = cardRef.current;
     if (!card) return;
-    const resizeObserver = new ResizeObserver(() => {});
+    const resizeObserver = new ResizeObserver(() => { });
     resizeObserver.observe(card);
     return () => resizeObserver.disconnect();
   }, []);
@@ -139,7 +139,7 @@ const AccountentMain = () => {
           ) : (
             <ul>
               {zakazlar
-                ?.filter((i) => i.isType === true)
+                ?.filter((i) => i.isType === true && i.isActive === true)
                 ?.map((order, index) => (
                   <li key={index} className="order-item">
                     <div className="order-info">

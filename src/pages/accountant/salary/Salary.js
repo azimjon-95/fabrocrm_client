@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, Spin, DatePicker, Empty } from "antd";
+import { Table, Spin, DatePicker, Empty, Tooltip } from "antd";
 import {
   ClockCircleOutlined,
   DollarOutlined,
@@ -13,6 +13,7 @@ import { useGetMonthlyAttendanceQuery } from "../../../context/service/attendanc
 import { useGetRelevantExpensesQuery } from "../../../context/service/expensesApi";
 import "./style.css";
 import Exsel from "./Exsel";
+
 
 const Salary = () => {
   const [selectedDate, setSelectedDate] = useState(dayjs());
@@ -72,22 +73,24 @@ const Salary = () => {
   const tableData = Object.values(groupedData || {}).map((worker) => {
     const { voxa, toshkent, workingHours, nightWorkingHours, workerId } =
       worker;
+
     const {
-      wages,
-      overtimeWages,
       voxa: voxaPercent = 0,
       toshkent: toshkentPercent = 0,
     } = salaryDataObj || {};
-
     // Worker ma'lumotlarini Workers massividan olish
     const matchingWorker = Workers?.find((w) => w._id === workerId);
     const workerName = matchingWorker
       ? `${matchingWorker.firstName} ${matchingWorker.lastName}`
       : worker.workerName;
 
+    const wages = +matchingWorker?.hourlySalary;
+    const overtimeWages = +matchingWorker?.hourlySalary * 2;
+
     const baseSalary = workingHours * (wages || 0);
     const extraSalary = nightWorkingHours * (overtimeWages || 0);
 
+    const monthlySalary = +matchingWorker?.salary;
     const totalVoxa = voxa * (wages + (wages * voxaPercent) / 100);
     const totalToshkent = toshkent * (wages + (wages * toshkentPercent) / 100);
 
@@ -96,6 +99,7 @@ const Salary = () => {
       workerName, // Yangilangan ism va familya
       salary: baseSalary,
       extraSalary,
+      monthlySalary,
       totalVoxa,
       totalToshkent,
       totalSalary: baseSalary + extraSalary + totalVoxa + totalToshkent,
@@ -183,7 +187,16 @@ const Salary = () => {
     return (
       <div className="css-dev-only-do-box">
         <div>
-          <strong></strong> {remainingSalary.toLocaleString()} so‘m
+          <Tooltip title="Hodim jami olingan maosh va avanlarndan qolgan qoldiq summa">
+            <strong style={{ borderBottom: "1px dotted grey", cursor: "progress" }}>Qoldiq:</strong>
+          </Tooltip> {" "}
+          {remainingSalary.toLocaleString()} so‘m
+        </div>
+        <div>
+          <Tooltip title="Ishchi 26 kun ishlasa, kuniga 10 soatdan jami 260 soat ishlasa, ushbu summa olingan maoshni tashkil etadi">
+            <strong style={{ borderBottom: "1px dotted grey", cursor: "progress" }}>Maosh:</strong>
+          </Tooltip> {" "}
+          {record?.monthlySalary.toLocaleString('uz-UZ')} so‘m
         </div>
       </div>
     );
@@ -272,7 +285,7 @@ const Salary = () => {
       },
     },
     {
-      title: "Qoldiq maosh", // Umumiy ish haqi va qoldiq summa
+      title: "Maosh", // Umumiy ish haqi va qoldiq summa
       key: "finalSalary",
       render: (_, record) => {
         return <UserSalary record={record} />;
@@ -311,3 +324,5 @@ const Salary = () => {
 };
 
 export default Salary;
+
+
