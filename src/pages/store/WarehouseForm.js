@@ -12,13 +12,14 @@ import {
   Row,
   Radio,
   message,
-  Divider, Space
+  Divider,
+  Space,
 } from "antd";
 
 import {
   SearchOutlined,
   EditOutlined,
-  DeleteOutlined
+  DeleteOutlined,
 } from "@ant-design/icons";
 import { RiSendPlaneFill } from "react-icons/ri";
 import { MdMenuOpen } from "react-icons/md";
@@ -34,10 +35,20 @@ import {
   useGetStoreByCategoryQuery,
   useUpdateStoreMutation,
   useDeleteStoreMutation,
-  useCreateStoreMutation
+  useCreateStoreMutation,
 } from "../../context/service/storeApi";
-import { useCreateShopMutation, useGetAllShopsQuery, useAddMaterialMutation, useUpdateShopMutation } from "../../context/service/newOredShops";
+import {
+  useCreateShopMutation,
+  useGetAllShopsQuery,
+  useAddMaterialMutation,
+  useUpdateShopMutation,
+} from "../../context/service/newOredShops";
 import "./style.css";
+
+import {
+  useGetDriversQuery,
+  useCreateDriverMutation,
+} from "../../context/service/driverApi";
 
 const { Option } = Select;
 
@@ -65,13 +76,20 @@ const Warehouse = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [form] = Form.useForm();
   const [isContainerVisible, setIsContainerVisible] = useState(false);
+  const [selectedShop, setSelectedShop] = useState(null);
+  const [selectedDriver, setSelectedDriver] = useState(null);
+  const [driverPrice, setDriverPrice] = useState(null);
+  const [openDriverModal, setOpenDriverModal] = useState(false);
+
   const { data: allStores = [], refetch: refetchAll } = useGetAllStoresQuery();
-  const { data: filteredStores = [], refetch: refetchFiltered } = useGetStoreByCategoryQuery(selectedCategory, { skip: !selectedCategory });
+  const { data: filteredStores = [], refetch: refetchFiltered } =
+    useGetStoreByCategoryQuery(selectedCategory, { skip: !selectedCategory });
   const [deleteStore] = useDeleteStoreMutation();
-  const [addMaterial] = useAddMaterialMutation()
+  const [addMaterial] = useAddMaterialMutation();
   const [createShop, { isLoading: isCreate }] = useCreateShopMutation();
-  const { data: allShops = [], refetch: refetchAllShops } = useGetAllShopsQuery();
-  const shop = allShops?.innerData?.find(i => i.isType === true) || {};
+  const { data: allShops = [], refetch: refetchAllShops } =
+    useGetAllShopsQuery();
+  const shop = allShops?.innerData?.find((i) => i.isType === true) || {};
   const stores = selectedCategory ? filteredStores : allStores;
   const [editingItem, setEditingItem] = useState(null);
   const { data: shops } = useGetShopsQuery();
@@ -80,13 +98,21 @@ const Warehouse = () => {
   const [updateShop, { isLoading: isUpdatingShop }] = useUpdateShopMutation();
   const [createStore, { isLoading: isUpdating }] = useCreateStoreMutation();
   const [updateStore, { isLoading: isCreating }] = useUpdateStoreMutation();
+
+  const { data: driversData } = useGetDriversQuery();
+  const [createDriver] = useCreateDriverMutation();
+  const drivers = driversData?.innerData || [];
+  const driverForSelect = drivers.map((item) => ({
+    // value: item.name,
+    value: item._id,
+    label: item.name,
+  }));
   useEffect(() => {
     if (isEditMode) {
-      form.setFieldValue('quantity', undefined);
+      form.setFieldValue("quantity", undefined);
     }
   }, [form, isEditMode]);
   const openModal = (record = null) => {
-
     if (record) {
       setIsEditMode(true);
       setEditingItem(record);
@@ -113,10 +139,10 @@ const Warehouse = () => {
 
   const onFinish = async (values) => {
     if (!shop || !Object.keys(shop).length) {
-      message.warning('Iltimos, avval roʻyxat yarating!');
+      message.warning("Iltimos, avval roʻyxat yarating!");
       return;
     }
-    const quantity = filteredData?.find(i => i._id === selectedProduct?._id);
+    const quantity = filteredData?.find((i) => i._id === selectedProduct?._id);
 
     const updatedMater = {
       name: quantity?.name,
@@ -124,7 +150,7 @@ const Warehouse = () => {
       quantity: quantity?.quantity + values.quantity,
       unit: quantity?.unit,
       pricePerUnit: values?.pricePerUnit || quantity?.pricePerUnit,
-    }
+    };
     try {
       if (isEditMode && editingItem) {
         const res = await updateStore({
@@ -143,13 +169,16 @@ const Warehouse = () => {
         quantity: values?.quantity,
         unit: values?.unit,
         pricePerUnit: values?.pricePerUnit,
-      }
+      };
 
       await addMaterial({ ShopId: shop._id, material });
 
       const materialTotal = material.pricePerUnit * material.quantity;
       const newTotalPrice = (shop.totalPrice || 0) + materialTotal;
-      await updateShop({ id: shop._id, updatedShop: { totalPrice: newTotalPrice } });
+      await updateShop({
+        id: shop._id,
+        updatedShop: { totalPrice: newTotalPrice },
+      });
 
       refetchAllShops();
 
@@ -178,8 +207,6 @@ const Warehouse = () => {
   const filteredData = stores?.innerData?.filter((store) =>
     store?.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -238,8 +265,6 @@ const Warehouse = () => {
     },
   ].filter(Boolean);
 
-
-
   const handleCreateShop = async () => {
     try {
       await createShop();
@@ -271,15 +296,17 @@ const Warehouse = () => {
     };
   }, []);
 
-
   // =======================================
-  const onNameChange = (event) => {
-    setName(event.target.value);
-  };
+  const onNameChange = (event) => setName(event.target.value);
   // Yangi shop qo'shish
   const addItem = async (e) => {
     e.preventDefault();
-    if (name && !shops?.innerData?.some((shop) => shop.name.toLowerCase() === name.toLowerCase())) {
+    if (
+      name &&
+      !shops?.innerData?.some(
+        (shop) => shop.name.toLowerCase() === name.toLowerCase()
+      )
+    ) {
       await addShop({ name }).unwrap();
       setName("");
       setTimeout(() => {
@@ -299,54 +326,81 @@ const Warehouse = () => {
       : [...(shops?.innerData || []), { _id: null, name: name }];
 
     return newOptions.map((item) => ({
-      value: JSON.stringify({ id: item._id, value: item.name }),  // JSON qilib uzatamiz
-      label: (
-        <Space>
-          {item.name}
-        </Space>
-      ),
+      value: JSON.stringify({ id: item._id, value: item.name }), // JSON qilib uzatamiz
+      label: <Space>{item.name}</Space>,
     }));
   }, [name, shops]);
 
-
   const onSelectChange = async (value) => {
-    setIsContainerVisible(true)
+    setIsContainerVisible(true);
     try {
       const parsedValue = JSON.parse(value);
-      await updateShop({ id: shop._id, updatedShop: { shopsId: parsedValue.id, shopName: parsedValue.value } })
-
+      await updateShop({
+        id: shop._id,
+        updatedShop: { shopsId: parsedValue.id, shopName: parsedValue.value },
+      });
     } catch (error) {
       message.error(error);
     }
-  }
-
+  };
 
   const onCloseChange = async () => {
-    if (shop.materials?.length === 0) {
-      message.warning('Boʻsh roʻyxatni buxgalteriyaga yuborib boʻlmaydi. Iltimos, mahsulotlarni qoʻshing.');
-      return
+    newDriver();
+    return;
+    if (shop.materials?.length === 0)
+      return message.warning(
+        "Boʻsh roʻyxatni buxgalteriyaga yuborib boʻlmaydi. Iltimos, mahsulotlarni qoʻshing."
+      );
+
+    if (shop?.shopName === "")
+      return message.warning("Do'kon tanlanmagan! Iltimos, do'konni tanlang.");
+
+    let shopInfo = JSON.parse(selectedShop);
+    if (!shopInfo?.value) {
+      return message.error("Do'kon tanlanmagan! Iltimos, do'konni tanlang.");
     }
-    if (shop?.shopName === "") {
-      message.warning("Do'kon tanlanmagan! Iltimos, do'konni tanlang.");
-      return
-    }
+
     try {
-      const res = await updateShop({ id: shop._id, updatedShop: { isType: false } })
-      if (res.success) {
-        message.success('Buxgalteryaga muvaffaqiyatli yuborildi!')
-        setIsContainerVisible(false)
+      const res = await updateShop({
+        id: shop._id,
+        updatedShop: { isType: shopInfo.value === "soldo" ? true : false },
+      });
+
+      if (res.data.state) {
+        message.success("Buxgalteryaga muvaffaqiyatli yuborildi!");
+        setIsContainerVisible(false);
+        setSelectedShop(null);
       }
     } catch (error) {
-      message.error(error);
+      message.error(
+        error?.response?.data?.message ||
+          "Buxgalteryaga yuborishda xatolik yuz berdi!"
+      );
     }
-  }
+  };
 
   const content = (
-    <Button style={{ background: "#0A3D3A" }} loading={isUpdatingShop} onClick={onCloseChange} type="primary">
+    <Button
+      style={{ background: "#0A3D3A" }}
+      loading={isUpdatingShop}
+      onClick={onCloseChange}
+      type="primary"
+    >
       Ha
     </Button>
   );
 
+  const newDriver = async () => {
+    try {
+      let res = await createDriver({
+        name: selectedDriver,
+        fare: +driverPrice,
+      });
+      console.log(res);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   return (
     <div className="warehouse-container">
@@ -371,7 +425,11 @@ const Warehouse = () => {
           prefix={<SearchOutlined />}
           className="warehouse-navbar_inp"
         />
-        <Button className="create-shops-modal-btn" type="primary" onClick={() => openModal(null)}>
+        <Button
+          className="create-shops-modal-btn"
+          type="primary"
+          onClick={() => openModal(null)}
+        >
           Mahsulot qo‘shish
         </Button>
       </div>
@@ -393,7 +451,7 @@ const Warehouse = () => {
         onCancel={closeModal}
         footer={null}
       >
-        {!shop?.isType &&
+        {!shop?.isType && (
           <Button
             loading={isCreate}
             ref={closeButtonRef}
@@ -401,14 +459,17 @@ const Warehouse = () => {
             className="create-shops-btn"
           >
             Roʻyxat yarating!
-          </Button>}
+          </Button>
+        )}
         <Form
-          form={form} onFinish={onFinish}
+          form={form}
+          onFinish={onFinish}
           initialValues={{
             category: categoryOptions[0]?.value,
             quantity: undefined, // Quantity uchun initialValue yo'q
           }}
-          layout="vertical">
+          layout="vertical"
+        >
           <Form.Item
             label="Mahsulot nomi"
             name="name"
@@ -426,7 +487,7 @@ const Warehouse = () => {
             <Radio.Group
               className="radio_Group_inp"
               options={categoryOptions}
-              onChange={(e) => form.setFieldValue('category', e.target.value)}
+              onChange={(e) => form.setFieldValue("category", e.target.value)}
             />
           </Form.Item>
           <Form.Item
@@ -444,9 +505,12 @@ const Warehouse = () => {
                 name="quantity"
                 shouldUpdate={false}
                 rules={[{ required: true, message: "Miqdorni kiriting!" }]}
-
               >
-                <InputNumber min={1} style={{ width: "100%" }} placeholder="Miqdor" />
+                <InputNumber
+                  min={1}
+                  style={{ width: "100%" }}
+                  placeholder="Miqdor"
+                />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -460,7 +524,12 @@ const Warehouse = () => {
             </Col>
           </Row>
           <Button
-            style={{ background: "#0A3D3A", width: "100%", marginTop: "20px", height: "34px" }}
+            style={{
+              background: "#0A3D3A",
+              width: "100%",
+              marginTop: "20px",
+              height: "34px",
+            }}
             type="primary"
             htmlType="submit"
             loading={isCreating || isUpdating}
@@ -470,25 +539,32 @@ const Warehouse = () => {
         </Form>
       </Modal>
 
-      {
-        shop.isType === true &&
-        <div ref={containerRef} className={`shopsnew-container ${isContainerVisible ? "show" : ""}`} >
+      {shop.isType === true && (
+        <div
+          ref={containerRef}
+          className={`shopsnew-container ${isContainerVisible ? "show" : ""}`}
+        >
           <Button
             ref={closeButtonRef}
             onClick={() => setIsContainerVisible(!isContainerVisible)}
             className="open-shops-modal-btn"
           >
-            {isContainerVisible ? <IoCloseSharp style={{ color: "red" }} /> : <MdMenuOpen />}
+            {isContainerVisible ? (
+              <IoCloseSharp style={{ color: "red" }} />
+            ) : (
+              <MdMenuOpen />
+            )}
           </Button>
           <div className="shopsnew-container-nav">
             <Select
               style={{ width: "220px" }}
-              defaultValue={shop?.shopName}
+              // defaultValue={shop?.shopName}
               placeholder="Do'konni tanlang yoki yarating"
               loading={isUpdatingShop}
               onChange={(value) => {
                 onSelectChange(value);
                 setIsContainerVisible(true);
+                setSelectedShop(value);
               }}
               dropdownRender={(menu) => (
                 <div className="select-shops">
@@ -510,30 +586,42 @@ const Warehouse = () => {
                       onChange={onNameChange}
                       onKeyDown={(e) => e.stopPropagation()}
                     />
-                    <Button type="text" onClick={addItem}> <PlusOutlined /></Button>
+                    <Button type="text" onClick={addItem}>
+                      {" "}
+                      <PlusOutlined />
+                    </Button>
                   </Space>
                 </div>
               )}
               options={computedOptions}
               allowClear
             />
+            <Button onClick={() => setOpenDriverModal(true)}>Haydovchi</Button>
             <Popover
               trigger="click"
               content={content}
               title="Siz rostdan Buxgalteryaga yubarmoqchimisiz?"
             >
-              <Button style={{ color: "#0A3D3A", fontSize: "16px", display: "flex", alignItems: "center", gap: "8px" }}>Yuborish <RiSendPlaneFill /></Button>
+              <Button
+                style={{
+                  color: "#0A3D3A",
+                  fontSize: "16px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                Yuborish <RiSendPlaneFill />
+              </Button>
             </Popover>
           </div>
           <h4>Omborga kelgan mahsulotlar ro'yxati</h4>
-          {
-            shop.materials?.map((item, inx) =>
-            (<div key={inx} className="item-info-shop">
+          {shop.materials?.map((item, inx) => (
+            <div key={inx} className="item-info-shop">
               <span className="item-name-shop">{item.name}</span>
               <span className="item-quantity-shop">
                 {item.quantity} {item.unit}
               </span>
-
 
               <span className="item-price-shop">
                 {item.pricePerUnit.toLocaleString("uz-UZ")} so‘m
@@ -543,14 +631,38 @@ const Warehouse = () => {
                 so‘m
               </span>
             </div>
-            ))
-          }
+          ))}
         </div>
-      }
+      )}
+
+      {/* havdovchi modali */}
+
+      <Modal
+        width={545}
+        title={"Haydovchi qo‘shish"}
+        open={openDriverModal}
+        onCancel={() => setOpenDriverModal(false)}
+        footer={null}
+      >
+        <Select
+          style={{ width: "100%" }}
+          placeholder="Haydovchi tanlang"
+          options={driverForSelect}
+          onChange={(e) => setSelectedDriver(e)}
+        />
+        <Input
+          type="text"
+          placeholder="yangi haydovchi"
+          onChange={(e) => setSelectedDriver(e.target.value)}
+        />
+        <Input
+          type="number"
+          placeholder="Narxi"
+          onChange={(e) => setDriverPrice(e.target.value)}
+        />
+      </Modal>
     </div>
   );
 };
 
 export default Warehouse;
-
-
