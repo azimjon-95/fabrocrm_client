@@ -38,10 +38,10 @@ export const ShopsApi = api.injectEndpoints({
 
     // Buyurtmani yangilash
     updateShop: builder.mutation({
-      query: ({ id, updatedShop }) => ({
+      query: ({ id, body }) => ({
         url: `/newShops/${id}`,
         method: "PUT",
-        body: updatedShop,
+        body: body,
       }),
       invalidatesTags: ({ id }) => [{ type: "Shops", id }],
     }),

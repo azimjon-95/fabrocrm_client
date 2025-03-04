@@ -50,6 +50,11 @@ import {
   useCreateDriverMutation,
 } from "../../context/service/driverApi";
 
+import {
+  useGetDebtorsQuery,
+  useUpdateOrderMutation,
+} from "../../context/service/orderApi";
+
 const { Option } = Select;
 
 const categoryOptions = [
@@ -81,6 +86,9 @@ const Warehouse = () => {
   const [driverPrice, setDriverPrice] = useState(null);
   const [openDriverModal, setOpenDriverModal] = useState(false);
 
+  const [selectedOrders, setSelectedOrders] = useState([]);
+  const [updateOrder] = useUpdateOrderMutation();
+
   const { data: allStores = [], refetch: refetchAll } = useGetAllStoresQuery();
   const { data: filteredStores = [], refetch: refetchFiltered } =
     useGetStoreByCategoryQuery(selectedCategory, { skip: !selectedCategory });
@@ -89,7 +97,7 @@ const Warehouse = () => {
   const [createShop, { isLoading: isCreate }] = useCreateShopMutation();
   const { data: allShops = [], refetch: refetchAllShops } =
     useGetAllShopsQuery();
-  const shop = allShops?.innerData?.find((i) => i.isType === true) || {};
+  let shop = allShops?.innerData?.find((i) => i.isType === true) || {};
   const stores = selectedCategory ? filteredStores : allStores;
   const [editingItem, setEditingItem] = useState(null);
   const { data: shops } = useGetShopsQuery();
@@ -102,11 +110,14 @@ const Warehouse = () => {
   const { data: driversData } = useGetDriversQuery();
   const [createDriver] = useCreateDriverMutation();
   const drivers = driversData?.innerData || [];
-  const driverForSelect = drivers.map((item) => ({
+  const driverForSelect = drivers?.map((item) => ({
     // value: item.name,
     value: item._id,
     label: item.name,
   }));
+
+  const { data: debtorsData } = useGetDebtorsQuery();
+
   useEffect(() => {
     if (isEditMode) {
       form.setFieldValue("quantity", undefined);
@@ -335,35 +346,71 @@ const Warehouse = () => {
     setIsContainerVisible(true);
     try {
       const parsedValue = JSON.parse(value);
-      await updateShop({
+      console.log({ shopsId: parsedValue.id, shopName: parsedValue.value });
+
+      let aa = await updateShop({
         id: shop._id,
-        updatedShop: { shopsId: parsedValue.id, shopName: parsedValue.value },
+        body: { shopsId: parsedValue.id, shopName: parsedValue.value },
       });
     } catch (error) {
-      message.error(error);
+      console.log(error);
     }
   };
 
   const onCloseChange = async () => {
-    newDriver();
-    return;
-    if (shop.materials?.length === 0)
+    if (shop.materials?.length === 0) {
       return message.warning(
         "Boʻsh roʻyxatni buxgalteriyaga yuborib boʻlmaydi. Iltimos, mahsulotlarni qoʻshing."
       );
+    }
 
-    if (shop?.shopName === "")
+    if (shop?.shopName === "") {
+      setIsContainerVisible(true);
       return message.warning("Do'kon tanlanmagan! Iltimos, do'konni tanlang.");
+    }
 
     let shopInfo = JSON.parse(selectedShop);
+
     if (!shopInfo?.value) {
+      setIsContainerVisible(true);
       return message.error("Do'kon tanlanmagan! Iltimos, do'konni tanlang.");
     }
 
+    if (shopInfo.value !== "soldo") {
+      if (selectedDriver === null) {
+        setIsContainerVisible(true);
+        return message.error(
+          "Haydovchi tanlanmagan! Iltimos, haydovchini tanlang."
+        );
+      }
+
+      if (driverPrice === null) {
+        setIsContainerVisible(true);
+        return message.error("Yo'lkira narxi kiritilmagan!");
+      }
+    }
+
     try {
+      if (shopInfo.value !== "soldo") {
+        await newDriver();
+      }
+      if (selectedOrders.length) {
+        for (const item of selectedOrders) {
+          let money = driverPrice / selectedOrders.length;
+          let findedOrder = debtorsData?.innerData?.find(
+            (order) => order._id === item
+          );
+          let newPrice = findedOrder?.extraExpenses + money;
+          await updateOrder({ id: item, updates: { extraExpenses: newPrice } });
+        }
+      }
+
       const res = await updateShop({
         id: shop._id,
-        updatedShop: { isType: shopInfo.value === "soldo" ? true : false },
+        body: {
+          isType: false,
+          isPaid: shopInfo.value === "soldo" ? true : false,
+        },
       });
 
       if (res.data.state) {
@@ -393,10 +440,9 @@ const Warehouse = () => {
   const newDriver = async () => {
     try {
       let res = await createDriver({
-        name: selectedDriver,
+        driver: selectedDriver,
         fare: +driverPrice,
       });
-      console.log(res);
     } catch (e) {
       console.log(e);
     }
@@ -641,19 +687,41 @@ const Warehouse = () => {
         width={545}
         title={"Haydovchi qo‘shish"}
         open={openDriverModal}
-        onCancel={() => setOpenDriverModal(false)}
+        onCancel={() => {
+          setIsContainerVisible(true);
+          setOpenDriverModal(false);
+        }}
         footer={null}
       >
         <Select
           style={{ width: "100%" }}
           placeholder="Haydovchi tanlang"
-          options={driverForSelect}
-          onChange={(e) => setSelectedDriver(e)}
+          options={driverForSelect.map((driver) => ({
+            label: driver.label, // Label sifatida name ishlatiladi
+            value: driver.value, // Value sifatida id ishlatiladi
+          }))}
+          onChange={(value, option) =>
+            setSelectedDriver({ id: option.value, name: option.label })
+          }
         />
+
+        <Select
+          mode="multiple"
+          style={{ width: "100%" }}
+          placeholder="Buyurtmalarni tanlang"
+          options={debtorsData?.innerData?.map((driver) => ({
+            label: driver.customer.fullName, // Label sifatida name ishlatiladi
+            value: driver._id, // Value sifatida id ishlatiladi
+          }))}
+          onChange={(values) => setSelectedOrders(values)} // To‘g‘ridan-to‘g‘ri values ni saqlaymiz
+        />
+
         <Input
           type="text"
           placeholder="yangi haydovchi"
-          onChange={(e) => setSelectedDriver(e.target.value)}
+          onChange={(e) =>
+            setSelectedDriver({ id: null, name: e.target.value })
+          }
         />
         <Input
           type="number"
