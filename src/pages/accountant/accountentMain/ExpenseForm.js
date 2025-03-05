@@ -6,24 +6,30 @@ import { message, Button, DatePicker, Input, Radio } from "antd";
 import AsyncSelect from "react-select/async"; // Yangi import
 import { useCreateExpenseMutation } from "../../../context/service/expensesApi";
 import { useUpdateBalanceMutation } from "../../../context/service/balanceApi";
-// workers
+import { useDispatch } from "react-redux";
 import { useGetWorkersQuery } from "../../../context/service/worker";
+import { setBoolean } from '../../../context/booleanSlice'
 import {
   useGetDebtorsQuery,
   useUpdateOrderMutation,
 } from "../../../context/service/orderApi";
-import { useGetAllShopsQuery } from "../../../context/service/newOredShops";
+import { useGetAllShopsQuery, useUpdateShopMutation } from "../../../context/service/newOredShops";
 
 const ExpenseForm = () => {
+  const dispatch = useDispatch();
   const [expensePaymentType, setExpensePaymentType] = useState(null); // to'lov turi
   const [expenseAmount, setExpenseAmount] = useState(""); // pul miqdori
   const [expenseDescription, setExpenseDescription] = useState(""); // tavsif
   const [expenseCategory, setExpenseCategory] = useState(""); // xarajat turi
   const [selectedCategory, setSelectedCategory] = useState(""); // tanlangan xarajat turi
+  const [returnMony, setReturnMony] = useState(0); // tanlangan xarajat turi
   const [selectedType, setSelectedType] = useState("income"); // tanlangan xarajat turi
   const [selectedDate, setSelectedDate] = useState(dayjs()); // tanlangan xarajat turi
   const [soldoFrom, setSoldoFrom] = useState(dayjs());
   const [soldoTo, setSoldoTo] = useState(dayjs());
+  const [usdRate, setUsdRate] = useState('');
+  const [amountDollar, setAmount] = useState(0);
+  const { mutate: updateShop } = useUpdateShopMutation();
 
   const [createExpense] = useCreateExpenseMutation();
   const [updateBalance] = useUpdateBalanceMutation();
@@ -44,9 +50,8 @@ const ExpenseForm = () => {
   // ISHCHILAR ROYHATI
   const workersLists = workers?.innerData.map((worker) => ({
     value: worker._id,
-    label: `${worker.firstName} ${worker.lastName} [${
-      worker.workerType || roleTranslations[worker.role]
-    }]`,
+    label: `${worker.firstName} ${worker.lastName} [${worker.workerType || roleTranslations[worker.role]
+      }]`,
   }));
 
   // QARZDORLAR ROYHATI
@@ -55,11 +60,16 @@ const ExpenseForm = () => {
     label: debtor.customer.fullName,
   }));
 
-  //  DO'KONLAR ROYHATI
-  const shops = shopsData?.innerData.map((i) => ({
-    value: i._id,
-    label: i.shopName,
-  }));
+  // DO'KONLAR RO'YHATI
+  const shops = shopsData?.innerData.map((i) => {
+    // Har bir material uchun umumiy narxni hisoblash
+    const totalAmount = i.materials.reduce((sum, item) => sum + (item.pricePerUnit * item.quantity), 0);
+
+    return {
+      value: i._id,
+      label: `${i.shopName} - ${totalAmount.toLocaleString()} so'm`, // Pul formatida chiqarish
+    };
+  });
 
   let options = [];
   if (
@@ -109,6 +119,7 @@ const ExpenseForm = () => {
     selectedType === "income" ? kirim_royhati : chiqim_royhati
   ).map((i) => ({ value: i, label: i }));
 
+
   // malumotlarni yuborish
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -118,32 +129,30 @@ const ExpenseForm = () => {
     const newData =
       expenseCategory === "Ish haqi" || expenseCategory === "Avans"
         ? {
-            name: selectedCategory.label,
-            amount: amount,
-            type: "Chiqim",
-            category: expenseCategory,
-            description: expenseDescription,
-            paymentType: expensePaymentType,
-            relevantId: selectedCategory.value,
-            date: selectedDate.toDate(),
-          }
+          name: selectedCategory.label,
+          amount: amount,
+          type: "Chiqim",
+          category: expenseCategory,
+          description: expenseDescription,
+          paymentType: expensePaymentType,
+          relevantId: selectedCategory.value,
+          date: selectedDate.toDate(),
+        }
         : {
-            name: selectedCategory.label || expenseCategory,
-            amount: amount,
-            type: selectedType === "income" ? "Kirim" : "Chiqim",
-            category: expenseCategory,
-            description: expenseDescription,
-            paymentType: expensePaymentType,
-            relevantId: selectedCategory.value,
-          };
+          name: selectedCategory.label || expenseCategory,
+          amount: amount,
+          type: selectedType === "income" ? "Kirim" : "Chiqim",
+          category: expenseCategory,
+          description: expenseDescription,
+          paymentType: expensePaymentType,
+          relevantId: selectedCategory.value,
+        };
 
     try {
-      // `debtors?.innerData` ichidan `_id` `selectedCategory.value` ga teng bo'lgan elementni topamiz
       const selectedDebtor = debtors?.innerData?.find(
         (item) => item._id === selectedCategory.value
       );
       const currentPaid = selectedDebtor?.paid || 0;
-      // Xarajat qo'shish
       const expenseResponse = await createExpense(newData).unwrap();
 
       // Balansni yangilash
@@ -159,14 +168,68 @@ const ExpenseForm = () => {
         orderResponse = await updateOrder({
           id: selectedCategory.value,
           updates: {
-            paid: currentPaid + amount,
+            paid: currentPaid + amountDollar || returnMony,
             paidAt: new Date().toISOString(), // Hozirgi vaqtni yuborish
           },
         }).unwrap();
       }
 
-      // Barcha operatsiyalar muvaffaqiyatli bo'lsa
+      let res = null;
+
+      if (expenseCategory === "Do'kon qarzini to'lash") {
+        const shop = shopsData.innerData.find((i) => i._id === selectedCategory.value);
+        const totalAmount = shop.materials.reduce((sum, item) => sum + (item.pricePerUnit * item.quantity), 0);
+
+        // Calculate paid and returnedMoney based on returnMony and totalAmount
+        let paid = totalAmount;
+        let returnedMoney = 0;
+        let isPaid = false;
+
+        if (returnMony > totalAmount) {
+          returnedMoney = returnMony - totalAmount;
+          paid = totalAmount;
+        } else {
+          paid = returnMony;
+        }
+        // returnMony, setReturnMony
+        if (paid === totalAmount) {
+          isPaid = true;
+        }
+        console.log({
+          id: shop._id,
+          updatedShop: {
+            paid: paid,
+            returnedMoney: returnedMoney,
+            isPaid: isPaid
+          }
+        });
+        res = updateShop({
+          id: shop._id,
+          updatedShop: {
+            paid: paid,
+            returnedMoney: returnedMoney,
+            isPaid: isPaid
+          }
+        });
+
+
+        if (returnedMoney > 0) {
+          const newDatas = {
+            name: shop.name,
+            amount: returnedMoney,
+            type: "Kirim",
+            category: "Do‘kondan qaytarilgan mablag",
+            description: "Hisob raqamdagi mablag‘ naqd pul sifatida olindi.",
+            paymentType: "Naqd",
+            relevantId: shop._id,
+          };
+
+          await createExpense(newDatas).unwrap();
+        }
+      }
+
       if (
+        res?.state &&
         expenseResponse?.state &&
         balanceResponse?.state &&
         orderResponse?.state
@@ -230,9 +293,21 @@ const ExpenseForm = () => {
     return parts.join(".");
   };
 
-  // Handle input change and format value
+  const handlePaymentTypeChange = (value) => {
+    dispatch(setBoolean(value.value === "dollar")); // Redux-ga qiymatni uzatish
+  }
+
+  const handleAmountChange = (value) => {
+    const cleanedValue = value.replace(/\s/g, ""); // Bo'sh joylarni olib tashlash
+    const numericValue = Number(cleanedValue); // Stringni numberga o'zgartirish
+    setAmount(+usdRate * numericValue);
+  };
+
   const handleChange = (e) => {
     const { value } = e.target;
+    const cleanedValue = value.replace(/\s/g, "");
+    setReturnMony(cleanedValue)
+    handleAmountChange(value)
     const formattedValue = formatNumber(value);
     setExpenseAmount(formattedValue);
   };
@@ -295,14 +370,15 @@ const ExpenseForm = () => {
         {/* TO'LOV TURI */}
         <AsyncSelect
           cacheOptions
-          defaultOptions={paymentTypeControl}
+          defaultOptions={paymentTypeControl || "Tulov turi tanlang"}
           loadOptions={loadPaymentTypeOptions}
           value={
             { value: expensePaymentType, label: expensePaymentType } || null
           }
-          onChange={(selectedOption) =>
+          onChange={(selectedOption) => {
             setExpensePaymentType(selectedOption ? selectedOption.value : null)
-          }
+            handlePaymentTypeChange(selectedOption)
+          }}
           placeholder="Tulov turi tanlang"
           classNamePrefix="custom-select"
           styles={{
@@ -421,12 +497,44 @@ const ExpenseForm = () => {
           />
         </div>
       )}
-      {!["Soldo"]?.includes(expenseCategory) && (
-        <Input
-          placeholder="Pul miqdori"
-          value={expenseAmount}
-          onChange={handleChange}
-        />
+      {!["Soldo"].includes(expenseCategory) && (
+        expensePaymentType === "dollar" && expenseAmount !== 0 ? (
+          <div className="ish-haqi-avans" style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "10px",
+          }}>
+            <div className="ish-haqi-kurs">
+              <p>{amountDollar.toLocaleString()} so'm</p>
+              <Input
+                style={{
+                  height: "38px",
+                  width: "100%"
+                }}
+                placeholder="1 dollar kurs narxi"
+                value={usdRate}
+                onChange={(e) => setUsdRate(e.target.value)}
+              />
+            </div>
+            {
+              +usdRate > 0 && <Input
+                style={{
+                  height: "38px"
+                }}
+                placeholder="Dollar miqdori..."
+                value={expenseAmount}
+                onChange={handleChange}
+              />
+            }
+          </div>
+        ) : (
+          <Input
+            placeholder="Pul miqdori"
+            value={expenseAmount}
+            onChange={handleChange}
+          />
+        )
       )}
 
       <Input.TextArea
@@ -451,7 +559,7 @@ const ExpenseForm = () => {
       >
         saqlash
       </Button>
-    </form>
+    </form >
   );
 };
 

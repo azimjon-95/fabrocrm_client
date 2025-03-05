@@ -19,7 +19,7 @@ const ShopsNotification = () => {
       title: "Umumiy narx",
       dataIndex: "totalPrice",
       key: "totalPrice",
-      render: (price) => `${price.toLocaleString()} so'm`,
+      render: (price) => `${price?.toLocaleString()} so'm`,
     },
     {
       title: "Holat",
@@ -70,15 +70,7 @@ const ShopsNotification = () => {
 
   return (
     <div>
-      <h2
-        style={{
-          color: "#0A3D3A",
-          textAlign: "center",
-          marginBottom: "10px",
-        }}
-      >
-        Buyurtmalar Ro'yxati
-      </h2>
+
       <Table
         columns={columns}
         dataSource={shops}

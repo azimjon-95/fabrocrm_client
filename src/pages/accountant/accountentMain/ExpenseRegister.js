@@ -8,10 +8,9 @@ import {
   BsCaretDownFill,
   BsArrowLeftRight,
 } from "react-icons/bs";
-import { Badge, Table, Tooltip } from "antd";
+import { Table, Tooltip, Input, Select } from "antd";
 import * as XLSX from "xlsx";
 import { IoMdRadioButtonOn } from "react-icons/io";
-// import soundFile from "../../../assets/sound.mp3";
 import { MdHistory } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import ExpenseForm from "./ExpenseForm";
@@ -40,25 +39,7 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
   const [open, setOpen] = useState(false);
   const [activeBox, setActiveBox] = useState("expenses");
   const [activeDataset, setActiveDataset] = useState("allExpenses");
-  // const [prevIds, setPrevIds] = useState(
-  //   () => JSON.parse(localStorage.getItem("prevIds")) || []
-  // );
-  const [notificationCount, setNotificationCount] = useState(0);
 
-  // useEffect(() => {
-  //   const newIds = filteredLists.map((i) => i._id);
-  //   const newNotifications = newIds.filter((id) => !prevIds.includes(id));
-  //   if (newNotifications.length > 0) {
-  //     newNotifications.forEach(() => {
-  //       const audio = new Audio(soundFile);
-  //       audio.play().catch(console.error);
-  //       setTimeout(() => audio.play().catch(console.error), 500);
-  //     });
-  //     setNotificationCount(newNotifications.length);
-  //     setPrevIds(newIds);
-  //     localStorage.setItem("prevIds", JSON.stringify(newIds));
-  //   }
-  // }, [filteredLists]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -75,8 +56,8 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
       prev === "allExpenses"
         ? "outgoingExpenses"
         : prev === "outgoingExpenses"
-        ? "incomeExpenses"
-        : "allExpenses"
+          ? "incomeExpenses"
+          : "allExpenses"
     );
   }, []);
 
@@ -97,12 +78,21 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
           <BsCaretUpFill style={{ color: "red" }} />
         ),
     },
+    {
+      title: "Kategoriya", dataIndex: "category", key: "category"
+    },
     { title: "Xarajat Nomi", dataIndex: "name", key: "name" },
     {
       title: "Miqdor",
       dataIndex: "amount",
       key: "amount",
-      render: (text) => `${new Intl.NumberFormat("uz-UZ").format(text)} so'm`,
+      render: (text, record) => {
+        let currency = "so'm";
+        if (record.paymentType === "dollar") currency = "$";
+        else if (record.paymentType === "Naqd") currency = "so'm";
+        else if (record.paymentType === "Bank orqali") currency = "so'm";
+        return `${new Intl.NumberFormat("uz-UZ").format(text)} ${currency}`;
+      },
     },
     {
       title: "Tavsif",
@@ -119,8 +109,7 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
       dataIndex: "date",
       key: "date",
       render: (date) =>
-        `${new Date(date).getDate()}-${
-          oylar[new Date(date).getMonth()]
+        `${new Date(date).getDate()}-${oylar[new Date(date).getMonth()]
         }/${new Date(date).toLocaleTimeString("uz-UZ", {
           hour: "2-digit",
           minute: "2-digit",
@@ -223,6 +212,33 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
     XLSX.writeFile(wb, fileName);
   };
 
+
+  const [filteredData, setFilteredData] = useState(activeData);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchText, setSearchText] = useState('');
+
+  useEffect(() => {
+    let filtered = activeData;
+
+    // Filter by category
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(item => item.category === selectedCategory);
+    }
+
+    // Filter by searchText (name or category)
+    if (searchText) {
+      filtered = filtered.filter(item =>
+        item.category.toLowerCase().includes(searchText.toLowerCase()) ||
+        item.name.toLowerCase().includes(searchText.toLowerCase())
+      );
+    }
+
+    setFilteredData(filtered);
+  }, [selectedCategory, searchText, activeData]);
+
+  // Extract unique categories from activeData
+  const categories = ['all', ...new Set(activeData.map(item => item.category))];
+
   return (
     <div className="box_expense-register">
       {activeBox === "info" && (
@@ -231,6 +247,30 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
             {formatDate(selectedDates[0])} <BsArrowLeftRight />{" "}
             {formatDate(selectedDates[1])}
           </button>
+
+          <Select
+            defaultValue="all"
+            onChange={value => setSelectedCategory(value)}
+            style={{ width: 170, height: 33, marginTop: "-2px", borderRadius: "0 0 5px 5px" }}
+            // clear
+            allowClear // Enable clearing the select field
+            onClear={() => setSelectedCategory('all')}
+
+          >
+            {categories.map(category => (
+              <Select.Option key={category} value={category}>
+                {category === 'all' ? 'Barcha Kategoriyalar' : category}
+              </Select.Option>
+            ))}
+          </Select>
+          <Input
+            placeholder="Qidirish..."
+            size="small"
+            onClear={() => setSearchText('all')}
+            onChange={(e) => setSearchText(e.target.value)}
+            style={{ width: 170, height: 31, marginTop: "-2px", borderRadius: "0 0 5px 5px" }}
+          />
+
           {open && (
             <div className="dropdown-modal">
               <input
@@ -263,46 +303,41 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
       <div className="box_expense-register_menu">
         <button
           onClick={() => setActiveBox("notifications")}
-          className={`box_expense-register_btn ${
-            activeBox === "notifications" ? "active" : ""
-          }`}
+          className={`box_expense-register_btn ${activeBox === "notifications" ? "active" : ""
+            }`}
         >
           <BellOutlined />
-          <Badge count={notificationCount} size="small" offset={[4, -4]} />
         </button>
         <button
           onClick={() => setActiveBox("info")}
-          className={`box_expense-register_btn ${
-            activeBox === "info" ? "active" : ""
-          }`}
+          className={`box_expense-register_btn ${activeBox === "info" ? "active" : ""
+            }`}
         >
           <RiFileList3Line size={20} />
         </button>
         <button
           onClick={() => setActiveBox("expenses")}
-          className={`box_expense-register_btn ${
-            activeBox === "expenses" ? "active" : ""
-          }`}
+          className={`box_expense-register_btn ${activeBox === "expenses" ? "active" : ""
+            }`}
         >
           <HiOutlinePencilSquare size={20} />
         </button>
         {activeBox === "info" && (
           <button
             onClick={exportToExcel}
-            className={`box_expense-register_btn ${
-              activeBox === "expenses" ? "active" : ""
-            }`}
+            className={`box_expense-register_btn ${activeBox === "expenses" ? "active" : ""
+              }`}
           >
             <LiaFileDownloadSolid />
           </button>
         )}
       </div>
-      <h3>
+      <h3 className={`${activeBox === "info" && "infoActive"}`}>
         {activeBox === "notifications"
-          ? "Bildirishnomalar"
+          ? "Buyurtmalar Ro'yxati"
           : activeBox === "info"
-          ? "Xarajatlar Ro'yxati"
-          : "Xarajatlar Qo'shish"}
+            ? "Xarajatlar Ro'yxati"
+            : "Xarajatlar Qo'shish"}
       </h3>
       <div className="box_expense-content">
         {activeBox === "notifications" && <ShopsNotification />}
@@ -310,7 +345,7 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
         {activeBox === "info" &&
           expenses?.innerData?.allExpenses?.length > 0 && (
             <Table
-              dataSource={activeData}
+              dataSource={[...filteredData].reverse()}
               columns={columns}
               rowKey="_id"
               pagination={false}

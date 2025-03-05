@@ -14,7 +14,12 @@ header button {
   display: none;
 }
 
-
+.dollarRate {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  font-size: 14px;
+}
 
 /* Media */
 
