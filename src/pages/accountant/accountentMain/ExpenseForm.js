@@ -8,12 +8,15 @@ import { useCreateExpenseMutation } from "../../../context/service/expensesApi";
 import { useUpdateBalanceMutation } from "../../../context/service/balanceApi";
 import { useDispatch } from "react-redux";
 import { useGetWorkersQuery } from "../../../context/service/worker";
-import { setBoolean } from '../../../context/booleanSlice'
+import { setBoolean } from "../../../context/booleanSlice";
 import {
   useGetDebtorsQuery,
   useUpdateOrderMutation,
 } from "../../../context/service/orderApi";
-import { useGetAllShopsQuery, useUpdateShopMutation } from "../../../context/service/newOredShops";
+import {
+  useGetAllShopsQuery,
+  useUpdateShopMutation,
+} from "../../../context/service/newOredShops";
 
 const ExpenseForm = () => {
   const dispatch = useDispatch();
@@ -27,9 +30,9 @@ const ExpenseForm = () => {
   const [selectedDate, setSelectedDate] = useState(dayjs()); // tanlangan xarajat turi
   const [soldoFrom, setSoldoFrom] = useState(dayjs());
   const [soldoTo, setSoldoTo] = useState(dayjs());
-  const [usdRate, setUsdRate] = useState('');
+  const [usdRate, setUsdRate] = useState("");
   const [amountDollar, setAmount] = useState(0);
-  const { mutate: updateShop } = useUpdateShopMutation();
+  const [updateShop] = useUpdateShopMutation();
 
   const [createExpense] = useCreateExpenseMutation();
   const [updateBalance] = useUpdateBalanceMutation();
@@ -50,8 +53,9 @@ const ExpenseForm = () => {
   // ISHCHILAR ROYHATI
   const workersLists = workers?.innerData.map((worker) => ({
     value: worker._id,
-    label: `${worker.firstName} ${worker.lastName} [${worker.workerType || roleTranslations[worker.role]
-      }]`,
+    label: `${worker.firstName} ${worker.lastName} [${
+      worker.workerType || roleTranslations[worker.role]
+    }]`,
   }));
 
   // QARZDORLAR ROYHATI
@@ -63,7 +67,10 @@ const ExpenseForm = () => {
   // DO'KONLAR RO'YHATI
   const shops = shopsData?.innerData.map((i) => {
     // Har bir material uchun umumiy narxni hisoblash
-    const totalAmount = i.materials.reduce((sum, item) => sum + (item.pricePerUnit * item.quantity), 0);
+    const totalAmount = i.materials.reduce(
+      (sum, item) => sum + item.pricePerUnit * item.quantity,
+      0
+    );
 
     return {
       value: i._id,
@@ -119,7 +126,6 @@ const ExpenseForm = () => {
     selectedType === "income" ? kirim_royhati : chiqim_royhati
   ).map((i) => ({ value: i, label: i }));
 
-
   // malumotlarni yuborish
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -129,24 +135,24 @@ const ExpenseForm = () => {
     const newData =
       expenseCategory === "Ish haqi" || expenseCategory === "Avans"
         ? {
-          name: selectedCategory.label,
-          amount: amount,
-          type: "Chiqim",
-          category: expenseCategory,
-          description: expenseDescription,
-          paymentType: expensePaymentType,
-          relevantId: selectedCategory.value,
-          date: selectedDate.toDate(),
-        }
+            name: selectedCategory.label,
+            amount: amount,
+            type: "Chiqim",
+            category: expenseCategory,
+            description: expenseDescription,
+            paymentType: expensePaymentType,
+            relevantId: selectedCategory.value,
+            date: selectedDate.toDate(),
+          }
         : {
-          name: selectedCategory.label || expenseCategory,
-          amount: amount,
-          type: selectedType === "income" ? "Kirim" : "Chiqim",
-          category: expenseCategory,
-          description: expenseDescription,
-          paymentType: expensePaymentType,
-          relevantId: selectedCategory.value,
-        };
+            name: selectedCategory.label || expenseCategory,
+            amount: amount,
+            type: selectedType === "income" ? "Kirim" : "Chiqim",
+            category: expenseCategory,
+            description: expenseDescription,
+            paymentType: expensePaymentType,
+            relevantId: selectedCategory.value,
+          };
 
     try {
       const selectedDebtor = debtors?.innerData?.find(
@@ -177,8 +183,13 @@ const ExpenseForm = () => {
       let res = null;
 
       if (expenseCategory === "Do'kon qarzini to'lash") {
-        const shop = shopsData.innerData.find((i) => i._id === selectedCategory.value);
-        const totalAmount = shop.materials.reduce((sum, item) => sum + (item.pricePerUnit * item.quantity), 0);
+        const shop = shopsData.innerData.find(
+          (i) => i._id === selectedCategory.value
+        );
+        const totalAmount = shop.materials.reduce(
+          (sum, item) => sum + item.pricePerUnit * item.quantity,
+          0
+        );
 
         // Calculate paid and returnedMoney based on returnMony and totalAmount
         let paid = totalAmount;
@@ -200,22 +211,23 @@ const ExpenseForm = () => {
           updatedShop: {
             paid: paid,
             returnedMoney: returnedMoney,
-            isPaid: isPaid
-          }
+            isPaid: isPaid,
+          },
         });
-        res = updateShop({
+        res = await updateShop({
           id: shop._id,
-          updatedShop: {
+          body: {
             paid: paid,
             returnedMoney: returnedMoney,
-            isPaid: isPaid
-          }
+            isPaid: isPaid,
+          },
         });
 
+        console.log(">>resres", res);
 
         if (returnedMoney > 0) {
           const newDatas = {
-            name: shop.name,
+            name: shop.shopName,
             amount: returnedMoney,
             type: "Kirim",
             category: "Do‘kondan qaytarilgan mablag",
@@ -242,6 +254,8 @@ const ExpenseForm = () => {
         setExpenseCategory("");
       }
     } catch (err) {
+      console.log(err);
+
       message.error("Xarajatni qo'shishda xatolik yuz berdi.");
     } finally {
       setExpenseCategory("");
@@ -295,7 +309,7 @@ const ExpenseForm = () => {
 
   const handlePaymentTypeChange = (value) => {
     dispatch(setBoolean(value.value === "dollar")); // Redux-ga qiymatni uzatish
-  }
+  };
 
   const handleAmountChange = (value) => {
     const cleanedValue = value.replace(/\s/g, ""); // Bo'sh joylarni olib tashlash
@@ -306,8 +320,8 @@ const ExpenseForm = () => {
   const handleChange = (e) => {
     const { value } = e.target;
     const cleanedValue = value.replace(/\s/g, "");
-    setReturnMony(cleanedValue)
-    handleAmountChange(value)
+    setReturnMony(cleanedValue);
+    handleAmountChange(value);
     const formattedValue = formatNumber(value);
     setExpenseAmount(formattedValue);
   };
@@ -376,8 +390,8 @@ const ExpenseForm = () => {
             { value: expensePaymentType, label: expensePaymentType } || null
           }
           onChange={(selectedOption) => {
-            setExpensePaymentType(selectedOption ? selectedOption.value : null)
-            handlePaymentTypeChange(selectedOption)
+            setExpensePaymentType(selectedOption ? selectedOption.value : null);
+            handlePaymentTypeChange(selectedOption);
           }}
           placeholder="Tulov turi tanlang"
           classNamePrefix="custom-select"
@@ -497,36 +511,39 @@ const ExpenseForm = () => {
           />
         </div>
       )}
-      {!["Soldo"].includes(expenseCategory) && (
-        expensePaymentType === "dollar" && expenseAmount !== 0 ? (
-          <div className="ish-haqi-avans" style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "10px",
-          }}>
+      {!["Soldo"].includes(expenseCategory) &&
+        (expensePaymentType === "dollar" && expenseAmount !== 0 ? (
+          <div
+            className="ish-haqi-avans"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
             <div className="ish-haqi-kurs">
               <p>{amountDollar.toLocaleString()} so'm</p>
               <Input
                 style={{
                   height: "38px",
-                  width: "100%"
+                  width: "100%",
                 }}
                 placeholder="1 dollar kurs narxi"
                 value={usdRate}
                 onChange={(e) => setUsdRate(e.target.value)}
               />
             </div>
-            {
-              +usdRate > 0 && <Input
+            {+usdRate > 0 && (
+              <Input
                 style={{
-                  height: "38px"
+                  height: "38px",
                 }}
                 placeholder="Dollar miqdori..."
                 value={expenseAmount}
                 onChange={handleChange}
               />
-            }
+            )}
           </div>
         ) : (
           <Input
@@ -534,8 +551,7 @@ const ExpenseForm = () => {
             value={expenseAmount}
             onChange={handleChange}
           />
-        )
-      )}
+        ))}
 
       <Input.TextArea
         placeholder="Qo‘shimcha Ma'lumot"
@@ -559,7 +575,7 @@ const ExpenseForm = () => {
       >
         saqlash
       </Button>
-    </form >
+    </form>
   );
 };
 
