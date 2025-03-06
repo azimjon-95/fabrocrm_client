@@ -11,6 +11,8 @@ import {
     PlusOutlined,
     DownloadOutlined,
 } from "@ant-design/icons";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 import {
     useGetWorkersQuery,
     useDeleteWorkerMutation,
@@ -150,6 +152,48 @@ const ViewPersons = () => {
         },
     ];
 
+
+    const exportToExcel = () => {
+        const exportData = filteredWorkers.map(worker => ({
+            "FIO": `${worker.firstName} ${worker.lastName} ${worker.middleName}`,
+            "Telefon": formatPhoneNumber(worker.phone),
+            "Manzil": worker.address || "",
+            "Tug'ilgan sana": formatBirthDate(worker.dayOfBirth).formattedDate,
+            "Yoshi": formatBirthDate(worker.dayOfBirth).adjustedAge.toString(),
+            "Pasport": "*********", // Yashirin qiymat
+            "ID (Hover qiling)": worker.idNumber, // Asl ID ni hover uchun kiritamiz
+            "Kasbi": roleMapping[worker.role] || worker.workerType,
+            "Rasm URL": worker.img || "Rasm yo‘q"
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+        // Ustunlar bo‘yicha maksimal uzunlikni hisoblash
+        const columnWidths = Object.keys(exportData[0]).map((key) => ({
+            wch: Math.max(
+                key.length, // Ustun nomining uzunligi
+                ...exportData.map(row => (row[key] ? row[key].toString().length : 0)) // Eng uzun ma'lumot uzunligi
+            ) + 2 // Qo‘shimcha joy qo‘shish
+        }));
+
+        // Kommentariya (hover qilinganda ID chiqadi)
+        filteredWorkers.forEach((worker, index) => {
+            const cellRef = `F${index + 2}`; // "Pasport" ustuni (F)
+            worksheet[cellRef] = { t: "s", v: "*********" }; // Yashirin qiymat
+            worksheet[cellRef].c = [{ t: "s", v: `ID: ${worker.idNumber}` }]; // Kommentariya bilan ID chiqadi
+        });
+
+
+        worksheet["!cols"] = columnWidths; // Kengliklarni o‘rnatish
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Hodimlar");
+
+        const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+        const data = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8" });
+        saveAs(data, "Hodimlar.xlsx");
+    };
+
     return (
         <div>
             <div style={{ display: "flex", gap: "10px" }}>
@@ -157,7 +201,7 @@ const ViewPersons = () => {
                 <Button size="large" type="primary" style={{ background: "#0A3D3A" }} icon={<PlusOutlined />} onClick={() => navigate(activeTab === "active" ? "/director/add/worker" : "/worker/add")}>
                     Hodimlarni qabul qilish
                 </Button>
-                <Button size="large" type="default" icon={<DownloadOutlined />}>Excel</Button>
+                <Button onClick={exportToExcel} size="large" type="default" icon={<DownloadOutlined />}>Excel</Button>
             </div>
 
             <Table
