@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import "./Sidebar.css";
-import {  NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { MdLogout, MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 import { Modal } from "antd";
 import { useNavigate } from "react-router-dom";
 import { menuItems } from "../../utils/SidebarMenu";
-import mebelxLogo from "../../assets/mbx.png";
+import mebelxLogo from "../../assets/shoxMebelLogo.png";
 
 const { confirm } = Modal;
 
@@ -33,8 +33,11 @@ function Sidebar() {
     <aside>
       <div className="sidebar_logo">
         <img src={mebelxLogo} alt="" />
-        <i>Avtomatlashtirish - kelajak bugun</i>
       </div>
+      {/* <div className="sidebar_logo">
+        <img src={mebelxLogo} alt="" />
+        <i>Avtomatlashtirish - kelajak bugun</i>
+      </div> */}
       <div className="sidebar_links">
         {menuItems[role]?.map((item) => (
           item.children ? (

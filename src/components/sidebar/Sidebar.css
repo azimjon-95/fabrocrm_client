@@ -16,9 +16,9 @@ aside {
   text-align: center;
   user-select: none;
   position: relative;
-  border-bottom: 1px solid #FFBB00;
   margin-top: 5px;
-  background: #0A3D3A;
+  /* background: #478581; */
+  overflow: hidden;
 }
 
 .sidebar_logo i {
@@ -33,9 +33,10 @@ aside {
 
 .sidebar_logo img {
   width: 100%;
-  height: 100%;
-  padding: 0 40px 0 0;
+  height: 95px !important;
+  padding: 0 20px 0 0;
   -webkit-user-drag: none;
+  margin-top: -25px;
   pointer-events: none;
 }
 

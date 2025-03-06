@@ -64,19 +64,35 @@ const ExpenseForm = () => {
     label: debtor.customer.fullName,
   }));
 
-  // DO'KONLAR RO'YHATI
-  const shops = shopsData?.innerData.map((i) => {
-    // Har bir material uchun umumiy narxni hisoblash
-    const totalAmount = i.materials.reduce(
-      (sum, item) => sum + item.pricePerUnit * item.quantity,
-      0
-    );
+  // chiqim DO'KONLAR RO'YHATI
+  const shops = shopsData?.innerData
+    ?.filter(
+      (i) => i.isPaid === false && !i.shopName.toLowerCase().includes("soldo")
+    )
+    .map((i) => {
+      // Har bir material uchun umumiy narxni hisoblash
+      const totalAmount = i.materials.reduce(
+        (sum, item) => sum + item.pricePerUnit * item.quantity,
+        0
+      );
+      let summ = totalAmount - (i.paid || 0);
+      return {
+        value: i._id,
+        label: `${i.shopName} - ${summ?.toLocaleString()} so'm`,
+      };
+    });
 
-    return {
-      value: i._id,
-      label: `${i.shopName} - ${totalAmount.toLocaleString()} so'm`, // Pul formatida chiqarish
-    };
-  });
+  // kirim do'konlar ro'yxati
+  const kirimDokonlar = shopsData?.innerData
+    ?.filter(
+      (i) => i.isPaid === true && !i.shopName.toLowerCase().includes("soldo")
+    )
+    .map((d) => {
+      return {
+        value: d._id,
+        label: `${d.shopName} - ${d.returnedMoney?.toLocaleString()} so'm`, // Pul formatida chiqarish
+      };
+    });
 
   let options = [];
   if (
@@ -94,10 +110,16 @@ const ExpenseForm = () => {
     expenseCategory === "Do'kon qarzini to'lash"
   ) {
     options = shops;
+  } else if (
+    selectedType === "income" &&
+    expenseCategory === "Do'kondan qaytarilgan mablag"
+  ) {
+    options = kirimDokonlar;
   }
 
   const kirim_royhati = [
     "Mijoz to‘lovlari",
+    "Do'kondan qaytarilgan mablag",
     "Investor sarmoyasi",
     "Qaytgan mablag‘",
     "Davlat subsidiyasi",
@@ -183,7 +205,7 @@ const ExpenseForm = () => {
       let res = null;
 
       if (expenseCategory === "Do'kon qarzini to'lash") {
-        const shop = shopsData.innerData.find(
+        const shop = shopsData.innerData?.find(
           (i) => i._id === selectedCategory.value
         );
         const totalAmount = shop.materials.reduce(
@@ -203,17 +225,10 @@ const ExpenseForm = () => {
           paid = returnMony;
         }
         // returnMony, setReturnMony
-        if (paid === totalAmount) {
+        if (returnMony >= totalAmount) {
           isPaid = true;
         }
-        console.log({
-          id: shop._id,
-          updatedShop: {
-            paid: paid,
-            returnedMoney: returnedMoney,
-            isPaid: isPaid,
-          },
-        });
+
         res = await updateShop({
           id: shop._id,
           body: {
@@ -222,30 +237,51 @@ const ExpenseForm = () => {
             isPaid: isPaid,
           },
         });
+      }
 
-        console.log(">>resres", res);
+      if (expenseCategory === "Do'kondan qaytarilgan mablag") {
+        const shop = shopsData.innerData?.find(
+          (i) => i._id === selectedCategory.value
+        );
 
-        if (returnedMoney > 0) {
+        if (shop) {
           const newDatas = {
             name: shop.shopName,
-            amount: returnedMoney,
+            amount: amount,
             type: "Kirim",
             category: "Do‘kondan qaytarilgan mablag",
-            description: "Hisob raqamdagi mablag‘ naqd pul sifatida olindi.",
-            paymentType: "Naqd",
+            description: expenseDescription,
+            paymentType: expensePaymentType,
             relevantId: shop._id,
           };
 
           await createExpense(newDatas).unwrap();
+
+          let updatedReturnedMoney = shop.returnedMoney;
+          let updatedPaid = shop.paid;
+
+          if (amount > shop.returnedMoney) {
+            updatedReturnedMoney = 0;
+            updatedPaid -= amount - shop.returnedMoney; // yetmaganini paid dan ayiramiz
+          } else {
+            updatedReturnedMoney -= amount;
+          }
+
+          const updatedShop = {
+            ...shop,
+            returnedMoney: updatedReturnedMoney,
+            paid: updatedPaid,
+            isPaid: amount > shop.returnedMoney ? false : true,
+          };
+
+          await updateShop({
+            id: shop._id,
+            body: updatedShop,
+          });
         }
       }
 
-      if (
-        res?.state &&
-        expenseResponse?.state &&
-        balanceResponse?.state &&
-        orderResponse?.state
-      ) {
+      if (expenseResponse?.state && balanceResponse?.state) {
         message.success("Xarajat muvaffaqiyatli qo'shildi!");
 
         // Formani tozalash
@@ -256,11 +292,20 @@ const ExpenseForm = () => {
     } catch (err) {
       console.log(err);
 
-      message.error("Xarajatni qo'shishda xatolik yuz berdi.");
+      message.error(
+        err.data.message || "Xarajatni qo'shishda xatolik yuz berdi."
+      );
     } finally {
       setExpenseCategory("");
       setExpensePaymentType("");
       e.target.reset();
+      setSelectedCategory("");
+      setSelectedType("income");
+      setSelectedDate(dayjs());
+      setSoldoFrom(dayjs());
+      setSoldoTo(dayjs());
+      setUsdRate("");
+      setReturnMony("");
     }
   };
 
