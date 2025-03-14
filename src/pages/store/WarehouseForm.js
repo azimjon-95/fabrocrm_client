@@ -188,17 +188,18 @@ const Warehouse = () => {
       const newTotalPrice = (shop.totalPrice || 0) + materialTotal;
       await updateShop({
         id: shop._id,
-        updatedShop: { totalPrice: newTotalPrice },
+        body: { totalPrice: newTotalPrice },
       });
-
-      refetchAllShops();
 
       form.resetFields();
       setIsModalOpen(false);
+
+      refetchAllShops();
       refetchAll();
       refetchFiltered();
     } catch (error) {
-      message.error(error?.data?.message);
+      console.log(error);
+      // message.error(error?.data?.message || ">>>");
     }
   };
 

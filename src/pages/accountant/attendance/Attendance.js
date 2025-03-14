@@ -67,13 +67,14 @@ const Attendance = () => {
     refetch: workersRefetch,
   } = useGetWorkersQuery();
   const adminRoles = [
-    "manager",
-    "seller",
+    // "manager",
+    // "seller",
     "director",
-    "accountant",
-    "warehouseman",
+    // "accountant",
+    // "warehouseman",
     "deputy_director",
   ];
+
   const Workers = workersData?.innerData.filter(
     (worker) => !adminRoles.includes(worker.role)
   );
@@ -238,7 +239,8 @@ const Attendance = () => {
               <div className="workingHours-nightWorkingHours">
                 {workingHours > 0 && (
                   <span
-                    className={nightWorkingHours > 0 && `workingHours`}
+                    // className={nightWorkingHours > 0 && `workingHours`}
+                    className={nightWorkingHours > 0 ? "workingHours" : ""}
                     style={{ color: "#ffffff" }}
                   >
                     {workingHours}
@@ -249,7 +251,8 @@ const Attendance = () => {
                 )}
                 {nightWorkingHours > 0 && (
                   <span
-                    className={workingHours > 0 && "nightWorkingHours"}
+                    // className={workingHours > 0 && "nightWorkingHours"}
+                    className={workingHours > 0 ? "nightWorkingHours" : ""}
                     style={{ color: "#ffffff" }}
                   >
                     {nightWorkingHours}

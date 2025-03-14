@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./style.css";
 import dayjs from "dayjs";
 import "moment/locale/uz"; // O'zbek tilini qo'shish
@@ -17,6 +17,14 @@ import {
   useGetAllShopsQuery,
   useUpdateShopMutation,
 } from "../../../context/service/newOredShops";
+
+import {
+  useGetIsPaidFalseQuery,
+  usePostMyDebtMutation,
+  usePaymentForDebtMutation,
+} from "../../../context/service/mydebtService";
+
+import socket from "../../../socket";
 
 const ExpenseForm = () => {
   const dispatch = useDispatch();
@@ -41,6 +49,17 @@ const ExpenseForm = () => {
   const { data: debtors } = useGetDebtorsQuery();
   const { data: shopsData } = useGetAllShopsQuery();
 
+  const { data: myDebtsData, refetch } = useGetIsPaidFalseQuery();
+  const [postMyDebt] = usePostMyDebtMutation();
+  const [paymentForDebt] = usePaymentForDebtMutation();
+
+  useEffect(() => {
+    socket.on("updateMyDebt", () => {
+      refetch();
+    });
+    return () => socket.off("updateMyDebt");
+  }, [refetch]);
+
   const roleTranslations = {
     manager: "Menejer",
     seller: "Sotuvchi",
@@ -63,6 +82,15 @@ const ExpenseForm = () => {
     value: debtor._id,
     label: debtor.customer.fullName,
   }));
+
+  const myDebtorLists = myDebtsData?.innerData?.map((debtor) => {
+    let ss = debtor.payments.reduce((a, b) => a + b.amount, 0);
+    let sss = debtor.amount - ss;
+    return {
+      value: debtor._id,
+      label: debtor.name + " - " + sss.toLocaleString() + " so'm",
+    };
+  });
 
   // chiqim DO'KONLAR RO'YHATI
   const shops = shopsData?.innerData
@@ -115,11 +143,17 @@ const ExpenseForm = () => {
     expenseCategory === "Do'kondan qaytarilgan mablag"
   ) {
     options = kirimDokonlar;
+  } else if (
+    selectedType === "expense" &&
+    expenseCategory === "Qarzni to'lash"
+  ) {
+    options = myDebtorLists;
   }
 
   const kirim_royhati = [
     "Mijoz to‘lovlari",
     "Do'kondan qaytarilgan mablag",
+    "Qarz olish",
     "Investor sarmoyasi",
     "Qaytgan mablag‘",
     "Davlat subsidiyasi",
@@ -131,6 +165,7 @@ const ExpenseForm = () => {
     "Ish haqi",
     "Avans",
     "Do'kon qarzini to'lash",
+    "Qarzni to'lash",
     "Ijara",
     "Mebel",
     "Kantselyariya",
@@ -154,7 +189,7 @@ const ExpenseForm = () => {
 
     let amount = parseFloat(expenseAmount?.split(" ")?.join(""));
 
-    const newData =
+    let newData =
       expenseCategory === "Ish haqi" || expenseCategory === "Avans"
         ? {
             name: selectedCategory.label,
@@ -176,6 +211,11 @@ const ExpenseForm = () => {
             relevantId: selectedCategory.value,
           };
 
+    if (expenseCategory === "Qarz olish") {
+      let { relevantId, ...newData1 } = newData;
+      newData = newData1;
+    }
+
     try {
       const selectedDebtor = debtors?.innerData?.find(
         (item) => item._id === selectedCategory.value
@@ -190,13 +230,31 @@ const ExpenseForm = () => {
         payType: expensePaymentType,
       }).unwrap();
 
+      if (expenseCategory === "Qarz olish") {
+        let data = {
+          amount: amount,
+          description: expenseDescription,
+          name: selectedCategory.label,
+          type: expensePaymentType,
+        };
+        let neww = await postMyDebt(data);
+      }
+
+      if (expenseCategory === "Qarzni to'lash") {
+        await paymentForDebt({
+          id: selectedCategory.value,
+          body: { amount: amount },
+        });
+      }
+
       // Faqat "Mijoz to‘lovlari" bo'lganda orderni yangilash
       let orderResponse = { state: true }; // Default qiymat
       if (expenseCategory === "Mijoz to‘lovlari") {
         orderResponse = await updateOrder({
           id: selectedCategory.value,
           updates: {
-            paid: currentPaid + amountDollar || returnMony,
+            paid:
+              currentPaid + (+amountDollar > 0 ? +amountDollar : +returnMony),
             paidAt: new Date().toISOString(), // Hozirgi vaqtni yuborish
           },
         }).unwrap();
@@ -521,6 +579,22 @@ const ExpenseForm = () => {
             }}
           />
         </div>
+      ) : (
+        ""
+      )}
+
+      {/* KIMDAN */}
+      {expenseCategory === "Qarz olish" ? (
+        <Input
+          placeholder="Kimdan"
+          value={selectedCategory?.label}
+          onChange={(e) => {
+            setSelectedCategory({
+              value: e.target.value,
+              label: e.target.value,
+            });
+          }}
+        />
       ) : (
         ""
       )}

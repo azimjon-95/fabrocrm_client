@@ -19,6 +19,7 @@ import { regions } from "../../../utils/regions";
 import { useCreateOrderMutation } from "../../../context/service/orderApi";
 import moment from "moment";
 import "./style.css";
+import { original } from "@reduxjs/toolkit";
 
 const { Option } = Select;
 const Order = () => {
@@ -29,7 +30,7 @@ const Order = () => {
 
   // const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
-  const { control, handleSubmit, watch } = useForm({
+  const { control, handleSubmit, watch, errors } = useForm({
     defaultValues: {
       paymentType: "Naqd",
       customerType: "Yuridik shaxs",
@@ -54,36 +55,14 @@ const Order = () => {
         !data.customerType ||
         !data.fullName ||
         !data.phone ||
-        !data.address
+        !data.address.region || // Viloyat
+        !data.address.district || // Tuman
+        !data.address.street || // Uy
+        !data.estimatedDays
       ) {
         message.warning("Iltimos, barcha majburiy maydonlarni to'ldiring!");
         return;
       }
-
-      // const myData = {
-      //   fullName: data.fullName,
-      //   paid: 0,
-      //   address: {
-      //     region: data.address.region,
-      //     district: data.address.district,
-      //     street: data.address.street,
-      //     location: sessionStorage.getItem("location"),
-      //   },
-      //   description: data.description,
-      //   date: moment(data.date).toISOString(),
-      //   estimatedDays: data.estimatedDays,
-      //   customer: {
-      //     type: data.customerType,
-      //     fullName: data.fullName,
-      //     phone: data.phone,
-      //     companyName: data.companyName,
-      //     director: data.director,
-      //     inn: data.inn || "",
-      //     paymentType: data.paymentType,
-      //   },
-      //   isType: true,
-      //   orders: savedFurniture,
-      // };
 
       const formData = new FormData();
       formData.append("fullName", data.fullName);
@@ -103,6 +82,7 @@ const Order = () => {
       formData.append("customer[inn]", data.inn || "");
       formData.append("customer[paymentType]", data.paymentType);
       formData.append("isType", true);
+      formData.append("nds", data.nds);
 
       // `orders` massivida har bir buyumni FormData ichiga joylash
       savedFurniture.forEach((item, index) => {
@@ -119,8 +99,13 @@ const Order = () => {
           `orders[${index}][dimensions][height]`,
           item.dimensions.height
         );
-        formData.append(`orders[${index}][budget]`, item.budget);
+        formData.append(`orders[${index}][originalPrice]`, item.budget);
+        // formData.append(`orders[${index}][budget]`, item.budget);
+        const ndsAmount = (item.budget * data.nds) / 100; // NDS summasini hisoblash
+        const updatedBudget = item.budget + ndsAmount; // Asl budgetga NDS qo'shish
+        formData.append(`orders[${index}][budget]`, Math.round(updatedBudget)); // Ikkita kasr xonasi bilan
         formData.append(`orders[${index}][quantity]`, item.quantity);
+        formData.append(`orders[${index}][description]`, item.description);
 
         if (item.image) {
           formData.append("images", item.image);
@@ -129,7 +114,9 @@ const Order = () => {
 
       createOrder(formData)
         .then((res) => {
-          message.success("Buyurtma muvaffaqiyatli yaratildi!");
+          console.log(res);
+
+          // message.success("Buyurtma muvaffaqiyatli yaratildi!");
           if (res?.data?.innerData) {
             navigate("/order/mengement/" + res?.data?.innerData?._id);
           }
@@ -157,8 +144,8 @@ const Order = () => {
     },
     budget: "",
     quantity: 1,
+    description: "",
   });
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -181,7 +168,6 @@ const Order = () => {
     }
   };
 
-
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -197,7 +183,8 @@ const Order = () => {
       formData.dimensions.width &&
       formData.budget &&
       formData.quantity &&
-      file
+      file &&
+      formData.description
     ) {
       const newFurniture = {
         name: formData.name,
@@ -208,7 +195,9 @@ const Order = () => {
         },
         image: file,
         quantity: +formData.quantity,
-        budget: (+formData.budget * +formData.quantity),
+        originalPrice: +formData.budget,
+        budget: +formData.budget * +formData.quantity,
+        description: formData.description,
       };
 
       setSavedFurniture([...savedFurniture, newFurniture]);
@@ -220,7 +209,8 @@ const Order = () => {
           height: "",
         },
         quantity: 0,
-        budget: ""
+        budget: "",
+        description: "",
       });
       setFile(null);
     }
@@ -265,11 +255,27 @@ const Order = () => {
             </Form.Item>
           </Col>
 
-          <Col span={12}>
+          {/* <Col span={12}>
             <Form.Item label="Telefon raqami">
               <Controller
                 name="phone"
                 control={control}
+                render={({ field }) => (
+                  <Input {...field} placeholder="Введите номер телефона" />
+                )}
+              />
+            </Form.Item>
+          </Col> */}
+          <Col span={12}>
+            <Form.Item
+              label="Telefon raqami"
+              validateStatus={errors?.phone ? "error" : ""}
+              help={errors?.phone?.message}
+            >
+              <Controller
+                name="phone"
+                control={control}
+                rules={{ required: "Telefon raqami majburiy" }}
                 render={({ field }) => (
                   <Input {...field} placeholder="Введите номер телефона" />
                 )}
@@ -320,7 +326,7 @@ const Order = () => {
 
         <Row gutter={12}>
           <Col span={selectedRegion ? 6 : 12}>
-            <Form.Item label="Viloyat">
+            <Form.Item required label="Viloyat">
               <Controller
                 name="address.region"
                 control={control}
@@ -499,41 +505,56 @@ const Order = () => {
                       width: "100%",
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "space-between"
+                      justifyContent: "space-between",
                     }}
                   >
-                    <div style={{
-                      display: "flex",
-                      alignItems: "center",
-                      flexDirection: "column",
-                    }}>
-                      <div style={{
-                        width: "100%",
+                    <div
+                      style={{
                         display: "flex",
-                        gap: "12px"
-                      }}>
-                        <div><strong>Nomi:</strong> {item.name}</div>
-                        <div><strong>Miqdori:</strong> {item.quantity}</div>
-                        <div><strong>Narxi:</strong> {item.budget}</div>
-                        <div><strong>Jami:</strong> {+item.budget * +item.quantity}</div>
+                        alignItems: "center",
+                        flexDirection: "column",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "100%",
+                          display: "flex",
+                          gap: "12px",
+                        }}
+                      >
+                        <div>
+                          <strong>Nomi:</strong> {item.name}
+                        </div>
+                        <div>
+                          <strong>Miqdori:</strong> {item.quantity}
+                        </div>
+                        <div>
+                          <strong>Narxi:</strong> {item.budget}
+                        </div>
+                        <div>
+                          <strong>Jami:</strong> {+item.budget * +item.quantity}
+                        </div>
                       </div>
 
-                      <div style={{
-                        width: "100%",
-                        display: "flex",
-                        gap: "12px"
-                      }}>
+                      <div
+                        style={{
+                          width: "100%",
+                          display: "flex",
+                          gap: "12px",
+                        }}
+                      >
                         <div>
-                          <strong>Razmerlar:</strong> {item.dimensions.length}sm (U)
-                          × {item.dimensions.width}sm (E) × {item.dimensions.height}
+                          <strong>Razmerlar:</strong> {item.dimensions.length}sm
+                          (U) × {item.dimensions.width}sm (E) ×{" "}
+                          {item.dimensions.height}
                           sm (B)
                         </div>
-
                       </div>
                     </div>
                     {item.image && (
                       <img
-                        src={item.image}
+                        // src={item.image}
+                        src={URL.createObjectURL(item.image)}
                         alt={item.name}
                         style={{
                           width: "50px",
@@ -550,15 +571,33 @@ const Order = () => {
           </Col>
 
           <Col span={12}>
-            <Form.Item label="Taxminiy tayyor bolish vaqt">
-              <Controller
-                name="estimatedDays"
-                control={control}
-                render={({ field }) => (
-                  <Input {...field} placeholder="Примерное время готовности" />
-                )}
-              />
-            </Form.Item>
+            <Row gutter={12}>
+              <Col span={12}>
+                <Form.Item label="Taxminiy tayyor bolish vaqt">
+                  <Controller
+                    name="estimatedDays"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        placeholder="Примерное время готовности"
+                      />
+                    )}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="NDS">
+                  <Controller
+                    name="nds"
+                    control={control}
+                    render={({ field }) => (
+                      <Input {...field} placeholder="NDS" />
+                    )}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
             {/* <Form.Item label="Tavsif">
               <Input.TextArea
                 name="description"
@@ -576,6 +615,7 @@ const Order = () => {
                     {...field}
                     autoSize={{ minRows: 5.8, maxRows: 5.8 }}
                     placeholder="Tavsif"
+                    onChange={handleChange}
                   />
                 )}
               />

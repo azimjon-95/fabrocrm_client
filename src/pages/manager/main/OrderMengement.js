@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Input, Select, Button, message, Form } from "antd";
-import {
-  SearchOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
+import { SearchOutlined, DeleteOutlined } from "@ant-design/icons";
 import { TbArrowBackUpDouble } from "react-icons/tb";
 import { useGetAllStoresQuery } from "../../../context/service/storeApi";
 import { GiTakeMyMoney } from "react-icons/gi";
@@ -11,7 +8,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { IoCheckmarkSharp } from "react-icons/io5";
 import { MdOutlineAdd, MdOutlineAddShoppingCart } from "react-icons/md";
 import {
-  useGetOrderByIdQuery, useCreateAdditionalMaterialMutation
+  useGetOrderByIdQuery,
+  useCreateAdditionalMaterialMutation,
 } from "../../../context/service/orderApi";
 import "./style.css";
 
@@ -29,20 +27,30 @@ const OrderMengement = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMaterials, setSelectedMaterials] = useState([]);
-  const [createAdditionalMaterial, { loading: isCreating }] = useCreateAdditionalMaterialMutation();
+  const [createAdditionalMaterial, { loading: isCreating }] =
+    useCreateAdditionalMaterialMutation();
   const [orderId, setOrderID] = useState(null);
   const [materials, setMaterials] = useState([]);
   const [isForm, setIsForm] = useState(false);
   const { data: allStores = [] } = useGetAllStoresQuery();
   const { data: orderData } = useGetOrderByIdQuery(id);
   let order = orderData?.innerData;
-  const Price = materials?.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0) || 0;
-  const totalPrice = selectedMaterials?.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0) || 0;
-
+  const Price =
+    materials?.reduce(
+      (sum, item) => sum + item.price * (item.quantity || 1),
+      0
+    ) || 0;
+  const totalPrice =
+    selectedMaterials?.reduce(
+      (sum, item) => sum + item.price * (item.quantity || 1),
+      0
+    ) || 0;
 
   useEffect(() => {
     if (order?.orders) {
-      setMaterials(order.orders.flatMap(orderItem => orderItem.materials || []));
+      setMaterials(
+        order.orders.flatMap((orderItem) => orderItem.materials || [])
+      );
     }
   }, [order]);
 
@@ -50,23 +58,22 @@ const OrderMengement = () => {
     localStorage.setItem("order", JSON.stringify(order));
   }, [order]);
 
-
   useEffect(() => {
     const storedOrder = localStorage.getItem("order");
-    if (!storedOrder) return; // Agar "order" mavjud bo'lmasa, funksiyani tugatish
 
+    if (!storedOrder) return; // Agar "order" mavjud bo'lmasa, funksiyani tugatish
     try {
       const order = JSON.parse(storedOrder);
+
       const foundOrder = order?.orders?.find((o) => o._id === orderId);
 
       if (foundOrder?.materials) {
         setSelectedMaterials(foundOrder.materials);
       }
-
     } catch (error) {
       console.error("JSON parse error:", error);
     }
-  }, [orderId]);
+  }, [orderId, order]);
   const [formDataNew, setFormDataNew] = useState({
     name: "",
     price: "",
@@ -83,7 +90,9 @@ const OrderMengement = () => {
 
   const handleAddMaterialNew = () => {
     // Generate a unique ID using random string + length
-    const uniqueId = `67d${Math.random().toString(36).substr(2, 9)}new${selectedMaterials.length + 1}`;
+    const uniqueId = `67d${Math.random().toString(36).substr(2, 9)}new${
+      selectedMaterials.length + 1
+    }`;
 
     const newMaterial = {
       id: uniqueId,
@@ -174,19 +183,17 @@ const OrderMengement = () => {
         ...prevState,
         [mat._id]: "", // Inputni tozalash
       }));
-
     } catch (error) {
-      message.error(error.message || "Xatolik yuz berdi, qayta urinib ko'ring!");
+      message.error(
+        error.message || "Xatolik yuz berdi, qayta urinib ko'ring!"
+      );
     }
   };
-
 
   const closeAndSave = () => {
     let order = JSON.parse(localStorage.getItem("order"));
     order.orders = order.orders?.map((i) =>
-      i._id === orderId
-        ? { ...i, materials: selectedMaterials }
-        : i
+      i._id === orderId ? { ...i, materials: selectedMaterials } : i
     );
 
     localStorage.setItem("order", JSON.stringify(order));
@@ -227,7 +234,9 @@ const OrderMengement = () => {
                     />
                     <b style={{ width: "30%" }}>{item.name}</b>{" "}
                     <b style={{ width: "30%" }}>{item.quantity}-ta</b>{" "}
-                    <b style={{ width: "30%" }}>{item.budget.toLocaleString()} so'm</b>{" "}
+                    <b style={{ width: "30%" }}>
+                      {item.budget.toLocaleString()} so'm
+                    </b>{" "}
                     <button
                       style={{
                         background: "#0A3D3A",
@@ -239,9 +248,10 @@ const OrderMengement = () => {
                         borderRadius: "5px",
                       }}
                       onClick={() => {
-                        setOrderID(item._id)
-                        setSelectedMaterials(item?.materials)
-                      }}>
+                        setOrderID(item._id);
+                        setSelectedMaterials(item?.materials);
+                      }}
+                    >
                       Materiallar
                     </button>
                   </div>
@@ -259,10 +269,7 @@ const OrderMengement = () => {
               />
               <div className="form-data-container">
                 <h3>Ombor</h3>
-                <Button
-                  type="primary"
-                  onClick={() => closeAndSave()}
-                >
+                <Button type="primary" onClick={() => closeAndSave()}>
                   <TbArrowBackUpDouble />
                 </Button>
               </div>
@@ -293,7 +300,10 @@ const OrderMengement = () => {
                       className="full-width"
                       placeholder="Miqdori"
                     />
-                    <Button loading={isCreating} onClick={() => handleAddMaterial(mat)}>
+                    <Button
+                      loading={isCreating}
+                      onClick={() => handleAddMaterial(mat)}
+                    >
                       <IoCheckmarkSharp />
                     </Button>
                   </div>
@@ -437,7 +447,10 @@ const OrderMengement = () => {
                         color: "#0A3D3A",
                       }}
                     >
-                      {totalPrice === 0 ? Price.toLocaleString() : totalPrice.toLocaleString()} so'm
+                      {totalPrice === 0
+                        ? Price.toLocaleString()
+                        : totalPrice.toLocaleString()}{" "}
+                      so'm
                     </p>
                   </Form.Item>
 

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Table, Image, Typography, Card, Button, DatePicker } from "antd";
 import { useGetAllWorkingHoursQuery } from "../../context/service/workingHours";
 import { useGetOrderByIdQuery } from "../../context/service/orderApi";
-// import Banner from "./banner.png";
+import Banner from "./banner.png";
 import { useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { AiOutlineDoubleLeft } from "react-icons/ai";
@@ -17,10 +17,11 @@ const ShohMebelTable = () => {
   const { id } = useParams();
   const { data: info } = useGetAllWorkingHoursQuery();
   const dataSource = info?.innerData?.find((i) => i) || {};
-  const currentDate = dayjs().format("DD.MM.YYYY");
+  // const currentDate = dayjs().format("DD.MM.YYYY");
   const { data: order } = useGetOrderByIdQuery(id);
   const orderList = order?.innerData || {};
   const [loading, setLoading] = useState(false); // Loading state
+  console.log(orderList);
 
   // Default sana
   const [currentDateToday, setCurrentDate] = useState(
@@ -132,8 +133,8 @@ const ShohMebelTable = () => {
               Сумма
             </i>
           ),
-          dataIndex: "budget",
-          key: "budget",
+          dataIndex: "priceXQty",
+          key: "priceXQty",
           align: "right",
           render: (text) => (
             <i style={{ fontFamily: "Arial, sans-serif", fontSize: "11px" }}>
@@ -156,8 +157,8 @@ const ShohMebelTable = () => {
                   Ставка
                 </i>
               ),
-              dataIndex: "discount",
-              key: "discount",
+              dataIndex: "nds",
+              key: "nds",
               align: "center",
               render: (text) => (
                 <i
@@ -175,8 +176,8 @@ const ShohMebelTable = () => {
                   Сумма
                 </i>
               ),
-              dataIndex: "vatAmount",
-              key: "vatAmount",
+              dataIndex: "totalNdsPrice",
+              key: "totalNdsPrice",
               align: "right",
               render: (text) => (
                 <i
@@ -194,8 +195,8 @@ const ShohMebelTable = () => {
               Стоимость с НДС
             </i>
           ),
-          dataIndex: "totalPriceWithVAT",
-          key: "totalPriceWithVAT",
+          dataIndex: "priceWidthNds",
+          key: "priceWidthNds",
           align: "right",
           render: (text) => (
             <i style={{ fontFamily: "Arial, sans-serif", fontSize: "11px" }}>
@@ -216,33 +217,46 @@ const ShohMebelTable = () => {
       ],
     },
   ];
+  console.log(orderList);
 
-  const data = orderList.orders?.map((i, inx) => ({
-    key: String(inx + 1), // Har bir element uchun unikal `key`
-    name: i.name,
-    quantity: i.quantity, // Agar quantity dinamik bo‘lsa, `i.quantity` qo‘ying
-    price: i.budget, // Agar narx dinamik bo‘lsa, `i.price` qo‘ying
-    image: i.image,
-    dimensions: {
-      length: i.dimensions?.length,
-      width: i.dimensions?.width,
-      height: i.dimensions?.height,
-    },
-  }));
-
-  const updatedData = data?.map((item) => {
-    const vatRate = 12;
-    const budget = +item.price * +item.quantity;
-    const vatAmount = budget * (vatRate / 100);
-    const totalPriceWithVAT = budget + vatAmount;
+  const data = orderList.orders?.map((i, inx) => {
+    let priceXQty = +i.originalPrice;
+    let totalNdsPrice = priceXQty * (orderList.nds / 100);
+    let priceWidthNds = priceXQty + totalNdsPrice;
     return {
-      ...item,
-      discount: vatRate + " %",
-      budget: budget.toLocaleString("uz-UZ"),
-      vatAmount: vatAmount.toLocaleString("uz-UZ"),
-      totalPriceWithVAT: totalPriceWithVAT.toLocaleString("uz-UZ"),
+      key: String(inx + 1),
+      name: i.name,
+      quantity: i.quantity,
+      price: i.originalPrice / i.quantity,
+      priceXQty: i.originalPrice,
+      nds: orderList.nds || 0,
+      totalNdsPrice: totalNdsPrice,
+      priceWidthNds: priceWidthNds,
+
+      allItemPrice: +i.budget * +i.quantity,
+      image: i.image,
+      dimensions: {
+        length: i.dimensions?.length,
+        width: i.dimensions?.width,
+        height: i.dimensions?.height,
+      },
     };
   });
+
+  // const updatedData = data?.map((item) => {
+  //   const vatRate = orderList.nds;
+  //   const budget = +item.price * +item.quantity;
+  //   const vatAmount = item.originalPrice * (vatRate / 100);
+  //   // const totalPriceWithVAT = budget + vatAmount;
+  //   const totalPriceWithVAT = budget;
+  //   return {
+  //     ...item,
+  //     discount: vatRate + " %",
+  //     budget: budget.toLocaleString("uz-UZ"),
+  //     vatAmount: vatAmount.toLocaleString("uz-UZ"),
+  //     totalPriceWithVAT: totalPriceWithVAT.toLocaleString("uz-UZ"),
+  //   };
+  // });
 
   const handleDownloadPDF = () => {
     setLoading(true); // Start loading
@@ -296,7 +310,7 @@ const ShohMebelTable = () => {
       <div className="container-pdf">
         <Card>
           <div className="header-pdf">
-            {/* <img src={Banner} alt="Shoh Mebel" className="header-image" /> */}
+            <img src={Banner} alt="Shoh Mebel" className="header-image" />
           </div>
           <div className="header-pdf-info">
             <i className="header-pdf-box">
@@ -329,43 +343,45 @@ const ShohMebelTable = () => {
           <Table
             size="small"
             columns={columns}
-            dataSource={updatedData}
+            dataSource={data}
             pagination={false}
             bordered
             summary={(pageData) => {
+              console.log(pageData);
+
               const formatNumber = (num) =>
                 isNaN(num) ? "0" : Number(num).toLocaleString("uz-UZ");
-              const transformedPageData = pageData.map((item) => {
-                const vatRate = 12; // 12% VAT as an integer
-                const budget = +item.price * +item.quantity; // Calculate total price based on quantity
-                const vatAmount = budget * (vatRate / 100); // Calculate VAT amount
-                const totalPriceWithVAT = budget + vatAmount; // Total price with VAT
-                return {
-                  ...item,
-                  discount: vatRate,
-                  budget: budget,
-                  vatAmount: vatAmount, // Format VAT amount for display
-                  totalPriceWithVAT: totalPriceWithVAT, // Format total price with VAT for display
-                };
-              });
+              // const transformedPageData = pageData.map((item) => {
+              //   const vatRate = orderList.nds; // 12% VAT as an integer
+              //   const budget = +item.originalPrice * +item.quantity; // Calculate total price based on quantity
+              //   const vatAmount = budget * (vatRate / 100); // Calculate VAT amount
+              //   const totalPriceWithVAT = budget + vatAmount; // Total price with VAT
+              //   return {
+              //     ...item,
+              //     discount: vatRate,
+              //     budget: budget,
+              //     vatAmount: vatAmount, // Format VAT amount for display
+              //     totalPriceWithVAT: totalPriceWithVAT, // Format total price with VAT for display
+              //   };
+              // });
 
-              // Calculate totals
-              const totalPrice = transformedPageData.reduce(
-                (sum, item) => sum + Number(item.price),
+              // // Calculate totals
+              // const totalPrice = transformedPageData.reduce(
+              //   (sum, item) => sum + Number(item.originalPrice),
+              //   0
+              // );
+              const totalBudget = pageData.reduce(
+                (sum, item) => sum + Number(item.priceXQty),
                 0
               );
-              const totalBudget = transformedPageData.reduce(
-                (sum, item) => sum + Number(item.budget),
+              const totalVatAmount = pageData.reduce(
+                (sum, item) => sum + Number(item.totalNdsPrice),
                 0
               );
-              const totalVatAmount = transformedPageData.reduce(
-                (sum, item) => sum + Number(item.vatAmount),
-                0
-              );
-              const totalPriceWithVAT = transformedPageData.reduce(
-                (sum, item) => sum + Number(item.totalPriceWithVAT),
-                0
-              );
+              // const totalPriceWithVAT = transformedPageData.reduce(
+              //   (sum, item) => sum + Number(item.totalPriceWithVAT),
+              //   0
+              // );
 
               return (
                 <Table.Summary.Row>
@@ -386,7 +402,7 @@ const ShohMebelTable = () => {
                         fontSize: "11px",
                       }}
                     >
-                      {formatNumber(totalPrice)}
+                      {/* {formatNumber(totalBudget)} */}
                     </i>
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={2} align="right">
@@ -417,7 +433,7 @@ const ShohMebelTable = () => {
                         fontSize: "11px",
                       }}
                     >
-                      {formatNumber(totalPriceWithVAT)}
+                      {formatNumber(totalBudget + totalVatAmount)}
                     </i>
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={6}></Table.Summary.Cell>

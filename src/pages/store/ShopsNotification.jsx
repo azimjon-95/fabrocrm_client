@@ -70,7 +70,6 @@ const ShopsNotification = () => {
 
   return (
     <div>
-
       <Table
         columns={columns}
         dataSource={shops}

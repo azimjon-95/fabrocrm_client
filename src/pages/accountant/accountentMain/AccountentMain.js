@@ -8,7 +8,10 @@ import {
 import { useNavigate } from "react-router-dom";
 import ExpenseRegister from "./ExpenseRegister";
 import MainCards from "./MainCards";
-import { useGetOrdersQuery } from "../../../context/service/orderApi";
+import {
+  // useGetOrdersQuery,
+  useGetDebtorsQuery,
+} from "../../../context/service/orderApi";
 import moment from "moment"; // For handling date formatting
 import socket from "../../../socket";
 
@@ -19,7 +22,8 @@ const AccountentMain = () => {
     data: ordersData,
     isLoading,
     refetch: refetchOrders,
-  } = useGetOrdersQuery();
+    // } = useGetOrdersQuery();
+  } = useGetDebtorsQuery();
   const [open, setOpen] = useState(false);
 
   const today = new Date();
@@ -48,10 +52,12 @@ const AccountentMain = () => {
 
     socket.on("newExpense", handleNewExpense);
     socket.on("newOrder", handleNewOrder);
+    socket.on("updateOrder", handleNewOrder);
 
     return () => {
       socket.off("newExpense", handleNewExpense);
       socket.off("newOrder", handleNewOrder);
+      socket.off("updateOrder", handleNewOrder);
     };
   }, [refetch, refetchOrders]);
 
@@ -59,17 +65,25 @@ const AccountentMain = () => {
     startOfMonth,
     endOfMonthToday,
   ]);
-  const { data: balanceReport } = useGetBalanceReportQuery(
-    {
-      startDate: selectedReportDates.length
-        ? moment(selectedReportDates[0]).format("YYYYMMDD")
-        : undefined,
-      endDate: selectedReportDates.length
-        ? moment(selectedReportDates[1]).format("YYYYMMDD")
-        : undefined,
-    },
-    { skip: !selectedReportDates.length }
-  );
+  const { data: balanceReport, refetch: refetchBalanceReport } =
+    useGetBalanceReportQuery(
+      {
+        startDate: selectedReportDates.length
+          ? moment(selectedReportDates[0]).format("YYYYMMDD")
+          : undefined,
+        endDate: selectedReportDates.length
+          ? moment(selectedReportDates[1]).format("YYYYMMDD")
+          : undefined,
+      },
+      { skip: !selectedReportDates.length }
+    );
+
+  useEffect(() => {
+    socket.on("updateOrder", () => refetchBalanceReport());
+    return () => {
+      socket.off("updateOrder");
+    };
+  }, [refetchBalanceReport]);
 
   // O'zbekcha oy nomlari
   const uzMonths = [
@@ -98,7 +112,7 @@ const AccountentMain = () => {
   useEffect(() => {
     const card = cardRef.current;
     if (!card) return;
-    const resizeObserver = new ResizeObserver(() => { });
+    const resizeObserver = new ResizeObserver(() => {});
     resizeObserver.observe(card);
     return () => resizeObserver.disconnect();
   }, []);
@@ -113,6 +127,7 @@ const AccountentMain = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
   let zakazlar = ordersData?.innerData || [];
+  console.log(zakazlar);
 
   return (
     <div className="accountent-container">

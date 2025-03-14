@@ -74,6 +74,7 @@ const UpdateOrderForm = () => {
   };
 
   if (isFetching) return <p>Yuklanmoqda...</p>;
+  console.log(order);
 
   return (
     <div className="order_Edit_Form">
@@ -195,6 +196,17 @@ const UpdateOrderForm = () => {
             </Form.Item>
           </Col>
         </Row>
+        <Row gutter={16}>
+          <Col span={8}>
+            <Form.Item
+              name={["nds"]}
+              label="NDS"
+              rules={[{ required: true, message: "Majburiy maydon" }]}
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+        </Row>
 
         <h2
           style={{
@@ -236,7 +248,16 @@ const UpdateOrderForm = () => {
                   <InputNumber style={{ width: "100%" }} />
                 </Form.Item>
               </Col>
-              <Col span={8}></Col>
+              <Col span={8}>
+                <Form.Item
+                  name={["orders", index, "quantity"]}
+                  label="Miqdori"
+                  rules={[{ required: true, message: "Majburiy maydon" }]}
+                  initialValue={item.qty}
+                >
+                  <InputNumber style={{ width: "100%" }} />
+                </Form.Item>
+              </Col>
             </Row>
 
             <Row gutter={16}>

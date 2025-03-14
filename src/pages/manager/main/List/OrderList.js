@@ -28,7 +28,7 @@ import {
 import { BookOutlined } from "@ant-design/icons";
 import { EyeOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
-import { FaToggleOn, } from 'react-icons/fa'
+import { FaToggleOn } from "react-icons/fa";
 import { SearchOutlined } from "@ant-design/icons";
 import "./style.css";
 import dayjs from "dayjs";
@@ -307,7 +307,7 @@ const ViewOrder = () => {
             borderRadius: "50%",
             backgroundColor: isActive ? "green" : "red",
             boxShadow: `0 0 5px ${isActive ? "green" : "red"}`,
-            animation: "pulse 1.5s infinite"
+            animation: "pulse 1.5s infinite",
           }}
         />
       ),
@@ -319,7 +319,9 @@ const ViewOrder = () => {
       render: (_, item) => (
         <div className="order-names">
           {item.orders?.map((order) => (
-            <p key={order._id} className="order-name">{order.name} - {order.quantity}</p>
+            <p key={order._id} className="order-name">
+              {order.name} - {order.quantity}
+            </p>
           ))}
         </div>
       ),
@@ -327,7 +329,8 @@ const ViewOrder = () => {
     {
       title: "Budjet",
       render: (paid, item) => {
-        const totalBudget = item?.orders?.reduce((sum, item) => sum + (item.budget * (item.quantity || 1)), 0) || 0;
+        const totalBudget =
+          item?.orders?.reduce((sum, item) => sum + item.budget, 0) || 0;
 
         return (
           <div className="text-green-500">
@@ -395,14 +398,24 @@ const ViewOrder = () => {
       key: "materials",
       align: "center",
       render: (_, record) => (
-        <Link style={{ color: "#0A3D3A" }} to={`/orders/materials/${record._id}`}>Ko‘rish</Link>
+        <Link
+          style={{ color: "#0A3D3A" }}
+          to={`/orders/materials/${record._id}`}
+        >
+          Ko‘rish
+        </Link>
       ),
     },
     {
       title: "Tijorat Taklifi",
       align: "center",
       render: (_, record) => (
-        <Link to={`/order-list/${record._id}`} style={{ fontSize: "20px", color: "#0A3D3A" }}><FaFileDownload /></Link>
+        <Link
+          to={`/order-list/${record._id}`}
+          style={{ fontSize: "20px", color: "#0A3D3A" }}
+        >
+          <FaFileDownload />
+        </Link>
       ),
     },
     {
@@ -414,7 +427,6 @@ const ViewOrder = () => {
           <Button icon={<MoreOutlined />} />
         </Dropdown>
       ),
-
     },
   ];
 

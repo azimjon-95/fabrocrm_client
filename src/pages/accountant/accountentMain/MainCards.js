@@ -69,7 +69,7 @@ const MainCards = ({
           <h3>Daromad</h3>
           <p>
             {" "}
-            {Number(balanceReport?.innerData?.balance)
+            {Number(balanceReport?.innerData?.balance || 0)
               .toLocaleString("en-US")
               .replace(/,/g, " ")}{" "}
             so'm

@@ -25,6 +25,7 @@ import CtrlWorkers from "../pages/director/Main/CtrlWorkers";
 import ViewOrder from "../pages/director/Main/ViewOrder";
 import Distributor from "../pages/distributor/Distributor";
 import PdfList from "../components/pdf/PdfList";
+import MyDebpts from "../pages/accountant/myDebts/MyDebpts";
 
 export const routes = [
   {
@@ -161,6 +162,12 @@ export const routes = [
     private: true,
     role: ["accountant", "deputy"],
   },
+  {
+    path: "/myDebts",
+    element: <MyDebpts />,
+    private: true,
+    role: ["accountant", "deputy"],
+  },
   // {
   //   path: "/salary/history/:date",
   //   element: <History />,
@@ -195,9 +202,13 @@ export const routes = [
   },
   // ==========================================================================================
 
-  { path: "/distributor", element: <Distributor />, private: true, role: ["distributor", "deputy"] },
+  {
+    path: "/distributor",
+    element: <Distributor />,
+    private: true,
+    role: ["distributor", "deputy"],
+  },
   // ==========================================================================================
-
 
   {
     path: "/director",

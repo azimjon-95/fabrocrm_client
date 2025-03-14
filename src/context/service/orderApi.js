@@ -14,6 +14,7 @@ export const orderApi = api.injectEndpoints({
         url: `/order/${id}`,
         method: "GET",
       }),
+      providesTags: ["GETORDER", "Order"],
     }),
 
     // Create a new order
@@ -23,6 +24,7 @@ export const orderApi = api.injectEndpoints({
         method: "POST",
         body: newOrder,
       }),
+      invalidatesTags: ["Order", "GETORDER"],
     }),
 
     // Create a new additional material
@@ -32,6 +34,7 @@ export const orderApi = api.injectEndpoints({
         method: "POST",
         body: newAdditional,
       }),
+      invalidatesTags: ["Order", "GETORDER"],
     }),
 
     // Update an existing order
@@ -41,7 +44,7 @@ export const orderApi = api.injectEndpoints({
         method: "PUT",
         body: updates,
       }),
-      invalidatesTags: ["Order"],
+      invalidatesTags: ["Order", "GETORDER"],
     }),
 
     // Delete an order
@@ -60,11 +63,13 @@ export const orderApi = api.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Order", "GETORDER"],
     }),
 
     // Get order progress
     orderProgress: builder.query({
       query: (orderId) => `/order/progress/${orderId}`,
+      providesTags: ["GETORDER", "Order"],
     }),
 
     ///order/get-material/:orderId/:materialId
@@ -73,6 +78,7 @@ export const orderApi = api.injectEndpoints({
         url: `/order/get-material/${orderId}/${materialId}`,
         method: "GET",
       }),
+      providesTags: ["GETORDER", "Order"],
     }),
 
     ///order/get-all-material/:orderId
@@ -81,18 +87,20 @@ export const orderApi = api.injectEndpoints({
         url: `/order/get-all-material/${orderId}`,
         method: "GET",
       }),
+      providesTags: ["GETORDER", "Order"],
     }),
 
     // /order/debt
     getDebt: builder.query({
       query: () => "/order-debt",
+      providesTags: ["GETORDER", "Order"],
     }),
 
     // qarzdorlarni olish "/order/debtors
     getDebtors: builder.query({
       query: () => "/ordergetdebtors",
+      invalidatesTags: ["GETORDER"],
     }),
-
 
     completeOrder: builder.mutation({
       query: (data) => ({
@@ -100,6 +108,7 @@ export const orderApi = api.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Order", "GETORDER"],
     }),
   }),
 });
@@ -117,6 +126,5 @@ export const {
   useGetAllMaterialByIdQuery,
   useGetDebtQuery,
   useGetDebtorsQuery,
-  useCompleteOrderMutation
-
+  useCompleteOrderMutation,
 } = orderApi;
