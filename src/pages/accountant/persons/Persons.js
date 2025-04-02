@@ -91,14 +91,13 @@ const RegisterWorker = () => {
       if (userData) {
         response = await updateWorker({
           id: userData._id,
-          data: formData,
+          body: formData,
         }).unwrap();
-        message.success("Foydalanuvchi yangilandi");
+        message.success(response.message || "yedi");
       } else {
         response = await createWorker(formData).unwrap();
         message.success(response.message);
       }
-      console.log(response);
 
       reset();
       setImageUrl(null);
@@ -225,7 +224,12 @@ const RegisterWorker = () => {
                 name="role"
                 control={control}
                 render={({ field }) => (
-                  <Select style={{ height: "37px", marginTop: "5px" }} size="large" {...field} placeholder="Lavozim tanlang">
+                  <Select
+                    style={{ height: "37px", marginTop: "5px" }}
+                    size="large"
+                    {...field}
+                    placeholder="Lavozim tanlang"
+                  >
                     <Option value="manager">Menejer</Option>
                     <Option value="distributor">Yetkazib beruvchi</Option>
                     <Option value="director">Direktor</Option>
@@ -245,7 +249,9 @@ const RegisterWorker = () => {
                 name="salary"
                 control={control}
                 rules={{ required: true }}
-                render={({ field }) => <Input {...field} placeholder="Введите зарплату" />}
+                render={({ field }) => (
+                  <Input {...field} placeholder="Введите зарплату" />
+                )}
               />
             </Form.Item>
           </Col>
@@ -257,7 +263,9 @@ const RegisterWorker = () => {
                     name="login"
                     control={control}
                     rules={{ required: true }}
-                    render={({ field }) => <Input {...field} placeholder="Введите логин" />}
+                    render={({ field }) => (
+                      <Input {...field} placeholder="Введите логин" />
+                    )}
                   />
                 </Form.Item>
               </Col>
@@ -267,7 +275,9 @@ const RegisterWorker = () => {
                     name="password"
                     control={control}
                     rules={{ required: true }}
-                    render={({ field }) => <Input {...field} placeholder="Введите пароль" />}
+                    render={({ field }) => (
+                      <Input {...field} placeholder="Введите пароль" />
+                    )}
                   />
                 </Form.Item>
               </Col>

@@ -25,6 +25,7 @@ import {
 } from "../../../context/service/mydebtService";
 
 import socket from "../../../socket";
+import { useGetBalanceQuery } from "../../../context/service/balanceApi";
 
 const ExpenseForm = () => {
   const dispatch = useDispatch();
@@ -52,6 +53,11 @@ const ExpenseForm = () => {
   const { data: myDebtsData, refetch } = useGetIsPaidFalseQuery();
   const [postMyDebt] = usePostMyDebtMutation();
   const [paymentForDebt] = usePaymentForDebtMutation();
+
+  const { data: balance } = useGetBalanceQuery();
+  let balancValues = balance?.innerData || {};
+
+  console.log(balancValues);
 
   useEffect(() => {
     socket.on("updateMyDebt", () => {
@@ -221,6 +227,28 @@ const ExpenseForm = () => {
         (item) => item._id === selectedCategory.value
       );
       const currentPaid = selectedDebtor?.paid || 0;
+
+      if (newData.paymentType === "dollar" && newData.type === "Chiqim") {
+        if (
+          balancValues.dollarBalance < newData.amount &&
+          newData.type === "Chiqim"
+        ) {
+          return message.warning("Dollar balansingiz yetarli emas");
+        }
+      }
+
+      if (newData.paymentType === "Bank orqali" && newData.type === "Chiqim") {
+        if (balancValues.bankTransferBalance < newData.amount) {
+          return message.warning("Hisob raqamda yetarli mablag' mavjud emas");
+        }
+      }
+
+      if (newData.paymentType === "Naqd" && newData.type === "Chiqim") {
+        if (balancValues.cashBalance < newData.amount) {
+          return message.warning("Hisob raqamda yetarli mablag' mavjud emas");
+        }
+      }
+
       const expenseResponse = await createExpense(newData).unwrap();
 
       // Balansni yangilash
@@ -349,10 +377,7 @@ const ExpenseForm = () => {
       }
     } catch (err) {
       console.log(err);
-
-      message.error(
-        err.data.message || "Xarajatni qo'shishda xatolik yuz berdi."
-      );
+      message.error(err.message || "Xarajatni qo'shishda xatolik yuz berdi.");
     } finally {
       setExpenseCategory("");
       setExpensePaymentType("");

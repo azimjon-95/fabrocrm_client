@@ -13,10 +13,10 @@ function Header() {
 
   // API orqali kursni olish (bu yerda kursni olish uchun masalan, yandex yoki boshqa manba ishlatiladi)
   useEffect(() => {
-    fetch('https://api.exchangerate-api.com/v4/latest/USD')
+    fetch("https://api.exchangerate-api.com/v4/latest/USD")
       .then((response) => response.json())
       .then((data) => {
-        setDollarRate(data.rates.UZS);  // USD/UZS kursini oling
+        setDollarRate(data.rates.UZS); // USD/UZS kursini oling
       })
       .catch((error) => console.error("API xatolik: ", error));
   }, []);
@@ -29,7 +29,9 @@ function Header() {
       okType: "danger",
       cancelText: "Yo'q",
       onOk() {
-        ["token", "role", "admin"].forEach(item => localStorage.removeItem(item));
+        ["token", "role", "admin"].forEach((item) =>
+          localStorage.removeItem(item)
+        );
         navigate("/login");
       },
     });
@@ -37,13 +39,13 @@ function Header() {
   return (
     <header>
       <h4>{adminFullname}</h4>
-      {
-        isDollar &&
-        <div className="dollarRate">
-          <p>O'zbekiston Milliy Banki</p>
-          <p>1$ = {dollarRate?.toLocaleString("uz-UZ")} so'm</p>
-        </div>
-      }
+      {/* {
+        isDollar && */}
+      <div className="dollarRate">
+        <p>O'zbekiston Milliy Banki</p>
+        <p>1$ = {dollarRate?.toLocaleString("uz-UZ")} so'm</p>
+      </div>
+      {/* } */}
       <button onClick={logOut}>
         <RiLogoutCircleRLine />
       </button>

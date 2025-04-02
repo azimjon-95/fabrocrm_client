@@ -243,11 +243,11 @@ const ViewOrder = () => {
       </Menu.Item>
       <Menu.Item
         key="active"
-        style={{ color: record?.isActive && "green" }}
+        style={{ color: !record?.isActive ? "green" : "red" }}
         icon={<FaToggleOn />}
-        onClick={() => handleIsActive(record._id)}
+        onClick={() => handleIsActive(record)}
       >
-        {record?.isActive ? "Faol" : "Faollashtirish"}
+        {!record?.isActive ? "Aktiv qilish" : "No Aktiv"}
       </Menu.Item>
 
       <Menu.Item
@@ -261,10 +261,17 @@ const ViewOrder = () => {
     </Menu>
   );
 
-  const handleIsActive = async (id) => {
+  const handleIsActive = async (record) => {
     try {
-      await updateOrder({ id, updates: { isActive: true } }).unwrap();
-      message.success("Buyurtma Faollashtirildi");
+      await updateOrder({
+        id: record._id,
+        updates: { isActive: !record.isActive },
+      }).unwrap();
+      message.success(
+        record.isActive
+          ? "Buyurtma  no aktivlashtirildi"
+          : "Buyurtma aktivlashtirildi"
+      );
       refetchOrders();
     } catch (error) {
       console.error("Xatolik yuz berdi:", error);

@@ -19,6 +19,7 @@ const MainCards = ({
 }) => {
   const modalRef = useRef(null);
   const { data: debtData, refetch: refetchDebt } = useGetDebtQuery();
+
   const {
     data: balance,
     isFetching,
@@ -52,6 +53,7 @@ const MainCards = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
+  console.log(balancValues?.cashBalance);
 
   return (
     <div
@@ -148,7 +150,7 @@ const MainCards = ({
               <Tooltip title="Dollar balansi">
                 <p className="balance-item">
                   <FaDollarSign className="balance-icon" />
-                  {formatNumber(balancValues?.dollarBalance || 0)} so'm
+                  {formatNumber(balancValues?.dollarBalance || 0)}
                 </p>
               </Tooltip>
               {/* <Tooltip title="Jami balansi">
