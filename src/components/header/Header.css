@@ -37,3 +37,42 @@ header button {
     color: #FFBB00;
   }
 }
+
+
+.dollar-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 20px;
+  /* Match the height of the rate text */
+}
+
+.dollar-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  position: relative;
+}
+
+.dollar-spinner::before {
+  content: '$';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+  color: #28a745;
+  /* Green for currency theme, adjust as needed */
+  animation: spin 1s linear infinite;
+}
+
+/* Spinning animation */
+@keyframes spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}

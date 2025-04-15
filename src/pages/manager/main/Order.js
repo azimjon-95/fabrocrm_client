@@ -178,13 +178,7 @@ const Order = () => {
 
   const handleSaveFurniture = () => {
     if (
-      formData.name &&
-      formData.dimensions.length &&
-      formData.dimensions.width &&
-      formData.budget &&
-      formData.quantity &&
-      file &&
-      formData.description
+      formData.name && formData.budget
     ) {
       const newFurniture = {
         name: formData.name,
@@ -199,7 +193,7 @@ const Order = () => {
         budget: +formData.budget * +formData.quantity,
         description: formData.description,
       };
-
+      console.log(newFurniture);
       setSavedFurniture([...savedFurniture, newFurniture]);
       setFormData({
         name: "",
