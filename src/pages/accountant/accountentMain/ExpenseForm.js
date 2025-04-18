@@ -23,7 +23,7 @@ import {
   usePostMyDebtMutation,
   usePaymentForDebtMutation,
   useUpdateMyDebtMutation,
-  useGetmyDebtsQuery
+  useGetmyDebtsQuery,
 } from "../../../context/service/mydebtService";
 
 import socket from "../../../socket";
@@ -60,7 +60,6 @@ const ExpenseForm = () => {
 
   const { data: balance } = useGetBalanceQuery();
   let balancValues = balance?.innerData || {};
-
 
   //======================================================
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -99,8 +98,6 @@ const ExpenseForm = () => {
       label: debtor.name + " - " + sss.toLocaleString() + " so'm",
     };
   });
-
-
 
   useEffect(() => {
     socket.on("updateMyDebt", () => {
@@ -231,23 +228,23 @@ const ExpenseForm = () => {
     let newData =
       expenseCategory === "Ish haqi" || expenseCategory === "Avans"
         ? {
-          name: selectedCategory,
+          name: selectedCategory.label,
           amount: amount,
           type: "Chiqim",
           category: expenseCategory,
           description: expenseDescription,
           paymentType: expensePaymentType,
-          relevantId: selectedCategory,
+          relevantId: selectedCategory.value,
           date: selectedDate.toDate(),
         }
         : {
-          name: selectedCategory || expenseCategory,
+          name: selectedCategory.label || expenseCategory,
           amount: amount,
           type: selectedType === "income" ? "Kirim" : "Chiqim",
           category: expenseCategory,
           description: expenseDescription,
           paymentType: expensePaymentType,
-          relevantId: selectedCategory,
+          relevantId: selectedCategory.value,
         };
 
     if (expenseCategory === "Qarz olish") {
@@ -257,7 +254,7 @@ const ExpenseForm = () => {
 
     try {
       const selectedDebtor = debtors?.innerData?.find(
-        (item) => item._id === selectedCategory
+        (item) => item._id === selectedCategory.value
       );
       const currentPaid = selectedDebtor?.paid || 0;
 
@@ -292,31 +289,40 @@ const ExpenseForm = () => {
       }).unwrap();
 
       if (expenseCategory === "Qarz olish") {
-        const checkDebt = myDebtsAll?.innerData?.find((i) => i.name?.toLowerCase() === selectedCategory?.toLowerCase());
+        const checkDebt = myDebtsAll?.innerData?.find(
+          (i) => i.name?.toLowerCase() === selectedCategory.label?.toLowerCase()
+        );
 
         let data = {
           amount, // The new debt amount
           description: expenseDescription,
-          name: selectedCategory,
+          name: selectedCategory.label,
           type: expensePaymentType,
         };
 
         try {
           if (checkDebt) {
-            const response = await updateMyDebt({ id: checkDebt._id, body: data });
-            message.success(response.message || 'Qarz muvaffaqiyatli yangilandi'); // Muvaffaqiyat xabari
+            const response = await updateMyDebt({
+              id: checkDebt._id,
+              body: data,
+            });
+            message.success(
+              response.message || "Qarz muvaffaqiyatli yangilandi"
+            ); // Muvaffaqiyat xabari
           } else {
             const response = await postMyDebt({ body: data });
-            message.success(response.message || 'Qarz muvaffaqiyatli yaratildi'); // Muvaffaqiyat xabari
+            message.success(
+              response.message || "Qarz muvaffaqiyatli yaratildi"
+            ); // Muvaffaqiyat xabari
           }
         } catch (error) {
-          message.error(error.message || 'Xatolik yuz berdi'); // Xato xabari
+          message.error(error.message || "Xatolik yuz berdi"); // Xato xabari
         }
       }
 
       if (expenseCategory === "Qarzni to'lash") {
         await paymentForDebt({
-          id: selectedCategory,
+          id: selectedCategory.value,
           body: { amount: amount },
         });
       }
@@ -325,7 +331,7 @@ const ExpenseForm = () => {
       let orderResponse = { state: true }; // Default qiymat
       if (expenseCategory === "Mijoz to‘lovlari") {
         orderResponse = await updateOrder({
-          id: selectedCategory,
+          id: selectedCategory.value,
           updates: {
             paid:
               currentPaid + (+amountDollar > 0 ? +amountDollar : +returnMony),
@@ -338,7 +344,7 @@ const ExpenseForm = () => {
 
       if (expenseCategory === "Do'kon qarzini to'lash") {
         const shop = shopsData.innerData?.find(
-          (i) => i._id === selectedCategory
+          (i) => i._id === selectedCategory.value
         );
         const totalAmount = shop.materials.reduce(
           (sum, item) => sum + item.pricePerUnit * item.quantity,
@@ -373,7 +379,7 @@ const ExpenseForm = () => {
 
       if (expenseCategory === "Do'kondan qaytarilgan mablag") {
         const shop = shopsData.innerData?.find(
-          (i) => i._id === selectedCategory
+          (i) => i._id === selectedCategory.value
         );
 
         if (shop) {
@@ -500,7 +506,6 @@ const ExpenseForm = () => {
     setExpenseAmount(formattedValue);
   };
 
-  console.log(myDebtsAll?.innerData);
 
   return (
     <form className="expense-form" onSubmit={handleSubmit}>
@@ -618,7 +623,7 @@ const ExpenseForm = () => {
             value={
               {
                 value: selectedCategory?.value,
-                label: selectedCategory,
+                label: selectedCategory.label,
               } || null
             }
             onChange={(e) => setSelectedCategory(e)}
@@ -663,10 +668,13 @@ const ExpenseForm = () => {
             ref={inputRef}
             className="debt-input"
             placeholder="Kimdan"
-            value={selectedCategory}
-            onChange={(e) =>
-              setSelectedCategory(e.target.value)
-            }
+            value={selectedCategory.label}
+            onChange={(e) => {
+              setSelectedCategory({
+                value: e.target.value,
+                label: e.target.value,
+              });
+            }}
             onClick={() => setIsModalOpen(true)}
           />
           <div
@@ -676,15 +684,27 @@ const ExpenseForm = () => {
             <ul>
               {myDebtsAll?.innerData?.map((value, inx) => {
                 // Har bir value uchun debts massividagi amount'larni yig'ish
-                const totalDebt = value.debts.reduce((sum, debt) => sum + debt.amount, 0);
+                const totalDebt = value.debts.reduce(
+                  (sum, debt) => sum + debt.amount,
+                  0
+                );
 
                 return (
-                  <li key={inx} onClick={() => {
-                    setSelectedCategory(value.name)
-                    setIsModalOpen(false)
-                  }}>
+                  <li
+                    key={inx}
+                    onClick={() => {
+                      // setSelectedCategory(value.name);
+                      setSelectedCategory({
+                        value: value._id,
+                        label: value.name,
+                      });
+                      setIsModalOpen(false);
+                    }}
+                  >
                     {value.name}
-                    <span className="amount">{value.remainingAmount.toLocaleString('uz-UZ')} so‘m</span>
+                    <span className="amount">
+                      {value.remainingAmount?.toLocaleString("uz-UZ")} so‘m
+                    </span>
                   </li>
                 );
               })}
@@ -693,44 +713,40 @@ const ExpenseForm = () => {
         </div>
       ) : (
         ""
-      )
-      }
-      {
-        ["Soldo"]?.includes(expenseCategory) && (
-          <div style={{ display: "flex", gap: "10px" }}>
-            <DatePicker
-              // picker="date"
-              value={soldoFrom}
-              onChange={(date) => {
-                if (date) {
-                  setSoldoFrom(dayjs(date));
-                }
-              }}
-              format="YYYY-MM-DD"
-              placeholder="Dan"
-            />
-            <DatePicker
-              // picker="date"
-              value={soldoTo}
-              onChange={(date) => {
-                if (date) {
-                  setSoldoTo(dayjs(date));
-                }
-              }}
-              format="YYYY-MM-DD"
-              placeholder="Gacha"
-            />
+      )}
+      {["Soldo"]?.includes(expenseCategory) && (
+        <div style={{ display: "flex", gap: "10px" }}>
+          <DatePicker
+            // picker="date"
+            value={soldoFrom}
+            onChange={(date) => {
+              if (date) {
+                setSoldoFrom(dayjs(date));
+              }
+            }}
+            format="YYYY-MM-DD"
+            placeholder="Dan"
+          />
+          <DatePicker
+            // picker="date"
+            value={soldoTo}
+            onChange={(date) => {
+              if (date) {
+                setSoldoTo(dayjs(date));
+              }
+            }}
+            format="YYYY-MM-DD"
+            placeholder="Gacha"
+          />
 
-            <Input
-              placeholder="Pul miqdori"
-              value={expenseAmount}
-              onChange={handleChange}
-            />
-          </div>
-        )
-      }
-      {
-        !["Soldo"].includes(expenseCategory) &&
+          <Input
+            placeholder="Pul miqdori"
+            value={expenseAmount}
+            onChange={handleChange}
+          />
+        </div>
+      )}
+      {!["Soldo"].includes(expenseCategory) &&
         (expensePaymentType === "dollar" && expenseAmount !== 0 ? (
           <div
             className="ish-haqi-avans"
@@ -770,8 +786,7 @@ const ExpenseForm = () => {
             value={expenseAmount}
             onChange={handleChange}
           />
-        ))
-      }
+        ))}
 
       <Input.TextArea
         placeholder="Qo‘shimcha Ma'lumot"
@@ -795,14 +810,8 @@ const ExpenseForm = () => {
       >
         saqlash
       </Button>
-    </form >
+    </form>
   );
 };
 
 export default ExpenseForm;
-
-
-
-
-
-

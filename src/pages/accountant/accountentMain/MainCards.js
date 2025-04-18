@@ -33,10 +33,12 @@ const MainCards = ({
     socket.on("updateOrder", () => {
       refetchDebt();
     });
+    socket.on("deleteExpense", () => refetchBalanceReport());
 
     return () => {
       socket.off("balance");
       socket.off("updateOrder");
+      socket.off("deleteExpense");
     };
   }, [refetchBalanceReport, refetchDebt]);
 
@@ -53,7 +55,6 @@ const MainCards = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
-
 
   return (
     <div

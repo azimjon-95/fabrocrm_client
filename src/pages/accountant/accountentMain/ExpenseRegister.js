@@ -2,13 +2,21 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import "./style.css";
 import { RiFileList3Line } from "react-icons/ri";
 import { HiOutlinePencilSquare } from "react-icons/hi2";
-import { BellOutlined } from "@ant-design/icons";
+import { BellOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
   BsCaretUpFill,
   BsCaretDownFill,
   BsArrowLeftRight,
 } from "react-icons/bs";
-import { Table, Tooltip, Input, Select } from "antd";
+import {
+  Table,
+  Tooltip,
+  Input,
+  Select,
+  Button,
+  Popconfirm,
+  message,
+} from "antd";
 import * as XLSX from "xlsx";
 import { IoMdRadioButtonOn } from "react-icons/io";
 import { MdHistory } from "react-icons/md";
@@ -16,6 +24,10 @@ import { useNavigate } from "react-router-dom";
 import ExpenseForm from "./ExpenseForm";
 import { LiaFileDownloadSolid } from "react-icons/lia";
 import ShopsNotification from "../../store/ShopsNotification";
+import {
+  useDeleteExpenseMutation,
+  useUpdateExpenseMutation,
+} from "../../../context/service/expensesApi";
 
 const formatDate = (date) => date.toISOString().split("T")[0];
 const oylar = [
@@ -40,6 +52,8 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
   const [activeBox, setActiveBox] = useState("expenses");
   const [activeDataset, setActiveDataset] = useState("allExpenses");
 
+  const [deleteExpense] = useDeleteExpenseMutation();
+  const [updateExpense] = useUpdateExpenseMutation();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -56,13 +70,21 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
       prev === "allExpenses"
         ? "outgoingExpenses"
         : prev === "outgoingExpenses"
-          ? "incomeExpenses"
-          : "allExpenses"
+        ? "incomeExpenses"
+        : "allExpenses"
     );
   }, []);
 
   const activeData = expenses?.innerData?.[activeDataset] || [];
 
+  const deleteExpenseHandler = async (id) => {
+    try {
+      await deleteExpense(id);
+    } catch (error) {
+      message.error("Xatolik yuz berdi");
+      console.log(error);
+    }
+  };
   const columns = [
     {
       title: (
@@ -79,7 +101,9 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
         ),
     },
     {
-      title: "Kategoriya", dataIndex: "category", key: "category"
+      title: "Kategoriya",
+      dataIndex: "category",
+      key: "category",
     },
     { title: "Xarajat Nomi", dataIndex: "name", key: "name" },
     {
@@ -109,11 +133,28 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
       dataIndex: "date",
       key: "date",
       render: (date) =>
-        `${new Date(date).getDate()}-${oylar[new Date(date).getMonth()]
+        `${new Date(date).getDate()}-${
+          oylar[new Date(date).getMonth()]
         }/${new Date(date).toLocaleTimeString("uz-UZ", {
           hour: "2-digit",
           minute: "2-digit",
         })}`,
+    },
+    {
+      title: "Amallar",
+      key: "actions",
+      render: (_, item) => (
+        <div>
+          <Popconfirm
+            title="Xarajatni o'chirishni tasdiqlaysizmi?"
+            onConfirm={() => deleteExpenseHandler(item._id)}
+            okText="Ha"
+            cancelText="Yo'q"
+          >
+            <Button icon={<DeleteOutlined />} danger />
+          </Popconfirm>
+        </div>
+      ),
     },
   ];
 
@@ -212,24 +253,24 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
     XLSX.writeFile(wb, fileName);
   };
 
-
   const [filteredData, setFilteredData] = useState(activeData);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchText, setSearchText] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     let filtered = activeData;
 
     // Filter by category
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(item => item.category === selectedCategory);
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter((item) => item.category === selectedCategory);
     }
 
     // Filter by searchText (name or category)
     if (searchText) {
-      filtered = filtered.filter(item =>
-        item.category.toLowerCase().includes(searchText.toLowerCase()) ||
-        item.name.toLowerCase().includes(searchText.toLowerCase())
+      filtered = filtered.filter(
+        (item) =>
+          item.category.toLowerCase().includes(searchText.toLowerCase()) ||
+          item.name.toLowerCase().includes(searchText.toLowerCase())
       );
     }
 
@@ -237,7 +278,10 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
   }, [selectedCategory, searchText, activeData]);
 
   // Extract unique categories from activeData
-  const categories = ['all', ...new Set(activeData.map(item => item.category))];
+  const categories = [
+    "all",
+    ...new Set(activeData.map((item) => item.category)),
+  ];
 
   return (
     <div className="box_expense-register">
@@ -250,25 +294,34 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
 
           <Select
             defaultValue="all"
-            onChange={value => setSelectedCategory(value)}
-            style={{ width: 170, height: 33, marginTop: "-2px", borderRadius: "0 0 5px 5px" }}
+            onChange={(value) => setSelectedCategory(value)}
+            style={{
+              width: 170,
+              height: 33,
+              marginTop: "-2px",
+              borderRadius: "0 0 5px 5px",
+            }}
             // clear
             allowClear // Enable clearing the select field
-            onClear={() => setSelectedCategory('all')}
-
+            onClear={() => setSelectedCategory("all")}
           >
-            {categories.map(category => (
+            {categories.map((category) => (
               <Select.Option key={category} value={category}>
-                {category === 'all' ? 'Barcha Kategoriyalar' : category}
+                {category === "all" ? "Barcha Kategoriyalar" : category}
               </Select.Option>
             ))}
           </Select>
           <Input
             placeholder="Qidirish..."
             size="small"
-            onClear={() => setSearchText('all')}
+            onClear={() => setSearchText("all")}
             onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: 170, height: 31, marginTop: "-2px", borderRadius: "0 0 5px 5px" }}
+            style={{
+              width: 170,
+              height: 31,
+              marginTop: "-2px",
+              borderRadius: "0 0 5px 5px",
+            }}
           />
 
           {open && (
@@ -303,30 +356,34 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
       <div className="box_expense-register_menu">
         <button
           onClick={() => setActiveBox("notifications")}
-          className={`box_expense-register_btn ${activeBox === "notifications" ? "active" : ""
-            }`}
+          className={`box_expense-register_btn ${
+            activeBox === "notifications" ? "active" : ""
+          }`}
         >
           <BellOutlined />
         </button>
         <button
           onClick={() => setActiveBox("info")}
-          className={`box_expense-register_btn ${activeBox === "info" ? "active" : ""
-            }`}
+          className={`box_expense-register_btn ${
+            activeBox === "info" ? "active" : ""
+          }`}
         >
           <RiFileList3Line size={20} />
         </button>
         <button
           onClick={() => setActiveBox("expenses")}
-          className={`box_expense-register_btn ${activeBox === "expenses" ? "active" : ""
-            }`}
+          className={`box_expense-register_btn ${
+            activeBox === "expenses" ? "active" : ""
+          }`}
         >
           <HiOutlinePencilSquare size={20} />
         </button>
         {activeBox === "info" && (
           <button
             onClick={exportToExcel}
-            className={`box_expense-register_btn ${activeBox === "expenses" ? "active" : ""
-              }`}
+            className={`box_expense-register_btn ${
+              activeBox === "expenses" ? "active" : ""
+            }`}
           >
             <LiaFileDownloadSolid />
           </button>
@@ -336,8 +393,8 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
         {activeBox === "notifications"
           ? "Buyurtmalar Ro'yxati"
           : activeBox === "info"
-            ? "Xarajatlar Ro'yxati"
-            : "Xarajatlar Qo'shish"}
+          ? "Xarajatlar Ro'yxati"
+          : "Xarajatlar Qo'shish"}
       </h3>
       <div className="box_expense-content">
         {activeBox === "notifications" && <ShopsNotification />}

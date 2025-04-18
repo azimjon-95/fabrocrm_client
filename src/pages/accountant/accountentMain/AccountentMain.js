@@ -53,11 +53,13 @@ const AccountentMain = () => {
     socket.on("newExpense", handleNewExpense);
     socket.on("newOrder", handleNewOrder);
     socket.on("updateOrder", handleNewOrder);
+    socket.on("deleteExpense", handleNewOrder);
 
     return () => {
       socket.off("newExpense", handleNewExpense);
       socket.off("newOrder", handleNewOrder);
       socket.off("updateOrder", handleNewOrder);
+      socket.off("deleteExpense", handleNewOrder);
     };
   }, [refetch, refetchOrders]);
 
@@ -112,7 +114,7 @@ const AccountentMain = () => {
   useEffect(() => {
     const card = cardRef.current;
     if (!card) return;
-    const resizeObserver = new ResizeObserver(() => { });
+    const resizeObserver = new ResizeObserver(() => {});
     resizeObserver.observe(card);
     return () => resizeObserver.disconnect();
   }, []);
@@ -127,7 +129,6 @@ const AccountentMain = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
   let zakazlar = ordersData?.innerData || [];
-
 
   return (
     <div className="accountent-container">
