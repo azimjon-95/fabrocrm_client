@@ -52,8 +52,8 @@ const ExpenseForm = () => {
   const { data: debtors } = useGetDebtorsQuery();
   const { data: shopsData } = useGetAllShopsQuery();
 
-  const { data: myDebtsData, refetch } = useGetIsPaidFalseQuery();
-  const { data: myDebtsAll, refetch: refetchMyDebts } = useGetmyDebtsQuery();
+  const { data: myDebtsData } = useGetIsPaidFalseQuery();
+  const { data: myDebtsAll, refetch } = useGetmyDebtsQuery();
   const [postMyDebt] = usePostMyDebtMutation();
   const [updateMyDebt] = useUpdateMyDebtMutation();
   const [paymentForDebt] = usePaymentForDebtMutation();
@@ -500,6 +500,7 @@ const ExpenseForm = () => {
     setExpenseAmount(formattedValue);
   };
 
+  console.log(myDebtsAll?.innerData);
 
   return (
     <form className="expense-form" onSubmit={handleSubmit}>
