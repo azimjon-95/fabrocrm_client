@@ -74,7 +74,6 @@ const UpdateOrderForm = () => {
   };
 
   if (isFetching) return <p>Yuklanmoqda...</p>;
-  console.log(order);
 
   return (
     <div className="order_Edit_Form">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./style.css";
 import dayjs from "dayjs";
 import "moment/locale/uz"; // O'zbek tilini qo'shish
@@ -22,6 +22,8 @@ import {
   useGetIsPaidFalseQuery,
   usePostMyDebtMutation,
   usePaymentForDebtMutation,
+  useUpdateMyDebtMutation,
+  useGetmyDebtsQuery,
 } from "../../../context/service/mydebtService";
 
 import socket from "../../../socket";
@@ -50,14 +52,52 @@ const ExpenseForm = () => {
   const { data: debtors } = useGetDebtorsQuery();
   const { data: shopsData } = useGetAllShopsQuery();
 
-  const { data: myDebtsData, refetch } = useGetIsPaidFalseQuery();
+  const { data: myDebtsData } = useGetIsPaidFalseQuery();
+  const { data: myDebtsAll, refetch } = useGetmyDebtsQuery();
   const [postMyDebt] = usePostMyDebtMutation();
+  const [updateMyDebt] = useUpdateMyDebtMutation();
   const [paymentForDebt] = usePaymentForDebtMutation();
 
   const { data: balance } = useGetBalanceQuery();
   let balancValues = balance?.innerData || {};
 
-  console.log(balancValues);
+  //======================================================
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const modalRef = useRef(null);
+  const inputRef = useRef(null); // Ref for the input element
+
+  // Handle clicks outside the modal to close it
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      // Check if modalRef and inputRef exist and if click is outside both
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target) &&
+        inputRef.current &&
+        inputRef.current.input &&
+        !inputRef.current.input.contains(event.target)
+      ) {
+        setIsModalOpen(false);
+      }
+    };
+
+    if (isModalOpen) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [isModalOpen]);
+  //======================================================
+  const myDebtorLists = myDebtsData?.innerData?.map((debtor) => {
+    let ss = debtor.payments.reduce((a, b) => a + b.amount, 0);
+    let sss = debtor.amount - ss;
+    return {
+      value: debtor._id,
+      label: debtor.name + " - " + sss.toLocaleString() + " so'm",
+    };
+  });
 
   useEffect(() => {
     socket.on("updateMyDebt", () => {
@@ -88,15 +128,6 @@ const ExpenseForm = () => {
     value: debtor._id,
     label: debtor.customer.fullName,
   }));
-
-  const myDebtorLists = myDebtsData?.innerData?.map((debtor) => {
-    let ss = debtor.payments.reduce((a, b) => a + b.amount, 0);
-    let sss = debtor.amount - ss;
-    return {
-      value: debtor._id,
-      label: debtor.name + " - " + sss.toLocaleString() + " so'm",
-    };
-  });
 
   // chiqim DO'KONLAR RO'YHATI
   const shops = shopsData?.innerData
@@ -259,13 +290,35 @@ const ExpenseForm = () => {
       }).unwrap();
 
       if (expenseCategory === "Qarz olish") {
+        const checkDebt = myDebtsAll?.innerData?.find(
+          (i) => i.name?.toLowerCase() === selectedCategory.label?.toLowerCase()
+        );
+
         let data = {
-          amount: amount,
+          amount, // The new debt amount
           description: expenseDescription,
           name: selectedCategory.label,
           type: expensePaymentType,
         };
-        let neww = await postMyDebt(data);
+
+        try {
+          if (checkDebt) {
+            const response = await updateMyDebt({
+              id: checkDebt._id,
+              body: data,
+            });
+            message.success(
+              response.message || "Qarz muvaffaqiyatli yangilandi"
+            ); // Muvaffaqiyat xabari
+          } else {
+            const response = await postMyDebt({ body: data });
+            message.success(
+              response.message || "Qarz muvaffaqiyatli yaratildi"
+            ); // Muvaffaqiyat xabari
+          }
+        } catch (error) {
+          message.error(error.message || "Xatolik yuz berdi"); // Xato xabari
+        }
       }
 
       if (expenseCategory === "Qarzni to'lash") {
@@ -610,16 +663,54 @@ const ExpenseForm = () => {
 
       {/* KIMDAN */}
       {expenseCategory === "Qarz olish" ? (
-        <Input
-          placeholder="Kimdan"
-          value={selectedCategory?.label}
-          onChange={(e) => {
-            setSelectedCategory({
-              value: e.target.value,
-              label: e.target.value,
-            });
-          }}
-        />
+        <div className="kimdandebt">
+          <Input
+            ref={inputRef}
+            className="debt-input"
+            placeholder="Kimdan"
+            value={selectedCategory.label}
+            onChange={(e) => {
+              setSelectedCategory({
+                value: e.target.value,
+                label: e.target.value,
+              });
+            }}
+            onClick={() => setIsModalOpen(true)}
+          />
+          <div
+            className={`kimdandebt_modal ${isModalOpen ? "open" : ""}`}
+            ref={modalRef}
+          >
+            <ul>
+              {myDebtsAll?.innerData?.map((value, inx) => {
+                // Har bir value uchun debts massividagi amount'larni yig'ish
+                const totalDebt = value.debts.reduce(
+                  (sum, debt) => sum + debt.amount,
+                  0
+                );
+
+                return (
+                  <li
+                    key={inx}
+                    onClick={() => {
+                      // setSelectedCategory(value.name);
+                      setSelectedCategory({
+                        value: value._id,
+                        label: value.name,
+                      });
+                      setIsModalOpen(false);
+                    }}
+                  >
+                    {value.name}
+                    <span className="amount">
+                      {value.remainingAmount?.toLocaleString("uz-UZ")} so‘m
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
       ) : (
         ""
       )}

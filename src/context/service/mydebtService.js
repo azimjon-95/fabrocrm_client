@@ -14,13 +14,21 @@ export const myDebtsApi = api.injectEndpoints({
       query: (body) => ({
         url: "/myDebts/create",
         method: "POST",
-        body: body,
+        body, // endi body: { amount, description, name, type } bo'ladi
       }),
       invalidatesTags: ["myDebts"],
     }),
     paymentForDebt: builder.mutation({
       query: ({ id, body }) => ({
         url: `/myDebts/payment/${id}`,
+        method: "PUT",
+        body: body,
+      }),
+      invalidatesTags: ["myDebts"],
+    }),
+    updateMyDebt: builder.mutation({
+      query: ({ id, body }) => (console.log({ id, body }), {
+        url: `/myDebts/${id}`,
         method: "PUT",
         body: body,
       }),
@@ -34,4 +42,5 @@ export const {
   useGetIsPaidFalseQuery,
   usePostMyDebtMutation,
   usePaymentForDebtMutation,
+  useUpdateMyDebtMutation,
 } = myDebtsApi;

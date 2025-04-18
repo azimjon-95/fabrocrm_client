@@ -28,7 +28,6 @@ const HistoryOrderLists = ({ list }) => {
   const navigator = useNavigate();
   const { data, isLoading } = useGetOrdersByisPaidQuery(false);
   let shops = data?.innerData || [];
-  console.log(shops);
 
   const columns = [
     {

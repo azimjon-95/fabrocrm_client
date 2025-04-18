@@ -21,7 +21,7 @@ const ShohMebelTable = () => {
   const { data: order } = useGetOrderByIdQuery(id);
   const orderList = order?.innerData || {};
   const [loading, setLoading] = useState(false); // Loading state
-  console.log(orderList);
+
 
   // Default sana
   const [currentDateToday, setCurrentDate] = useState(
@@ -217,7 +217,6 @@ const ShohMebelTable = () => {
       ],
     },
   ];
-  console.log(orderList);
 
   const data = orderList.orders?.map((i, inx) => {
     let priceXQty = +i.originalPrice;
@@ -347,7 +346,6 @@ const ShohMebelTable = () => {
             pagination={false}
             bordered
             summary={(pageData) => {
-              console.log(pageData);
 
               const formatNumber = (num) =>
                 isNaN(num) ? "0" : Number(num).toLocaleString("uz-UZ");

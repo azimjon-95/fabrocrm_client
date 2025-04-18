@@ -66,7 +66,6 @@ const ViewOrder = () => {
 
   useEffect(() => {
     socket.on("updateOrder", (data) => {
-      console.log("Buyurtma yangilandi", data);
       refetchOrders();
     });
     return () => {
