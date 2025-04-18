@@ -112,7 +112,7 @@ const AccountentMain = () => {
   useEffect(() => {
     const card = cardRef.current;
     if (!card) return;
-    const resizeObserver = new ResizeObserver(() => {});
+    const resizeObserver = new ResizeObserver(() => { });
     resizeObserver.observe(card);
     return () => resizeObserver.disconnect();
   }, []);
@@ -127,7 +127,7 @@ const AccountentMain = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
   let zakazlar = ordersData?.innerData || [];
-  console.log(zakazlar);
+
 
   return (
     <div className="accountent-container">

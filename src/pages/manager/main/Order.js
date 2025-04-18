@@ -114,8 +114,6 @@ const Order = () => {
 
       createOrder(formData)
         .then((res) => {
-          console.log(res);
-
           // message.success("Buyurtma muvaffaqiyatli yaratildi!");
           if (res?.data?.innerData) {
             navigate("/order/mengement/" + res?.data?.innerData?._id);
@@ -193,7 +191,6 @@ const Order = () => {
         budget: +formData.budget * +formData.quantity,
         description: formData.description,
       };
-      console.log(newFurniture);
       setSavedFurniture([...savedFurniture, newFurniture]);
       setFormData({
         name: "",

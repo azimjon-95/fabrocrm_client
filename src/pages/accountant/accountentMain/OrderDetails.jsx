@@ -6,7 +6,6 @@ import moment from "moment";
 const OrderDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  console.log(state.order);
 
   if (!state || !state.order) {
     return <h2>Buyurtma topilmadi</h2>;

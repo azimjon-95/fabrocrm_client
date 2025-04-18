@@ -347,7 +347,6 @@ const Warehouse = () => {
     setIsContainerVisible(true);
     try {
       const parsedValue = JSON.parse(value);
-      console.log({ shopsId: parsedValue.id, shopName: parsedValue.value });
 
       let aa = await updateShop({
         id: shop._id,
@@ -422,7 +421,7 @@ const Warehouse = () => {
     } catch (error) {
       message.error(
         error?.response?.data?.message ||
-          "Buxgalteryaga yuborishda xatolik yuz berdi!"
+        "Buxgalteryaga yuborishda xatolik yuz berdi!"
       );
     }
   };

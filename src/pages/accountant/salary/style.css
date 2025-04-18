@@ -130,3 +130,160 @@
 .Salary_nav .ant-picker svg {
   color: #0A3D3A !important;
 }
+
+.salary-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+}
+
+/* ==================== */
+.salary-navworking-days {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.salary-navworking-days>.ant-picker {
+  height: 38px !important;
+  border-radius: 8px !important;
+}
+
+.working-days-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.working-days-container>input {
+  width: 180px;
+  padding: 6px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.working-days-inputActive {
+  border-radius: 8px 8px 0 0;
+}
+
+.working-days-container>input:focus {
+  border-color: #008000;
+}
+
+.working-days-container>input::placeholder {
+  font-size: 14px;
+}
+
+.working-days-container .modal-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 37px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  width: 100%;
+}
+
+.modalworking-days {
+  background-color: white;
+  border-radius: 8px;
+  padding: 0 7px 7px 7px;
+  max-width: 400px;
+  border: 1px solid #008000;
+  border-top: none;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modalworking-days h2 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.no-data {
+  color: #666;
+  font-size: 14px;
+}
+
+.working-days-list {
+  list-style: none;
+}
+
+.working-day-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 7px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.working-day-content {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.checkboxDay {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.dateDay {
+  font-size: 12px;
+  color: #666;
+}
+
+.delete-buttonDay {
+  background-color: transparent;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  font-size: 14px;
+  height: 20px;
+}
+
+.delete-icon {
+  margin-top: 3px;
+}
+
+.send-buttonDay {
+  position: absolute;
+  right: 0;
+  border: none;
+  background: green;
+  color: #fff;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 7.3px 5px;
+  margin-top: .5px;
+
+  z-index: 50;
+}
+
+.send-buttonDayActiv {
+  position: absolute;
+  right: 0;
+  border: none;
+  background: green;
+  color: #fff;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 7.3px 5px;
+  margin-top: .5px;
+  z-index: 50;
+}
+
+.delete-buttonDay:hover {
+  color: #a71d2a;
+}

@@ -14,7 +14,6 @@ const MaterialItem = ({ material, orderId }) => {
     useGetStoreByCustomerIdQuery(material?.materialID);
   const { data: materialData, isLoading: isMaterialLoading } =
     useGetMaterialByIdQuery({ orderId, materialId: material._id });
-  console.log(material);
 
   return (
     <List.Item key={material._id}>

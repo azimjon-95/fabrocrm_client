@@ -53,7 +53,7 @@ const MainCards = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
-  console.log(balancValues?.cashBalance);
+
 
   return (
     <div

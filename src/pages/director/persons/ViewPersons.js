@@ -28,6 +28,8 @@ const ViewPersons = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [activeTab, setActiveTab] = useState("all");
 
+    console.log(workers);
+
     const handleDelete = async (id) => {
         try {
             let response = await deleteWorker(id);

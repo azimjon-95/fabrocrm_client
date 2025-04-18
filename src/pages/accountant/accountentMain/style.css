@@ -1042,6 +1042,52 @@
   border-radius: 5px !important;
 }
 
+.kimdandebt {
+  width: 100%;
+  position: relative;
+}
+
+
+.debt-input {
+  width: 100%;
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.debt-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.kimdandebt_modal {
+  display: none;
+  /* Hidden by default */
+  position: absolute;
+  top: 100%;
+  /* Places modal just below the input */
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000 !important;
+  max-height: 200px;
+  /* Limit height */
+  overflow-y: auto;
+  /* Scroll if content overflows */
+}
+
+.kimdandebt_modal.open {
+  display: block;
+  /* Show when 'open' class is added */
+}
+
+
 .expense-form {
   padding: 0 10px;
 }
@@ -1090,6 +1136,63 @@
   left: 3px;
   color: #0a3d3a;
   font-size: 13px;
+}
+
+
+
+
+
+
+
+
+
+
+
+/* Modal ichidagi ul (ro‘yxat) */
+.kimdandebt_modal ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Har bir li (ro‘yxat elementi) */
+.kimdandebt_modal ul li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 16px;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+/* Hover effekti */
+.kimdandebt_modal ul li:hover {
+  background-color: #f5f5f5;
+}
+
+/* Oxirgi li uchun chegara olib tashlash */
+.kimdandebt_modal ul li:last-child {
+  border-bottom: none;
+}
+
+/* Amount (yig‘indi) uchun qo‘shimcha uslub */
+.kimdandebt_modal ul li span.amount {
+  font-weight: 600;
+  color: #2ecc71;
+  /* Yashil rang, muvaffaqiyatli yig‘indi uchun */
+}
+
+
+
+/* Mobil qurilmalar uchun moslashuvchanlik */
+@media (max-width: 768px) {
+  .kimdandebt_modal {
+    width: 90%;
+    max-height: 80vh;
+  }
 }
 
 @media (max-width: 500px) {
