@@ -29,3 +29,19 @@
     padding: 8px 0;
     border-bottom: 1px solid #e8e8e8;
 }
+
+.data-date {
+    font-weight: 500;
+}
+
+.data-amount {
+    color: #1890ff;
+}
+
+.data-type {
+    text-transform: capitalize;
+}
+
+.data-description {
+    color: #595959;
+}
