@@ -123,6 +123,8 @@ const MyDebts = () => {
                 debtModal.data.map((debt, index) => (
                   <div className="data-item" key={index}>
                     <span>{moment(debt.date).format("YYYY-MM-DD HH:mm")}</span>
+                    <span className="data-type">{debt.type}</span>
+                    <span className="data-description">{debt.description}</span>
                     <span>{debt.amount.toLocaleString()} so'm</span>
                   </div>
                 ))
@@ -146,6 +148,8 @@ const MyDebts = () => {
                     <span>
                       {moment(payment.date).format("YYYY-MM-DD HH:mm")}
                     </span>
+                    <span className="data-type">{payment.type}</span>
+                    <span className="data-description">{payment.description}</span>
                     <span>{payment.amount.toLocaleString()} so'm</span>
                   </div>
                 ))
