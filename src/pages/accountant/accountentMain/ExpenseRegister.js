@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import "./style.css";
 import { RiFileList3Line } from "react-icons/ri";
 import { HiOutlinePencilSquare } from "react-icons/hi2";
-import { BellOutlined, DeleteOutlined } from "@ant-design/icons";
+import { BellOutlined, DeleteOutlined, EditFilled } from "@ant-design/icons";
 import {
   BsCaretUpFill,
   BsCaretDownFill,
@@ -16,6 +16,8 @@ import {
   Button,
   Popconfirm,
   message,
+  Modal,
+  Form,
 } from "antd";
 import * as XLSX from "xlsx";
 import { IoMdRadioButtonOn } from "react-icons/io";
@@ -24,10 +26,8 @@ import { useNavigate } from "react-router-dom";
 import ExpenseForm from "./ExpenseForm";
 import { LiaFileDownloadSolid } from "react-icons/lia";
 import ShopsNotification from "../../store/ShopsNotification";
-import {
-  useDeleteExpenseMutation,
-  useUpdateExpenseMutation,
-} from "../../../context/service/expensesApi";
+import { useDeleteExpenseMutation } from "../../../context/service/expensesApi";
+import Edit from "./Edit";
 
 const formatDate = (date) => date.toISOString().split("T")[0];
 const oylar = [
@@ -46,14 +46,15 @@ const oylar = [
 ];
 
 const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
+  const [form] = Form.useForm();
   const navigate = useNavigate();
   const modalRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [activeBox, setActiveBox] = useState("expenses");
   const [activeDataset, setActiveDataset] = useState("allExpenses");
+  const [editModal, setEditModal] = useState(false);
 
   const [deleteExpense] = useDeleteExpenseMutation();
-  const [updateExpense] = useUpdateExpenseMutation();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -153,6 +154,13 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
           >
             <Button icon={<DeleteOutlined />} danger />
           </Popconfirm>
+          <Button
+            icon={<EditFilled />}
+            onClick={() => {
+              setEditModal(item);
+              form.setFieldsValue(item);
+            }}
+          />
         </div>
       ),
     },
@@ -285,6 +293,15 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
 
   return (
     <div className="box_expense-register">
+      <Modal
+        open={editModal}
+        onClose={() => setEditModal(false)}
+        title="Xarajat tahrirlash"
+        onCancel={() => setEditModal(false)}
+        footer={null}
+      >
+        <Edit data={editModal} />
+      </Modal>
       {activeBox === "info" && (
         <div className="rangePicker" ref={modalRef}>
           <button onClick={() => setOpen(!open)} className="toggle-btn">
