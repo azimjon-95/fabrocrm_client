@@ -2,7 +2,13 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import "./style.css";
 import { RiFileList3Line } from "react-icons/ri";
 import { HiOutlinePencilSquare } from "react-icons/hi2";
-import { BellOutlined, DeleteOutlined, EditFilled } from "@ant-design/icons";
+import {
+  BellOutlined,
+  DeleteOutlined,
+  EditFilled,
+  PlusOutlined,
+  EditOutlined,
+} from "@ant-design/icons";
 import {
   BsCaretUpFill,
   BsCaretDownFill,
@@ -133,13 +139,36 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
       title: "Sana/Soat",
       dataIndex: "date",
       key: "date",
-      render: (date) =>
-        `${new Date(date).getDate()}-${
+      render: (date, item) => {
+        let create = `${new Date(date).getDate()}-${
           oylar[new Date(date).getMonth()]
         }/${new Date(date).toLocaleTimeString("uz-UZ", {
           hour: "2-digit",
           minute: "2-digit",
-        })}`,
+        })}`;
+        let update = `${new Date(item.updatedAt).getDate()}-${
+          oylar[new Date(item.updatedAt).getMonth()]
+        }/${new Date(item.updatedAt).toLocaleTimeString("uz-UZ", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}`;
+
+        let dateToShow = item.date === item.updatedAt;
+
+        return (
+          <div>
+            <div>
+              <PlusOutlined /> {create}
+            </div>
+            {!dateToShow && (
+              <div>
+                {" "}
+                <EditOutlined /> {update}
+              </div>
+            )}
+          </div>
+        );
+      },
     },
     {
       title: "Amallar",
@@ -300,7 +329,7 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
         onCancel={() => setEditModal(false)}
         footer={null}
       >
-        <Edit data={editModal} />
+        <Edit data={editModal} setEditModal={setEditModal} />
       </Modal>
       {activeBox === "info" && (
         <div className="rangePicker" ref={modalRef}>

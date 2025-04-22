@@ -99,62 +99,66 @@ const ExpenseForm = () => {
   };
 
   // Lists for selects
-  const workersLists = workers?.innerData?.map((worker) => ({
-    value: worker._id,
-    label: `${worker.firstName} ${worker.lastName} [${worker.workerType || roleTranslations[worker.role]
+  const workersLists =
+    workers?.innerData?.map((worker) => ({
+      value: worker._id,
+      label: `${worker.firstName} ${worker.lastName} [${
+        worker.workerType || roleTranslations[worker.role]
       }]`,
-  })) || [];
-
-  const debtorLists = debtors?.innerData?.map((debtor) => ({
-    value: debtor._id,
-    label: debtor.customer.fullName,
-  })) || [];
-
-  const shops = shopsData?.innerData
-    ?.filter(
-      (i) => !i.isPaid && !i.shopName.toLowerCase().includes("soldo")
-    )
-    ?.map((i) => {
-      const totalAmount = i.materials.reduce(
-        (sum, item) => sum + item.pricePerUnit * item.quantity,
-        0
-      );
-      const summ = totalAmount - (i.paid || 0);
-      return {
-        value: i._id,
-        label: `${i.shopName} - ${summ.toLocaleString()} so'm`,
-      };
-    }) || [];
-
-  const kirimDokonlar = shopsData?.innerData
-    ?.filter(
-      (i) => i.isPaid && !i.shopName.toLowerCase().includes("soldo")
-    )
-    ?.map((d) => ({
-      value: d._id,
-      label: `${d.shopName} - ${d.returnedMoney?.toLocaleString()} so'm`,
-      name: d.shopName,
     })) || [];
 
-  const myDebtorLists = myDebtsAll?.innerData?.map((debtor) => ({
-    value: debtor._id,
-    label: `${debtor.name} ${debtor.remainingAmount?.toLocaleString()} so'm`,
-  })) || [];
+  const debtorLists =
+    debtors?.innerData?.map((debtor) => ({
+      value: debtor._id,
+      label: debtor.customer.fullName,
+    })) || [];
+
+  const shops =
+    shopsData?.innerData
+      ?.filter((i) => !i.isPaid && !i.shopName.toLowerCase().includes("soldo"))
+      ?.map((i) => {
+        const totalAmount = i.materials.reduce(
+          (sum, item) => sum + item.pricePerUnit * item.quantity,
+          0
+        );
+        const summ = totalAmount - (i.paid || 0);
+        return {
+          value: i._id,
+          label: `${i.shopName} - ${summ.toLocaleString()} so'm`,
+        };
+      }) || [];
+
+  const kirimDokonlar =
+    shopsData?.innerData
+      ?.filter((i) => i.isPaid && !i.shopName.toLowerCase().includes("soldo"))
+      ?.map((d) => ({
+        value: d._id,
+        label: `${d.shopName} - ${d.returnedMoney?.toLocaleString()} so'm`,
+        name: d.shopName,
+      })) || [];
+
+  const myDebtorLists =
+    myDebtsAll?.innerData?.map((debtor) => ({
+      value: debtor._id,
+      label: `${debtor.name} ${debtor.remainingAmount?.toLocaleString()} so'm`,
+    })) || [];
 
   // Options based on category
   const options =
-    selectedType === "expense" && ["Ish haqi", "Avans"].includes(expenseCategory)
+    selectedType === "expense" &&
+    ["Ish haqi", "Avans"].includes(expenseCategory)
       ? workersLists
       : selectedType === "income" && expenseCategory === "Mijoz to‘lovlari"
-        ? debtorLists
-        : selectedType === "expense" && expenseCategory === "Do'kon qarzini to'lash"
-          ? shops
-          : selectedType === "income" &&
-            expenseCategory === "Do'kondan qaytarilgan mablag"
-            ? kirimDokonlar
-            : selectedType === "expense" && expenseCategory === "Qarzni to'lash"
-              ? myDebtorLists
-              : [];
+      ? debtorLists
+      : selectedType === "expense" &&
+        expenseCategory === "Do'kon qarzini to'lash"
+      ? shops
+      : selectedType === "income" &&
+        expenseCategory === "Do'kondan qaytarilgan mablag"
+      ? kirimDokonlar
+      : selectedType === "expense" && expenseCategory === "Qarzni to'lash"
+      ? myDebtorLists
+      : [];
 
   // Income and expense categories
   const kirim_royhati = [
@@ -205,9 +209,8 @@ const ExpenseForm = () => {
       return;
     }
 
-    const newData =
-      ["Ish haqi", "Avans"].includes(expenseCategory)
-        ? {
+    const newData = ["Ish haqi", "Avans"].includes(expenseCategory)
+      ? {
           name: selectedCategory?.label || expenseCategory,
           amount,
           type: "Chiqim",
@@ -217,7 +220,7 @@ const ExpenseForm = () => {
           relevantId: selectedCategory?.value,
           date: selectedDate.toDate(),
         }
-        : {
+      : {
           name: selectedCategory?.label || expenseCategory,
           amount,
           type: selectedType === "income" ? "Kirim" : "Chiqim",
@@ -261,7 +264,8 @@ const ExpenseForm = () => {
       // Handle debt creation or update
       if (expenseCategory === "Qarz olish") {
         const checkDebt = myDebtsAll?.innerData?.find(
-          (i) => i.name?.toLowerCase() === selectedCategory?.label?.toLowerCase()
+          (i) =>
+            i.name?.toLowerCase() === selectedCategory?.label?.toLowerCase()
         );
         const debtData = {
           amount,
@@ -311,8 +315,7 @@ const ExpenseForm = () => {
         await updateOrder({
           id: selectedCategory?.value,
           updates: {
-            paid:
-              currentPaid + (amountDollar > 0 ? amountDollar : returnMony),
+            paid: currentPaid + (amountDollar > 0 ? amountDollar : returnMony),
             paidAt: new Date().toISOString(),
           },
         }).unwrap();
@@ -555,7 +558,8 @@ const ExpenseForm = () => {
             loadOptions={kimga_nimaga_qidiruv}
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e || null)}
-            placeholder={selectedType === "income" ? "Mijoz to‘lovlari" : "Ish haqi"}
+            // placeholder={selectedType === "income" ? "Mijoz to‘lovlari" : "Ish haqi"}
+            placeholder={expenseCategory}
             classNamePrefix="custom-select"
             styles={selectStyles}
           />
@@ -682,7 +686,11 @@ const ExpenseForm = () => {
         }}
       />
 
-      <Button style={{ background: "#0A3D3A" }} type="primary" htmlType="submit">
+      <Button
+        style={{ background: "#0A3D3A" }}
+        type="primary"
+        htmlType="submit"
+      >
         Saqlash
       </Button>
     </form>
@@ -690,12 +698,6 @@ const ExpenseForm = () => {
 };
 
 export default ExpenseForm;
-
-
-
-
-
-
 
 // import { useEffect, useRef, useState } from "react";
 // import "./style.css";
@@ -742,8 +744,6 @@ export default ExpenseForm;
 //   const [usdRate, setUsdRate] = useState("");
 //   const [amountDollar, setAmount] = useState(0);
 //   const [updateShop] = useUpdateShopMutation();
-
-
 
 //   const [createExpense] = useCreateExpenseMutation();
 //   const [updateBalance] = useUpdateBalanceMutation();
@@ -988,8 +988,6 @@ export default ExpenseForm;
 //         payType: expensePaymentType,
 //       }).unwrap();
 
-
-
 //       if (expenseCategory === "Qarz olish") {
 //         const checkDebt = myDebtsAll?.innerData?.find(
 //           (i) => i.name?.toLowerCase() === selectedCategory.label?.toLowerCase()
@@ -1227,7 +1225,6 @@ export default ExpenseForm;
 //     const formattedValue = formatNumber(value);
 //     setExpenseAmount(formattedValue);
 //   };
-
 
 //   return (
 //     <form className="expense-form" onSubmit={handleSubmit}>
@@ -1538,12 +1535,3 @@ export default ExpenseForm;
 // };
 
 // export default ExpenseForm;
-
-
-
-
-
-
-
-
-

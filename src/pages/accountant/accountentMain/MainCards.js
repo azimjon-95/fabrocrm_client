@@ -34,11 +34,13 @@ const MainCards = ({
       refetchDebt();
     });
     socket.on("deleteExpense", () => refetchBalanceReport());
+    socket.on("newExpense", () => refetchBalanceReport());
 
     return () => {
       socket.off("balance");
       socket.off("updateOrder");
       socket.off("deleteExpense");
+      socket.off("newExpense");
     };
   }, [refetchBalanceReport, refetchDebt]);
 

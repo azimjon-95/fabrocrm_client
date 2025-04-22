@@ -8,7 +8,7 @@ import { useGetDebtorsQuery } from "../../../context/service/orderApi";
 import { useGetAllShopsQuery } from "../../../context/service/newOredShops";
 import { useGetIsPaidFalseQuery } from "../../../context/service/mydebtService";
 
-function Edit({ data }) {
+function Edit({ data, setEditModal }) {
   const [form] = Form.useForm();
   const [updateExpense, { isLoading }] = useUpdateExpenseMutation();
   const { data: workers } = useGetWorkersQuery();
@@ -24,14 +24,13 @@ function Edit({ data }) {
   }, [data]);
 
   const onFinish = async (values) => {
-    console.log(values);
-
     try {
       await updateExpense({
         id: data._id,
         expenseData: { ...data, ...values },
       });
       message.success("Muvaffaqiyatli yangilandi");
+      setEditModal(false);
     } catch (error) {
       console.log(error);
 
