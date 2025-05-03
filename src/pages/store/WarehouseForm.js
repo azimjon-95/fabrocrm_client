@@ -683,9 +683,11 @@ const Warehouse = () => {
 
       {/* havdovchi modali */}
 
+      {/* import {Modal, Select, Input, Space, Divider} from "antd"; */}
+
       <Modal
         width={545}
-        title={"Haydovchi qo‘shish"}
+        title="Haydovchi qo‘shish"
         open={openDriverModal}
         onCancel={() => {
           setIsContainerVisible(true);
@@ -693,42 +695,48 @@ const Warehouse = () => {
         }}
         footer={null}
       >
-        <Select
-          style={{ width: "100%" }}
-          placeholder="Haydovchi tanlang"
-          options={driverForSelect.map((driver) => ({
-            label: driver.label, // Label sifatida name ishlatiladi
-            value: driver.value, // Value sifatida id ishlatiladi
-          }))}
-          onChange={(value, option) =>
-            setSelectedDriver({ id: option.value, name: option.label })
-          }
-        />
+        <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+          <Select
+            style={{ width: "100%" }}
+            placeholder="Haydovchi tanlang"
+            options={driverForSelect.map((driver) => ({
+              label: driver.label,
+              value: driver.value,
+            }))}
+            onChange={(value, option) =>
+              setSelectedDriver({ id: option.value, name: option.label })
+            }
+          />
 
-        <Select
-          mode="multiple"
-          style={{ width: "100%" }}
-          placeholder="Buyurtmalarni tanlang"
-          options={debtorsData?.innerData?.map((driver) => ({
-            label: driver.customer.fullName, // Label sifatida name ishlatiladi
-            value: driver._id, // Value sifatida id ishlatiladi
-          }))}
-          onChange={(values) => setSelectedOrders(values)} // To‘g‘ridan-to‘g‘ri values ni saqlaymiz
-        />
+          <Select
+            mode="multiple"
+            style={{ width: "100%" }}
+            placeholder="Buyurtmalarni tanlang"
+            options={debtorsData?.innerData?.map((order) => ({
+              label: order.customer.fullName,
+              value: order._id,
+            }))}
+            onChange={(values) => setSelectedOrders(values)}
+          />
 
-        <Input
-          type="text"
-          placeholder="yangi haydovchi"
-          onChange={(e) =>
-            setSelectedDriver({ id: null, name: e.target.value })
-          }
-        />
-        <Input
-          type="number"
-          placeholder="Narxi"
-          onChange={(e) => setDriverPrice(e.target.value)}
-        />
+          <Divider plain>Yoki yangi haydovchi qo‘shing</Divider>
+
+          <Input
+            type="text"
+            placeholder="Yangi haydovchi ismi"
+            onChange={(e) =>
+              setSelectedDriver({ id: null, name: e.target.value })
+            }
+          />
+          <Divider plain>Yetkazib beruvchi haqi</Divider>
+          <Input
+            type="number"
+            placeholder="Narxi"
+            onChange={(e) => setDriverPrice(e.target.value)}
+          />
+        </Space>
       </Modal>
+
     </div>
   );
 };

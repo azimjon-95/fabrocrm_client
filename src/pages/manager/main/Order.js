@@ -19,7 +19,6 @@ import { regions } from "../../../utils/regions";
 import { useCreateOrderMutation } from "../../../context/service/orderApi";
 import moment from "moment";
 import "./style.css";
-import { original } from "@reduxjs/toolkit";
 
 const { Option } = Select;
 const Order = () => {
@@ -82,7 +81,7 @@ const Order = () => {
       formData.append("customer[inn]", data.inn || "");
       formData.append("customer[paymentType]", data.paymentType);
       formData.append("isType", true);
-      formData.append("nds", data.nds);
+      formData.append("nds", data.nds || 0);
 
       // `orders` massivida har bir buyumni FormData ichiga joylash
       savedFurniture.forEach((item, index) => {
@@ -100,8 +99,8 @@ const Order = () => {
           item.dimensions.height
         );
         formData.append(`orders[${index}][originalPrice]`, item.budget);
-        // formData.append(`orders[${index}][budget]`, item.budget);
-        const ndsAmount = (item.budget * data.nds) / 100; // NDS summasini hisoblash
+        const ndsPercentage = data.nds || 0; // data.nds yo'q bo‘lsa 0 sifatida qabul qilinadi
+        const ndsAmount = (item.budget * ndsPercentage) / 100;
         const updatedBudget = item.budget + ndsAmount; // Asl budgetga NDS qo'shish
         formData.append(`orders[${index}][budget]`, Math.round(updatedBudget)); // Ikkita kasr xonasi bilan
         formData.append(`orders[${index}][quantity]`, item.quantity);
@@ -246,17 +245,7 @@ const Order = () => {
             </Form.Item>
           </Col>
 
-          {/* <Col span={12}>
-            <Form.Item label="Telefon raqami">
-              <Controller
-                name="phone"
-                control={control}
-                render={({ field }) => (
-                  <Input {...field} placeholder="Введите номер телефона" />
-                )}
-              />
-            </Form.Item>
-          </Col> */}
+
           <Col span={12}>
             <Form.Item
               label="Telefon raqami"

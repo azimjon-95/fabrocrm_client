@@ -1,21 +1,8 @@
 import { createApi, fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react";
 
-// const baseQuery = fetchBaseQuery({
-//   baseURL: "https://mebelx-server-three.vercel.app/api",
-//   // baseUrl: "http://localhost:5000/api",
-
-//   prepareHeaders: (headers) => {
-//     const token = localStorage.getItem("token");
-//     if (token) {
-//       headers.set("Authorization", `Bearer ${token}`);
-//     }
-//     return headers;
-//   },
-// });
-
 const baseQuery = fetchBaseQuery({
-  // baseUrl: "https://mebelx.abdujabborov.uz/api",
-  baseUrl: "http://localhost:5000/api",
+  baseUrl: "https://mebelx.abdujabborov.uz/api",
+  // baseUrl: "http://localhost:5000/api",
   // baseUrl: "https://mebelx-server-three.vercel.app/api",
   prepareHeaders: (headers) => {
     const token = localStorage.getItem("token");

@@ -24,7 +24,8 @@ import {
   EditOutlined,
   DeleteOutlined,
   CheckOutlined,
-} from "@ant-design/icons";
+  RollbackOutlined
+} from '@ant-design/icons'; // bu yerga import qilib qo'y
 import { BookOutlined } from "@ant-design/icons";
 import { EyeOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
@@ -50,7 +51,6 @@ const ViewOrder = () => {
   const [deleteOrder] = useDeleteOrderMutation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegion, setSelectedRegion] = useState(null);
-  //   useUpdateOrderMutation
   const [updateOrder] = useUpdateOrderMutation();
   const [completeOrder] = useCompleteOrderMutation();
 
@@ -223,6 +223,7 @@ const ViewOrder = () => {
     </Modal>
   );
 
+
   const menu = (record) => (
     <Menu>
       <Menu.Item
@@ -233,13 +234,23 @@ const ViewOrder = () => {
         Zakazni yopish
       </Menu.Item>
 
-      <Menu.Item
+      {/* <Menu.Item
         key="update"
         onClick={() => navigate(`/orders/update/${record._id}`)}
         icon={<EditOutlined />}
       >
         Yangilash
+      </Menu.Item> */}
+
+      <Menu.Item
+        key="soldo"
+        onClick={() => navigate(`/order/restore/${record._id}`)}
+        icon={<RollbackOutlined />}
+        style={{ color: "blue" }}
+      >
+        Soldo/Taxrirlash
       </Menu.Item>
+
       <Menu.Item
         key="active"
         style={{ color: !record?.isActive ? "green" : "red" }}
@@ -259,6 +270,7 @@ const ViewOrder = () => {
       </Menu.Item>
     </Menu>
   );
+
 
   const handleIsActive = async (record) => {
     try {

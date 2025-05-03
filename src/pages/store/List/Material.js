@@ -55,7 +55,6 @@ const Material = () => {
     const [loadingStates, setLoadingStates] = useState({});
     const [createAdditionalMaterial, { loading: isCreating }] = useCreateAdditionalMaterialMutation();
 
-
     const handleInputChange = (e, materialId) => {
         const { value } = e.target;
         setInputValues((prev) => ({

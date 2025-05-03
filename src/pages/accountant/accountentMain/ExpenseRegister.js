@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import "./style.css";
 import { RiFileList3Line } from "react-icons/ri";
 import { HiOutlinePencilSquare } from "react-icons/hi2";
@@ -10,24 +10,34 @@ import {
 } from "react-icons/bs";
 import {
   Table,
-  Tooltip,
+  Tooltip, Modal,
   Input,
-  Select,
-  Button,
+  Select, Form,
+  Button, Switch,
   Popconfirm,
-  message,
+  message, InputNumber, DatePicker
 } from "antd";
 import * as XLSX from "xlsx";
 import { IoMdRadioButtonOn } from "react-icons/io";
+import { FaTruck } from "react-icons/fa6";
 import { MdHistory } from "react-icons/md";
+import { FaHistory } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { IoMdCreate } from "react-icons/io";
 import ExpenseForm from "./ExpenseForm";
 import { LiaFileDownloadSolid } from "react-icons/lia";
 import ShopsNotification from "../../store/ShopsNotification";
 import {
+  useGetDriversQuery,
+  useCreateDriverMutation,
+  useDeleteDriverMutation
+} from "../../../context/service/driverApi";
+import {
   useDeleteExpenseMutation,
-  useUpdateExpenseMutation,
 } from "../../../context/service/expensesApi";
+
+const { TextArea } = Input;
+
 
 const formatDate = (date) => date.toISOString().split("T")[0];
 const oylar = [
@@ -51,9 +61,51 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
   const [open, setOpen] = useState(false);
   const [activeBox, setActiveBox] = useState("expenses");
   const [activeDataset, setActiveDataset] = useState("allExpenses");
-
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchText, setSearchText] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalSwitch, setIsModalSwitch] = useState(false);
+  const [form] = Form.useForm();
   const [deleteExpense] = useDeleteExpenseMutation();
-  const [updateExpense] = useUpdateExpenseMutation();
+  const [deleteDriver] = useDeleteDriverMutation();
+  const { data: driversData } = useGetDriversQuery();
+  const [createDriver] = useCreateDriverMutation();
+  const drivers = driversData?.innerData || [];
+  const [historyVisible, setHistoryVisible] = useState(false);
+  const [historyData, setHistoryData] = useState([]);
+  const [isSoldo, setIsSoldo] = useState(false);
+  const handleOpenHistoryModal = (stroy) => {
+    setHistoryData(stroy || []);
+    setHistoryVisible(true);
+  };
+  const activeData = useMemo(
+    () => expenses?.innerData?.[activeDataset] || [],
+    [expenses, activeDataset]
+  );
+
+  // Compute filteredData with useMemo instead of useEffect
+  const filteredData = useMemo(() => {
+    let filtered = activeData;
+
+    // Filter by category
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter((item) => item.category === selectedCategory);
+    }
+
+    // Filter by searchText (name or category)
+    if (searchText) {
+      filtered = filtered.filter(
+        (item) =>
+          item.category.toLowerCase().includes(searchText.toLowerCase()) ||
+          item.name.toLowerCase().includes(searchText.toLowerCase())
+      );
+    }
+
+    return filtered;
+  }, [selectedCategory, searchText, activeData]);
+
+  // Extract unique categories from activeData
+  const categories = ["all", ...new Set(activeData.map((item) => item.category))];
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -70,12 +122,10 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
       prev === "allExpenses"
         ? "outgoingExpenses"
         : prev === "outgoingExpenses"
-        ? "incomeExpenses"
-        : "allExpenses"
+          ? "incomeExpenses"
+          : "allExpenses"
     );
   }, []);
-
-  const activeData = expenses?.innerData?.[activeDataset] || [];
 
   const deleteExpenseHandler = async (id) => {
     try {
@@ -85,6 +135,7 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
       console.log(error);
     }
   };
+
   const columns = [
     {
       title: (
@@ -133,8 +184,7 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
       dataIndex: "date",
       key: "date",
       render: (date) =>
-        `${new Date(date).getDate()}-${
-          oylar[new Date(date).getMonth()]
+        `${new Date(date).getDate()}-${oylar[new Date(date).getMonth()]
         }/${new Date(date).toLocaleTimeString("uz-UZ", {
           hour: "2-digit",
           minute: "2-digit",
@@ -252,36 +302,152 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
 
     XLSX.writeFile(wb, fileName);
   };
+  let title = "";
 
-  const [filteredData, setFilteredData] = useState(activeData);
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [searchText, setSearchText] = useState("");
+  if (activeBox === "notifications") {
+    title = "Buyurtmalar Ro'yxati";
+  } else if (activeBox === "info") {
+    title = "Xarajatlar Ro'yxati";
+  } else if (activeBox === "dilivery") {
+    title = "Yetkazib berish Ro'yxati";
+  } else {
+    title = "Xarajatlar Qo'shish";
+  }
 
-  useEffect(() => {
-    let filtered = activeData;
-
-    // Filter by category
-    if (selectedCategory !== "all") {
-      filtered = filtered.filter((item) => item.category === selectedCategory);
+  const handleDelete = (record) => {
+    console.log(record);
+    try {
+      deleteDriver(record).unwrap();
+      message.success("Yetkazib beruvchi o'chirildi");
+    } catch (error) {
+      message.error(error.message || "O'chirishda xatolik yuz berdi.");
     }
+  };
 
-    // Filter by searchText (name or category)
-    if (searchText) {
-      filtered = filtered.filter(
-        (item) =>
-          item.category.toLowerCase().includes(searchText.toLowerCase()) ||
-          item.name.toLowerCase().includes(searchText.toLowerCase())
-      );
+
+
+  const openModal = (driver = null) => {
+    setIsModalOpen(true);
+
+    // Formga qiymatlarni yuklash
+    if (driver) {
+      form.setFieldsValue({
+        driver: {
+          name: driver.name || "",
+          phone: driver.phone || "",
+        },
+        fare: driver.fare || 0,
+        state: driver.state || "olib keldi",
+        description: driver.description || "",
+      });
+    } else {
+      form.resetFields();
+      form.setFieldsValue({
+        fare: 0,
+        state: "olib keldi",
+      });
     }
+  };
 
-    setFilteredData(filtered);
-  }, [selectedCategory, searchText, activeData]);
+  const handleCreateDriver = async (values) => {
+    try {
+      const payload = {
+        ...values,
+        name: values?.driver?.name || values.name,
+        phone: values?.driver?.phone || values.phone,
+      };
 
-  // Extract unique categories from activeData
-  const categories = [
-    "all",
-    ...new Set(activeData.map((item) => item.category)),
+      await createDriver(payload).unwrap();
+      message.success("Yetkazib beruvchi muvaffaqiyatli qo'shildi");
+      form.resetFields();
+      setIsModalOpen(false);
+    } catch (error) {
+      message.error(error?.data?.message || "Qo'shishda xatolik yuz berdi.");
+    }
+  };
+  const driverColumns = [
+    {
+      title: "Yetkazib beruvchi",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Telefon raqami",
+      dataIndex: "phone",
+      key: "phone",
+      render: (phone) => `+998 ${phone}`,
+    },
+    {
+      title: "Balans",
+      dataIndex: "balance",
+      key: "balance",
+      render: (_, record) => `${record.balance.toLocaleString()} so'm`,
+    },
+    {
+      title: "Yuklash",
+      key: "upload",
+      render: (_, record) => (
+        <Button
+          danger
+          type="dashed"
+          onClick={() => { openModal(record); setIsModalSwitch(false) }}
+          style={{ "padding": "3px 8px", "height": "25px", "display": "flex", "alignItems": "center", "justifyContent": "center" }}
+        ><FaTruck size={20} style={{ "margin": 0 }} />
+        </Button>
+      ),
+    },
+    {
+      title: "Tarix",
+      key: "history",
+      render: (_, record) => (
+        <Button
+          danger
+          type="dashed"
+          title="Tarixni ko'rish"
+          onClick={() => handleOpenHistoryModal(record.stroy)}
+          style={{
+            padding: "3px 8px",
+            height: "25px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}
+        >
+          <FaHistory />
+        </Button>
+      )
+    },
+    {
+      title: "O'chirish",
+      key: "delete",
+      render: (_, record) => {
+        if (record.balance > 0) {
+          return (
+            <Button
+              icon={<DeleteOutlined />}
+              danger
+              disabled
+              title="Avval qarzni to‘lang"
+            >
+            </Button>
+          );
+        }
+
+        return (
+          <Popconfirm
+            title="O'chirishni tasdiqlaysizmi?"
+            onConfirm={() => handleDelete(record._id)}
+            okText="Ha"
+            cancelText="Yo'q"
+          >
+            <Button icon={<DeleteOutlined />} danger>
+            </Button>
+          </Popconfirm>
+        );
+      },
+    },
   ];
+
 
   return (
     <div className="box_expense-register">
@@ -301,8 +467,7 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
               marginTop: "-2px",
               borderRadius: "0 0 5px 5px",
             }}
-            // clear
-            allowClear // Enable clearing the select field
+            allowClear
             onClear={() => setSelectedCategory("all")}
           >
             {categories.map((category) => (
@@ -314,7 +479,7 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
           <Input
             placeholder="Qidirish..."
             size="small"
-            onClear={() => setSearchText("all")}
+            onClear={() => setSearchText("")}
             onChange={(e) => setSearchText(e.target.value)}
             style={{
               width: 170,
@@ -353,49 +518,56 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
           <MdHistory size={20} />
         </button>
       )}
+
+      {activeBox === "dilivery" && (
+        <button
+          onClick={() => { openModal(); setIsModalSwitch(true); }}
+          className="notifications-story"
+        >
+
+          <IoMdCreate size={20} />
+        </button>
+      )}
       <div className="box_expense-register_menu">
         <button
+          onClick={() => setActiveBox("dilivery")}
+          className={`box_expense-register_btn ${activeBox === "dilivery" ? "active" : ""
+            }`}
+        >
+          <FaTruck size={20} />
+        </button>
+        <button
           onClick={() => setActiveBox("notifications")}
-          className={`box_expense-register_btn ${
-            activeBox === "notifications" ? "active" : ""
-          }`}
+          className={`box_expense-register_btn ${activeBox === "notifications" ? "active" : ""
+            }`}
         >
           <BellOutlined />
         </button>
         <button
           onClick={() => setActiveBox("info")}
-          className={`box_expense-register_btn ${
-            activeBox === "info" ? "active" : ""
-          }`}
+          className={`box_expense-register_btn ${activeBox === "info" ? "active" : ""
+            }`}
         >
           <RiFileList3Line size={20} />
         </button>
         <button
           onClick={() => setActiveBox("expenses")}
-          className={`box_expense-register_btn ${
-            activeBox === "expenses" ? "active" : ""
-          }`}
+          className={`box_expense-register_btn ${activeBox === "expenses" ? "active" : ""
+            }`}
         >
           <HiOutlinePencilSquare size={20} />
         </button>
         {activeBox === "info" && (
           <button
             onClick={exportToExcel}
-            className={`box_expense-register_btn ${
-              activeBox === "expenses" ? "active" : ""
-            }`}
+            className={`box_expense-register_btn ${activeBox === "info" ? "active" : ""
+              }`}
           >
             <LiaFileDownloadSolid />
           </button>
         )}
       </div>
-      <h3 className={`${activeBox === "info" && "infoActive"}`}>
-        {activeBox === "notifications"
-          ? "Buyurtmalar Ro'yxati"
-          : activeBox === "info"
-          ? "Xarajatlar Ro'yxati"
-          : "Xarajatlar Qo'shish"}
-      </h3>
+      <h3 className={activeBox === "info" ? "infoActive" : ""}>{title}</h3>
       <div className="box_expense-content">
         {activeBox === "notifications" && <ShopsNotification />}
         {activeBox === "expenses" && <ExpenseForm />}
@@ -411,7 +583,150 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
               scroll={{ x: "max-content" }}
             />
           )}
+        {activeBox === "dilivery" &&
+          <Table
+            dataSource={drivers}
+            columns={driverColumns}
+            rowKey="_id"
+            pagination={false}
+            size="small"
+            bordered
+            scroll={{ x: "max-content" }}
+          />}
       </div>
+
+      <Modal
+        title="Yetkazib beruvchi qo'shish"
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={null}
+        centered
+      >
+        <Form layout="vertical" form={form} onFinish={handleCreateDriver}>
+          <div className="modal-titleSoldo">
+            {
+              isModalSwitch && (
+                <Form.Item
+                  label="Soldo"
+                  name={["driver", "soldo"]}
+                  valuePropName="checked"
+                >
+                  <Switch checkedChildren="Ha" unCheckedChildren="Yo'q" onChange={(checked) => setIsSoldo(checked)} />
+                </Form.Item>
+              )
+            }
+
+            {isSoldo && isModalSwitch && (
+              <Form.Item
+                label="Qaysi oy uchun?"
+                name={["driver", "month"]} style={{ width: "100%" }}
+                rules={[{ required: isSoldo ? true : false, message: "Iltimos, oyni tanlang" }]}
+              >
+                <DatePicker picker="month"
+                  style={{ width: "100%" }}
+                  format="YYYY-MM"
+                  placeholder="Oy tanlang" />
+              </Form.Item>
+            )}
+          </div>
+          <Form.Item
+            label="Ismi"
+            name={["driver", "name"]}
+            rules={[{ required: true, message: "Iltimos, ismini kiriting" }]}
+          >
+            <Input placeholder="Masalan: Ali" />
+          </Form.Item>
+
+          <Form.Item
+            label="Telefon"
+            name={["driver", "phone"]}
+            rules={[{ pattern: /^\d{9,12}$/, message: "To‘g‘ri telefon raqami kiriting" }]}
+          >
+            <Input addonBefore="+998" placeholder="901234567" />
+          </Form.Item>
+
+          <Form.Item
+            label="Narxi (so‘m)"
+            name="fare"
+            rules={[{ required: true, message: "Narxni kiriting" }]}
+          >
+            <InputNumber
+              style={{ width: "100%" }}
+              min={0}
+              step={1000}
+              placeholder="Masalan: 150000"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Holati"
+            name="state"
+            rules={[{ required: true, message: "Holatni tanlang" }]}
+          >
+            <Select>
+              <Select.Option value="olib keldi">Olib keldi</Select.Option>
+              <Select.Option value="olib ketdi">Olib ketdi</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item label="Izoh" name="description">
+            <TextArea rows={3} placeholder="Izoh kiriting (ixtiyoriy)" />
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+              style={{ backgroundColor: "#0a3d3a", fontWeight: 600 }}
+            >
+              Saqlash
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        open={historyVisible}
+        onCancel={() => setHistoryVisible(false)}
+        footer={null}
+        title="Tarix"
+        width={600}
+      >
+        <Table
+          dataSource={historyData}
+          rowKey="_id"
+          pagination={false}
+          bordered
+          size="small"
+          columns={[
+            {
+              title: "Sana",
+              dataIndex: "date",
+              key: "date",
+              render: (date) => new Date(date).toLocaleString("uz-UZ")
+            },
+
+            {
+              title: "Izoh",
+              dataIndex: "description",
+              key: "description"
+            },
+            {
+              title: "Narx",
+              dataIndex: "price",
+              key: "price",
+              render: (price) => `${price.toLocaleString()} so'm`
+            },
+            {
+              title: "Holat",
+              dataIndex: "state",
+              key: "state"
+            }
+          ]}
+        />
+      </Modal>
+
     </div>
   );
 };

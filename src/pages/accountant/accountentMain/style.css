@@ -1185,7 +1185,20 @@
   /* Yashil rang, muvaffaqiyatli yig‘indi uchun */
 }
 
+.modal-titleSoldo {
+  display: flex;
+  gap: 15px;
+  border-bottom: 1px solid #f0f0f0;
 
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+}
+
+.modal-titleSoldo .ant-picker {
+  height: 32px !important;
+  border-radius: 4px !important;
+}
 
 /* Mobil qurilmalar uchun moslashuvchanlik */
 @media (max-width: 768px) {

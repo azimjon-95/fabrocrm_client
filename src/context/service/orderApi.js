@@ -27,6 +27,41 @@ export const orderApi = api.injectEndpoints({
       invalidatesTags: ["Order", "GETORDER"],
     }),
 
+    // useUpdateMaterialValueMutation {
+    //   orderId,
+    //   materialId: material.materialID,
+    //   orderCardId,
+    //   value,
+    // }
+    updateMaterialValue: builder.mutation({
+      query: ({ orderId, materialId, orderCardId, value }) => (console.log(orderId, materialId, orderCardId, value), {
+        url: `/ordermain/${orderId}/material/${materialId}/${orderCardId}`,
+        method: "PUT",
+        body: { value },
+      }),
+      invalidatesTags: ["Order", "GETORDER"],
+    }),
+
+    createOrderIntoInfo: builder.mutation({
+      query: ({ infoId, formData }) => {
+        return {
+          url: `/orderIntoInfo/${infoId}`,
+          method: "POST",
+          body: formData, // bu yerda FormData ni bevosita jo‘natyapmiz
+        };
+      },
+      invalidatesTags: ["Order", "GETORDER"],
+    }),
+
+    //router.delete('/orderinfo/:infoId/orders/:orderId'
+    deleteOrderIntoInfo: builder.mutation({
+      query: ({ infoId, orderId }) => ({
+        url: `/orderIntoInfo/${infoId}/orders/${orderId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Order", "GETORDER"],
+    }),
+
     // Create a new additional material
     createAdditionalMaterial: builder.mutation({
       query: (newAdditional) => ({
@@ -60,6 +95,15 @@ export const orderApi = api.injectEndpoints({
     giveMaterial: builder.mutation({
       query: (data) => ({
         url: "/order/giveMaterial",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Order", "GETORDER"],
+    }),
+    ///order/giveMaterialSoldo
+    giveMaterialSoldo: builder.mutation({
+      query: (data) => ({
+        url: "/order/giveMaterialSoldo",
         method: "POST",
         body: data,
       }),
@@ -127,4 +171,8 @@ export const {
   useGetDebtQuery,
   useGetDebtorsQuery,
   useCompleteOrderMutation,
+  useGiveMaterialSoldoMutation,
+  useCreateOrderIntoInfoMutation,
+  useDeleteOrderIntoInfoMutation,
+  useUpdateMaterialValueMutation
 } = orderApi;

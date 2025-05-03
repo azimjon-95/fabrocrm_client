@@ -31,7 +31,9 @@ const Attendance = () => {
   const [attendance] = useState(location.pathname === "/all/attendance");
   const [updateAttendance] = useUpdateAttendanceMutation();
   const month = String(selectedDate.month() + 1).padStart(2, "0");
-  const { data, isLoading } = useGetMonthlyAttendanceQuery({ year, month });
+  const { data, isLoading,
+    refetch: attendanceRefetch,
+  } = useGetMonthlyAttendanceQuery({ year, month });
   const { data: ordersData } = useGetOrdersQuery();
   const activeOrders = ordersData?.innerData?.filter((i) => i.isType);
   // useGetAllWorkingHoursQuery
@@ -178,6 +180,7 @@ const Attendance = () => {
       const res = await updateAttendance(updatedData).unwrap();
       message.success(res.message);
       workersRefetch();
+      attendanceRefetch()
     } catch (error) {
       console.error("Xatolik yuz berdi:", error);
     }
@@ -215,8 +218,8 @@ const Attendance = () => {
               backgroundColor: isFutureDate
                 ? "transparent"
                 : record.dates[date]
-                ? "#4CAF50"
-                : "#FF5733",
+                  ? "#4CAF50"
+                  : "#FF5733",
               color: "#fff",
               textAlign: "center",
               cursor: isFutureDate ? "not-allowed" : "pointer",

@@ -78,6 +78,36 @@ export const ShopsApi = api.injectEndpoints({
       query: (q) => "/getshopsbyisPaid?isPaid=" + q,
       providesTags: ["Shops"],
     }),
+
+    // getAggregatedOrders && processPayment
+    getAggregatedOrders: builder.query({
+      query: () => "/newShops/getAggregatedOrders",
+      providesTags: ["Shops"],
+    }),
+    processPayment: builder.mutation({
+      query: (data) => ({
+        url: "/newShops/processPayment",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Shops"],
+    }),
+
+    // "/newShops/getReturnedOrders",
+    getReturnedOrders: builder.query({
+      query: () => "/newShops/getReturnedOrders",
+      providesTags: ["Shops"],
+    }),
+
+    // "/newShops/processReturnedPay"
+    processReturnedPay: builder.mutation({
+      query: (data) => ({
+        url: "/newShops/processReturnedPay",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Shops"],
+    }),
   }),
 });
 
@@ -92,4 +122,8 @@ export const {
   useAddMaterialMutation,
   useDeleteMaterialMutation,
   useGetOrdersByisPaidQuery,
+  useGetAggregatedOrdersQuery,
+  useProcessPaymentMutation,
+  useGetReturnedOrdersQuery,
+  useProcessReturnedPayMutation
 } = ShopsApi;

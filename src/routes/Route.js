@@ -9,8 +9,8 @@ import Attendance from "../pages/accountant/attendance/Attendance";
 import Order from "../pages/manager/main/Order";
 import OrderList from "../pages/manager/main/List/OrderList";
 import OrderStory from "../pages/manager/main/List/OrderStory";
+import Restore from "../pages/manager/main/List/Restore";
 import MaterialPage from "../pages/manager/main/List/MaterialPage";
-import UpdateOrderForm from "../pages/manager/main/List/UpdateOrderForm";
 import Salary from "../pages/accountant/salary/Salary";
 import OrderDetails from "../pages/accountant/accountentMain/OrderDetails";
 import WarehouseForm from "../pages/store/WarehouseForm";
@@ -52,12 +52,7 @@ export const routes = [
     private: true,
     role: ["manager", "deputy"],
   },
-  {
-    path: "/orders/update/:id",
-    element: <UpdateOrderForm />,
-    private: true,
-    role: ["manager", "deputy"],
-  },
+
   {
     path: "/manag/warehouse",
     element: <WarehouseForm />,
@@ -141,6 +136,12 @@ export const routes = [
   {
     path: "/order/history/lists",
     element: <HistoryOrderLists />,
+    private: true,
+    role: ["warehouseman", "accountant", "deputy"],
+  },
+  {
+    path: "/order/restore/:id",
+    element: <Restore />,
     private: true,
     role: ["warehouseman", "accountant", "deputy"],
   },

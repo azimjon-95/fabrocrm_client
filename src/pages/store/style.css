@@ -58,8 +58,7 @@
   border: 2px solid #f0f0f0;
 }
 
-:where(.css-dev-only-do-not-override-1drr2mu).ant-radio-button-wrapper
-  > .ant-radio-button {
+:where(.css-dev-only-do-not-override-1drr2mu).ant-radio-button-wrapper>.ant-radio-button {
   position: absolute;
   inset-block-start: 0;
   inset-inline-start: 0;
@@ -70,13 +69,16 @@
   border: 1px solid #0a3d3a;
 }
 
+.box_expense-content .ant-btn-dangerous.ant-btn-dashed {
+  color: green !important;
+  border-color: green !important;
+}
+
 .ant-radio-button-wrapper {
   overflow: hidden;
 }
 
-:where(
-    .css-dev-only-do-not-override-1drr2mu
-  ).ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+:where(.css-dev-only-do-not-override-1drr2mu).ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
   z-index: 1;
   color: #ffffff !important;
   background: #ffffff;
@@ -196,7 +198,7 @@
   padding: 4px 0;
 }
 
-.shopsnew-container.show > h4 {
+.shopsnew-container.show>h4 {
   text-align: center;
   color: #fff !important;
   padding: 10px 0;
@@ -249,30 +251,42 @@
   gap: 8px;
 }
 
-.allLists-box > div {
+.allLists-box>div {
   width: 49%;
   height: calc(100vh - 70px);
   overflow-y: auto;
 }
 
 /* Styling the scrollbar */
-.allLists-box > div::-webkit-scrollbar {
+.allLists-box>div::-webkit-scrollbar {
   width: 3px;
 }
 
-.allLists-box > div::-webkit-scrollbar-thumb {
+:where(.css-dev-only-do-not-override-1drr2mu).ant-divider-horizontal.ant-divider-with-text {
+  display: flex;
+  align-items: center;
+  margin: 0px 0 !important;
+  color: #00000082;
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+  text-align: center;
+  border-block-start: 0 #00000025;
+}
+
+.allLists-box>div::-webkit-scrollbar-thumb {
   background-color: #888;
   /* Color of the scrollbar handle */
   border-radius: 10px;
   /* Rounds the edges of the scrollbar handle */
 }
 
-.allLists-box > div::-webkit-scrollbar-thumb:hover {
+.allLists-box>div::-webkit-scrollbar-thumb:hover {
   background-color: #555;
   /* Color of the scrollbar handle on hover */
 }
 
-.allLists-box > div::-webkit-scrollbar-track {
+.allLists-box>div::-webkit-scrollbar-track {
   background-color: #f1f1f1;
   /* Color of the scrollbar track */
   border-radius: 10px;

@@ -35,6 +35,7 @@ const ViewPersons = () => {
   const workers = workersData?.innerData || [];
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  console.log(workersData);
 
   const handleDelete = async (id) => {
     try {
@@ -50,15 +51,16 @@ const ViewPersons = () => {
     const formattedPhone = phone.replace(/[^\d]/g, "");
     return formattedPhone.length === 9
       ? `+998 ${formattedPhone.slice(0, 2)} ${formattedPhone.slice(
-          2,
-          5
-        )} ${formattedPhone.slice(5, 7)} ${formattedPhone.slice(7, 9)}`
+        2,
+        5
+      )} ${formattedPhone.slice(5, 7)} ${formattedPhone.slice(7, 9)}`
       : phone;
   };
 
   const handleUpdate = (record) => {
     navigate("/persons/add", { state: { userData: record } });
   };
+
 
   const filteredWorkers = workers.filter((worker) => {
     const fullName =
@@ -237,6 +239,8 @@ const ViewPersons = () => {
     });
     saveAs(data, "Hodimlar.xlsx");
   };
+
+
 
   return (
     <div>
