@@ -27,6 +27,7 @@ import { IoMdCreate } from "react-icons/io";
 import ExpenseForm from "./ExpenseForm";
 import { LiaFileDownloadSolid } from "react-icons/lia";
 import ShopsNotification from "../../store/ShopsNotification";
+import { useGetDebtorsQuery } from "../../../context/service/orderApi";
 import {
   useGetDriversQuery,
   useCreateDriverMutation,
@@ -66,6 +67,8 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalSwitch, setIsModalSwitch] = useState(false);
   const [form] = Form.useForm();
+  const [selectedOrders, setSelectedOrders] = useState([]);
+  const { data: debtorsData } = useGetDebtorsQuery();
   const [deleteExpense] = useDeleteExpenseMutation();
   const [deleteDriver] = useDeleteDriverMutation();
   const { data: driversData } = useGetDriversQuery();
@@ -74,6 +77,7 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
   const [historyVisible, setHistoryVisible] = useState(false);
   const [historyData, setHistoryData] = useState([]);
   const [isSoldo, setIsSoldo] = useState(false);
+
   const handleOpenHistoryModal = (stroy) => {
     setHistoryData(stroy || []);
     setHistoryVisible(true);
@@ -315,7 +319,7 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
   }
 
   const handleDelete = (record) => {
-    console.log(record);
+
     try {
       deleteDriver(record).unwrap();
       message.success("Yetkazib beruvchi o'chirildi");
@@ -355,6 +359,7 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
         ...values,
         name: values?.driver?.name || values.name,
         phone: values?.driver?.phone || values.phone,
+        selectedOrders: selectedOrders || [],
       };
 
       await createDriver(payload).unwrap();
@@ -365,6 +370,7 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
       message.error(error?.data?.message || "Qo'shishda xatolik yuz berdi.");
     }
   };
+
   const driverColumns = [
     {
       title: "Yetkazib beruvchi",
@@ -628,7 +634,22 @@ const ExpenseRegister = ({ selectedDates, setSelectedDates, expenses }) => {
                   placeholder="Oy tanlang" />
               </Form.Item>
             )}
+
           </div>
+          <Form.Item
+            label="Aktiv buyurtmalar "
+          >
+            <Select
+              mode="multiple"
+              style={{ width: "100%" }}
+              placeholder="Buyurtmalarni tanlang"
+              options={debtorsData?.innerData?.map(order => ({
+                label: order.customer.fullName,
+                value: order._id,
+              }))}
+              onChange={setSelectedOrders}
+            />
+          </Form.Item>
           <Form.Item
             label="Ismi"
             name={["driver", "name"]}

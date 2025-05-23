@@ -7,7 +7,7 @@ export const workersDays = api.injectEndpoints({
             providesTags: ['WorkingDays'],
         }),
         createWorkingDay: builder.mutation({
-            query: ({ value }) => (console.log(value), {
+            query: ({ value }) => ({
                 url: '/workingDays',
                 method: 'POST',
                 body: value,

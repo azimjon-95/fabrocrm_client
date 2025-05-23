@@ -79,6 +79,7 @@ const Material = () => {
                 orderCardId,
                 orderId: id,
                 materialName: material.name,
+                price: material.price,
                 givenQuantity: quantity,
             }).unwrap();
 

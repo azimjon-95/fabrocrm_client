@@ -11,7 +11,14 @@ export const ShopsApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Shops"],
     }),
-
+    createShopSoldo: builder.mutation({
+      query: (newShop) => ({
+        url: "/newShopsSoldo/",
+        method: "POST",
+        body: newShop,
+      }),
+      invalidatesTags: ["Shops"],
+    }),
     // Barcha buyurtmalarni olish
     getAllShops: builder.query({
       query: () => "/newShops",
@@ -108,6 +115,13 @@ export const ShopsApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Shops"],
     }),
+
+    // get("/newShops/generateMonthlyReport",    const { year, month } = req.query;
+    generateMonthlyReport: builder.query({
+      query: (data) => `/newShops/generateMonthlyReport?year=${data.year}&month=${data.month}`,
+      providesTags: ["Shops"],
+    }),
+
   }),
 });
 
@@ -125,5 +139,7 @@ export const {
   useGetAggregatedOrdersQuery,
   useProcessPaymentMutation,
   useGetReturnedOrdersQuery,
-  useProcessReturnedPayMutation
+  useProcessReturnedPayMutation,
+  useGenerateMonthlyReportQuery,
+  useCreateShopSoldoMutation,
 } = ShopsApi;

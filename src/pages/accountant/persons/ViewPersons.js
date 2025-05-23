@@ -35,7 +35,7 @@ const ViewPersons = () => {
   const workers = workersData?.innerData || [];
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
-  console.log(workersData);
+
 
   const handleDelete = async (id) => {
     try {

@@ -5,6 +5,11 @@ export const storeApi = api.injectEndpoints({
         getAllStores: builder.query({
             query: () => "/store/all",
         }),
+
+        getStoresMonthlyReport: builder.query({
+            query: ({ month, year }) => `/store/report?month=${month}&year=${year}`,
+        }),
+
         createStore: builder.mutation({
             query: (newStore) => ({
                 url: "/store/create",
@@ -66,7 +71,8 @@ export const {
     useCreateStoreMutation,
     useGetStoreByCustomerIdQuery,
     useGetStockHistoryQuery,
-    useUpdateManyStoresMutation
+    useUpdateManyStoresMutation,
+    useGetStoresMonthlyReportQuery
 } = storeApi;
 
 

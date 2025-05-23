@@ -63,7 +63,7 @@ const MainCards = ({
       style={{ marginBottom: isState ? 10 : 20 }}
       className="cards-container"
     >
-      <div className="card income">
+      {/* <div className="card income">
         {!isState && (
           <button onClick={() => setOpen(true)} className="formattedPeriod-btn">
             {balanceReport?.innerData?.formattedPeriod} <FaCalendarAlt />
@@ -80,7 +80,7 @@ const MainCards = ({
             so'm
           </p>
         </div>
-      </div>
+      </div> */}
 
       {open && (
         <div className="dropdown-reportDates" ref={modalRef}>

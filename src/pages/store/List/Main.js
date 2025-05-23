@@ -125,7 +125,6 @@ const Main = () => {
 
         message.success("Yangi buyurtma yaratildi!");
       } catch (error) {
-        console.log(error);
         message.warning(
           error.message || "Buyurtma yaratishda xatolik yuz berdi."
         );

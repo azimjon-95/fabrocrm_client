@@ -11,7 +11,7 @@ export const orderApi = api.injectEndpoints({
     // Update an existing order
     getOrderById: builder.query({
       query: (id) => ({
-        url: `/order/${id}`,
+        url: `/orderId/${id}`,
         method: "GET",
       }),
       providesTags: ["GETORDER", "Order"],
@@ -27,6 +27,7 @@ export const orderApi = api.injectEndpoints({
       invalidatesTags: ["Order", "GETORDER"],
     }),
 
+
     // useUpdateMaterialValueMutation {
     //   orderId,
     //   materialId: material.materialID,
@@ -34,7 +35,7 @@ export const orderApi = api.injectEndpoints({
     //   value,
     // }
     updateMaterialValue: builder.mutation({
-      query: ({ orderId, materialId, orderCardId, value }) => (console.log(orderId, materialId, orderCardId, value), {
+      query: ({ orderId, materialId, orderCardId, value }) => ({
         url: `/ordermain/${orderId}/material/${materialId}/${orderCardId}`,
         method: "PUT",
         body: { value },
@@ -154,6 +155,16 @@ export const orderApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Order", "GETORDER"],
     }),
+
+    // RTK Query Mutation
+    editGivnMaterial: builder.mutation({
+      query: ({ id, quantity }) => ({
+        url: `/orderGiven/${id}`,
+        method: 'PUT',
+        body: { quantity }, // Send quantity as the body
+      }),
+      invalidatesTags: ['Order', 'GETORDER'],
+    }),
   }),
 });
 
@@ -174,5 +185,6 @@ export const {
   useGiveMaterialSoldoMutation,
   useCreateOrderIntoInfoMutation,
   useDeleteOrderIntoInfoMutation,
-  useUpdateMaterialValueMutation
+  useUpdateMaterialValueMutation,
+  useEditGivnMaterialMutation,
 } = orderApi;

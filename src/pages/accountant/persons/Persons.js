@@ -11,6 +11,7 @@ import {
   Select,
   Spin,
   message,
+  InputNumber,
 } from "antd";
 import {
   UploadOutlined,
@@ -31,90 +32,105 @@ const RegisterWorker = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const userData = location.state?.userData;
-  const {
-    control,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm();
+  const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      middleName: "",
+      address: "",
+      dayOfBirth: "",
+      phone: "",
+      idNumber: "",
+      password: "",
+      login: "",
+      salary: "",
+      role: "worker",
+      workerType: "",
+    },
+  });
 
-  const [createWorker, { isLoading: isCreateLoading }] =
-    useCreateWorkerMutation();
-  const [updateWorker, { isLoading: isUpdateLoading }] =
-    useUpdateWorkerMutation();
-
+  const [createWorker, { isLoading: isCreateLoading }] = useCreateWorkerMutation();
+  const [updateWorker, { isLoading: isUpdateLoading }] = useUpdateWorkerMutation();
   const [imageUrl, setImageUrl] = useState(null);
-  const [file, setFile] = useState(null);
-  const [workerType, setWorkerType] = useState("");
+  const [filePreview, setFilePreview] = useState(null);
+  const [workerType, setWorkerType] = useState(userData?.workerType || "");
 
   useEffect(() => {
     if (userData) {
-      setValue("firstName", userData.firstName);
-      setValue("lastName", userData.lastName);
-      setValue("middleName", userData.middleName);
-      setValue("address", userData.address);
-      setValue("dayOfBirth", userData.dayOfBirth);
-      setValue("login", userData.login);
-      setValue("password", userData.password);
-      setValue("phone", userData.phone);
-      setValue("idNumber", userData.idNumber);
-      setValue("salary", userData.salary);
-      setValue("role", userData.role);
-      setValue("workerType", null);
-      setImageUrl(userData.imageUrl || null); // If there's an image URL
+      const fields = [
+        "firstName",
+        "lastName",
+        "middleName",
+        "address",
+        "dayOfBirth",
+        "phone",
+        "idNumber",
+        "password",
+        "login",
+        "role",
+        "workerType",
+      ];
+      fields.forEach((field) => setValue(field, userData[field] || ""));
+      setValue("salary", userData.salary?.[0]?.salary || "");
+      setImageUrl(userData.imageUrl || null);
+      setWorkerType(userData.workerType || "");
     }
   }, [userData, setValue]);
 
   const onSubmit = async (data) => {
     try {
       const formData = new FormData();
-      formData.append("firstName", data.firstName);
-      formData.append("lastName", data.lastName);
-      formData.append("middleName", data.middleName);
-      formData.append("address", data.address);
-      formData.append("dayOfBirth", data.dayOfBirth);
-      formData.append("phone", data.phone);
-      formData.append("idNumber", data.idNumber);
-      formData.append("password", data.password);
-      formData.append("salary", +data.salary);
-      formData.append("login", data.login);
-      formData.append("workerType", data.workerType);
-      formData.append("role", data.role);
+      const payload = {
+        firstName: String(data.firstName || ""),
+        lastName: String(data.lastName || ""),
+        middleName: String(data.middleName || ""),
+        address: String(data.address || ""),
+        dayOfBirth: String(data.dayOfBirth || ""),
+        phone: String(data.phone || ""),
+        idNumber: String(data.idNumber || ""),
+        password: String(data.password || ""),
+        login: String(data.login || ""),
+        workerType: String(data.workerType || ""),
+        role: String(data.role || "worker"),
+      };
 
+      // Barcha oddiy maydonlarni qo‘shish
+      Object.entries(payload).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+
+      // `salary` ni to‘g‘ri formatda qo‘shish
+      formData.append("salary[0][salary]", String(data.salary || ""));
+
+      // `image` maydonini qo‘shish (serverda kutilgan nomga moslashtirilgan)
       if (imageUrl) {
-        formData.append("image", imageUrl);
+        formData.append("image", imageUrl); // Serverda `image` nomi kutilmoqda
       }
 
-      let response;
 
-      if (userData) {
-        response = await updateWorker({
-          id: userData._id,
-          body: formData,
-        }).unwrap();
-        message.success(response.message || "yedi");
-      } else {
-        response = await createWorker(formData).unwrap();
-        message.success(response.message);
-      }
+      const response = userData
+        ? await updateWorker({ id: userData._id, body: formData }).unwrap()
+        : await createWorker(formData).unwrap();
 
+      message.success(response.message || (userData ? "Ma'lumotlar yangilandi" : "Hodim ro‘yxatdan o‘tdi"));
       reset();
       setImageUrl(null);
+      setFilePreview(null);
+      navigate(-1);
     } catch (error) {
+      console.error("Xato:", error?.data);
       message.error(error?.data?.message || "Xatolik yuz berdi");
     }
   };
-
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImageUrl(file);
-        setFile(reader.result);
-      };
-      reader.readAsDataURL(file);
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        message.error("Fayl hajmi 5MB dan kichik bo‘lishi kerak");
+        return;
+      }
+      setImageUrl(file);
+      setFilePreview(URL.createObjectURL(file));
     }
   };
 
@@ -126,79 +142,84 @@ const RegisterWorker = () => {
   return (
     <div>
       <div className="nav_add">
-        <button
+        <Button
           style={{ background: "#0A3D3A", marginTop: "10px" }}
           className="back-btns"
+          icon={<ArrowLeftOutlined />}
           onClick={() => navigate(-1)}
         >
-          <ArrowLeftOutlined />
           Orqaga qaytish
-        </button>
+        </Button>
         <h2 className="create-worker-title">
-          {userData
-            ? "Hodimni ma'lumotlarini yangilash"
-            : "Hodimlarni Ro‘yxatdan O‘tkazish"}
+          {userData ? "Hodimni ma'lumotlarini yangilash" : "Hodimlarni Ro‘yxatdan O‘tkazish"}
         </h2>
       </div>
 
       <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
         <Row gutter={16}>
           <Col span={6}>
-            <Form.Item label="Xodim turi:">
+            <Form.Item label="Xodim turi" required>
               <Radio.Group
+                options={options}
                 optionType="button"
                 buttonStyle="solid"
-                options={options}
                 size="large"
-                onChange={(e) => setWorkerType(e.target.value)} // useState holatini yangilash
-                value={workerType} // useState qiymatini o'rnatish
+                onChange={(e) => {
+                  setWorkerType(e.target.value);
+                  setValue("workerType", e.target.value);
+                }}
+                value={workerType}
               />
             </Form.Item>
           </Col>
           <Col span={6}>
-            <Form.Item required={true} label="Pasport seriya ">
+            <Form.Item label="Pasport seriya" required>
               <Controller
                 name="idNumber"
                 control={control}
-                rules={{ required: "Majburiy maydon" }}
+                rules={{
+                  required: "Pasport seriya kiritish majburiy",
+                  pattern: {
+                    value: /^[A-Z]{2}[0-9]{7}$/,
+                    message: "Pasport seriya formati noto‘g‘ri (AA1234567)",
+                  },
+                }}
                 render={({ field }) => (
                   <Input
                     size="large"
                     {...field}
-                    value={field.value}
-                    placeholder="Введите серию паспорта (AA1234567)"
+                    placeholder="AA1234567"
+                    maxLength={9}
                   />
                 )}
               />
+              {errors.idNumber && <p style={{ color: "red" }}>{errors.idNumber.message}</p>}
             </Form.Item>
           </Col>
           <Col span={4}>
-            <Form.Item required={true} label="Ism">
+            <Form.Item label="Ism" required>
               <Controller
                 name="firstName"
                 control={control}
-                rules={{ required: "Majburiy maydon" }}
+                rules={{ required: "Ism kiritish majburiy" }}
                 render={({ field }) => (
-                  <Input size="large" {...field} placeholder="Введите имя" />
+                  <Input size="large" {...field} placeholder="Ism" />
                 )}
               />
+              {errors.firstName && <p style={{ color: "red" }}>{errors.firstName.message}</p>}
             </Form.Item>
           </Col>
-
           <Col span={4}>
-            <Form.Item required={true} label="Familiya">
+            <Form.Item label="Familiya" required>
               <Controller
                 name="lastName"
                 control={control}
-                rules={{ required: "Majburiy maydon" }}
+                rules={{ required: "Familiya kiritish majburiy" }}
                 render={({ field }) => (
-                  <Input
-                    size="large"
-                    {...field}
-                    placeholder="Введите фамилию"
-                  />
+                  <Input size="large" {...field} placeholder="Familiya" />
                 )}
               />
+              {errors.lastName && <p style={{ color: "red" }}>{errors.lastName.message}</p>}
             </Form.Item>
           </Col>
           <Col span={4}>
@@ -207,11 +228,7 @@ const RegisterWorker = () => {
                 name="middleName"
                 control={control}
                 render={({ field }) => (
-                  <Input
-                    size="large"
-                    {...field}
-                    placeholder="Введите отчество"
-                  />
+                  <Input size="large" {...field} placeholder="Otasining ismi" />
                 )}
               />
             </Form.Item>
@@ -225,10 +242,10 @@ const RegisterWorker = () => {
                 control={control}
                 render={({ field }) => (
                   <Select
-                    style={{ height: "37px", marginTop: "5px" }}
                     size="large"
                     {...field}
                     placeholder="Lavozim tanlang"
+                    style={{ height: "37px", marginTop: "5px" }}
                   >
                     <Option value="manager">Menejer</Option>
                     <Option value="distributor">Yetkazib beruvchi</Option>
@@ -242,60 +259,72 @@ const RegisterWorker = () => {
               />
             </Form.Item>
           </Col>
-
           <Col span={6}>
-            <Form.Item required label="Oylik maoshi">
+            <Form.Item label="Oylik maosh" required>
               <Controller
                 name="salary"
                 control={control}
-                rules={{ required: true }}
+                rules={{ required: "Oylik maosh kiritish majburiy" }}
                 render={({ field }) => (
-                  <Input {...field} placeholder="Введите зарплату" />
+                  <InputNumber
+                    size="large"
+                    {...field}
+                    placeholder="Oylik maosh"
+                    style={{ width: "100%" }}
+                    min={0}
+                    formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                    parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                  />
                 )}
               />
+              {errors.salary && <p style={{ color: "red" }}>{errors.salary.message}</p>}
             </Form.Item>
           </Col>
           {workerType !== "ishchilar" ? (
             <>
               <Col span={6}>
-                <Form.Item required label="Login">
+                <Form.Item label="Login" required>
                   <Controller
                     name="login"
                     control={control}
-                    rules={{ required: true }}
+                    rules={{ required: "Login kiritish majburiy" }}
                     render={({ field }) => (
-                      <Input {...field} placeholder="Введите логин" />
+                      <Input size="large" {...field} placeholder="Login" />
                     )}
                   />
+                  {errors.login && <p style={{ color: "red" }}>{errors.login.message}</p>}
                 </Form.Item>
               </Col>
               <Col span={6}>
-                <Form.Item required label="Parol">
+                <Form.Item label="Parol" required>
                   <Controller
                     name="password"
                     control={control}
-                    rules={{ required: true }}
+                    rules={{ required: "Parol kiritish majburiy" }}
                     render={({ field }) => (
-                      <Input {...field} placeholder="Введите пароль" />
+                      <Input.Password size="small" {...field} placeholder="Parol" />
                     )}
                   />
+                  {errors.password && <p style={{ color: "red" }}>{errors.password.message}</p>}
                 </Form.Item>
               </Col>
             </>
           ) : (
             <Col span={6}>
-              <Form.Item required label="Ishchi kasbi">
+              <Form.Item label="Ishchi kasbi" required>
                 <Controller
                   name="workerType"
                   control={control}
-                  rules={{ required: true }}
-                  render={({ field }) => <Input {...field} />}
+                  rules={{ required: "Ishchi kasbini kiritish majburiy" }}
+                  render={({ field }) => (
+                    <Input size="large" {...field} placeholder="Ishchi kasbi" />
+                  )}
                 />
+                {errors.workerType && <p style={{ color: "red" }}>{errors.workerType.message}</p>}
               </Form.Item>
             </Col>
           )}
         </Row>
-
         <Row gutter={16}>
           <Col span={12}>
             <Form.Item label="Manzil">
@@ -303,7 +332,7 @@ const RegisterWorker = () => {
                 name="address"
                 control={control}
                 render={({ field }) => (
-                  <Input size="large" {...field} placeholder="Введите адрес" />
+                  <Input size="large" {...field} placeholder="Manzil" />
                 )}
               />
             </Form.Item>
@@ -313,81 +342,73 @@ const RegisterWorker = () => {
               <Controller
                 name="dayOfBirth"
                 control={control}
+                rules={{
+                  pattern: {
+                    value: /^\d{4}-\d{2}-\d{2}$/,
+                    message: "Tug‘ilgan sana formati GGGG-MM-DD bo‘lishi kerak",
+                  },
+                }}
                 render={({ field }) => (
-                  <Input size="large" {...field} placeholder="ГГГГ-ММ-ДД" />
+                  <Input size="large" {...field} placeholder="GGGG-MM-DD" />
                 )}
               />
+              {errors.dayOfBirth && <p style={{ color: "red" }}>{errors.dayOfBirth.message}</p>}
             </Form.Item>
           </Col>
         </Row>
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item required={true} label="Telefon">
+            <Form.Item label="Telefon" required>
               <Controller
                 name="phone"
                 control={control}
                 rules={{
-                  required: "Majburiy maydon",
+                  required: "Telefon raqami kiritish majburiy",
                   pattern: {
                     value: /^[0-9]{9}$/,
-                    message: "Faqat 9 ta raqam kiriting",
+                    message: "Telefon raqami 9 ta raqamdan iborat bo‘lishi kerak",
                   },
                 }}
                 render={({ field }) => (
-                  <>
-                    <Input
-                      size="large"
-                      {...field}
-                      placeholder="Введите номер телефона (xx xxx xx xx)"
-                      maxLength={9}
-                      onInput={(e) =>
-                        (e.target.value = e.target.value.replace(/\D/g, ""))
-                      } // Faqat raqam kiritishga ruxsat
-                    />
-                    {errors.phone && (
-                      <p style={{ color: "red" }}>{errors.phone.message}</p>
-                    )}
-                  </>
+                  <Input
+                    size="large"
+                    {...field}
+                    placeholder="xx xxx xx xx"
+                    maxLength={9}
+                    onInput={(e) => (e.target.value = e.target.value.replace(/\D/g, ""))}
+                  />
                 )}
               />
+              {errors.phone && <p style={{ color: "red" }}>{errors.phone.message}</p>}
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label=" ">
-              <div
-                style={{ display: "flex", gap: "20px", position: "relative" }}
-              >
+            <Form.Item label="Rasm">
+              <div style={{ display: "flex", gap: "20px", position: "relative" }}>
                 <Button
                   size="large"
                   icon={<UploadOutlined />}
                   onClick={() => document.getElementById("fileInput").click()}
-                  style={{ height: "100%", alignSelf: "center" }}
                 >
                   Rasm yuklash (3x4)
                 </Button>
-                {file && (
+                {filePreview && (
                   <>
                     <Avatar
                       size={100}
-                      src={file || null}
-                      icon={
-                        isCreateLoading || isUpdateLoading ? (
-                          <Spin />
-                        ) : (
-                          <UserOutlined />
-                        )
-                      }
+                      src={filePreview}
+                      icon={isCreateLoading || isUpdateLoading ? <Spin /> : <UserOutlined />}
                       className="create-avatar"
                     />
-                    <div
+                    <Button
+                      type="link"
+                      icon={<CloseOutlined />}
                       onClick={() => {
                         setImageUrl(null);
-                        setFile(null);
+                        setFilePreview(null);
                       }}
-                      className="avatar-close-button"
-                    >
-                      <CloseOutlined />
-                    </div>
+                      style={{ position: "absolute", top: 0, right: 0 }}
+                    />
                   </>
                 )}
                 <input
@@ -407,12 +428,7 @@ const RegisterWorker = () => {
             type="primary"
             htmlType="submit"
             loading={isCreateLoading || isUpdateLoading}
-            style={{
-              width: "200px",
-              background: "#0A3D3A",
-              marginTop: "20px",
-            }}
-            block
+            style={{ width: "200px", background: "#0A3D3A", marginTop: "20px" }}
           >
             {userData ? "Yangilash" : "Ro‘yxatdan o‘tkazish"}
           </Button>

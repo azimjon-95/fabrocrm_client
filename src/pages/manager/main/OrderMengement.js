@@ -35,6 +35,7 @@ const OrderMengement = () => {
   const { data: allStores = [] } = useGetAllStoresQuery();
   const { data: orderData } = useGetOrderByIdQuery(id);
   let order = orderData?.innerData;
+
   const Price =
     materials?.reduce(
       (sum, item) => sum + item.price * (item.quantity || 1),
@@ -90,9 +91,8 @@ const OrderMengement = () => {
 
   const handleAddMaterialNew = () => {
     // Generate a unique ID using random string + length
-    const uniqueId = `67d${Math.random().toString(36).substr(2, 9)}new${
-      selectedMaterials.length + 1
-    }`;
+    const uniqueId = `67d${Math.random().toString(36).substr(2, 9)}new${selectedMaterials.length + 1
+      }`;
 
     const newMaterial = {
       id: uniqueId,

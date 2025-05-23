@@ -19,6 +19,19 @@ export const driverApi = api.injectEndpoints({
         body: { amount },
       }),
     }),
+
+    // Monthly report endpoint
+    getDriverMonthlyData: builder.query({
+      query: ({ year, month }) => ({
+        url: "/driver/monthly-report",
+        params: { year, month },
+      }),
+      providesTags: [
+        "Drivers",
+      ],
+    }),
+
+
     decrementBalance: builder.mutation({
       query: ({ id, amount }) => ({
         url: `/driver/decrement/${id}`,
@@ -41,4 +54,5 @@ export const {
   useIncrementBalanceMutation,
   useDecrementBalanceMutation,
   useDeleteDriverMutation,
+  useGetDriverMonthlyDataQuery
 } = driverApi;

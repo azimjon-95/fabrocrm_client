@@ -11,6 +11,7 @@ import { MdChecklist, MdOutlineWarehouse } from "react-icons/md";
 import { FaWarehouse, FaClipboardList } from "react-icons/fa"; // Bo‘lim ikonkalari uchun
 import { VscChecklist } from "react-icons/vsc";
 import { FaTruck } from "react-icons/fa";
+import { TbReportSearch } from "react-icons/tb";
 import { TbHeartRateMonitor } from "react-icons/tb";
 import { TbReorder } from "react-icons/tb";
 import { FiMinusCircle } from "react-icons/fi";
@@ -27,12 +28,25 @@ export const menuItems = {
       path: "/myDebts",
       label: "Qarzlar",
     },
-    { icon: <RiUserAddFill size={20} />, path: "/persons", label: "Hodimlar" },
-    { icon: <MdChecklist size={20} />, path: "/attendance", label: "Davomat" },
+    {
+      icon: <RiUserAddFill size={20} />,
+      path: "/persons",
+      label: "Hodimlar"
+    },
+    {
+      icon: <MdChecklist size={20} />,
+      path: "/attendance",
+      label: "Davomat"
+    },
     {
       icon: <MoneyCollectOutlined size={20} />,
       path: "/salary",
       label: "Oylik ish maosh",
+    },
+    {
+      icon: <TbReportSearch size={20} />,
+      path: "/reportmonthly",
+      label: "Oylik hisobot"
     },
     {
       icon: <AppstoreAddOutlined size={20} />,
@@ -113,6 +127,11 @@ export const menuItems = {
           icon: <MoneyCollectOutlined size={20} />,
           path: "/salary",
           label: "Oylik ish maosh",
+        },
+        {
+          icon: <TbReportSearch size={20} />,
+          path: "/reportmonthly",
+          label: "Oylik hisobot"
         },
         {
           icon: <AppstoreAddOutlined size={20} />,

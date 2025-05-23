@@ -1200,6 +1200,55 @@
   border-radius: 4px !important;
 }
 
+.soldiform {
+  position: relative;
+  width: 100%;
+
+}
+
+.soldiformModal {
+  position: absolute;
+  width: 100%;
+  top: 38px;
+  left: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000 !important;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.soldiformModal>p {
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.soldiformModal>p:hover {
+  background-color: #f5f5f5;
+}
+
+/* Scrollbar uslubi faqat Webkit brauzerlar (Chrome, Edge, Safari) uchun */
+.soldiformModal::-webkit-scrollbar {
+  width: 4px;
+}
+
+.soldiformModal::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.soldiformModal::-webkit-scrollbar-thumb {
+  background-color: #999;
+  border-radius: 4px;
+  border: 2px solid #f1f1f1;
+}
+
+.soldiformModal::-webkit-scrollbar-thumb:hover {
+  background-color: #666;
+}
+
 /* Mobil qurilmalar uchun moslashuvchanlik */
 @media (max-width: 768px) {
   .kimdandebt_modal {

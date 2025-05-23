@@ -27,12 +27,20 @@ export const myDebtsApi = api.injectEndpoints({
       invalidatesTags: ["myDebts"],
     }),
     updateMyDebt: builder.mutation({
-      query: ({ id, body }) => (console.log({ id, body }), {
+      query: ({ id, body }) => ({
         url: `/myDebts/${id}`,
         method: "PUT",
         body: body,
       }),
       invalidatesTags: ["myDebts"],
+    }),
+
+    getMyDebtsMonthlyData: builder.query({
+      query: ({ year, month }) => ({
+        url: "/myDebts/monthly-report",
+        params: { year, month },
+      }),
+      providesTags: ["myDebts"],
     }),
   }),
 });
@@ -43,4 +51,5 @@ export const {
   usePostMyDebtMutation,
   usePaymentForDebtMutation,
   useUpdateMyDebtMutation,
+  useGetMyDebtsMonthlyDataQuery,
 } = myDebtsApi;

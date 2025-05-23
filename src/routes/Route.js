@@ -6,6 +6,7 @@ import ViewPersons from "../pages/accountant/persons/ViewPersons";
 import Persons from "../pages/director/persons/ViewPersons";
 import SettingsPage from "../pages/accountant/settingsPage/SettingsPage";
 import Attendance from "../pages/accountant/attendance/Attendance";
+import WorkersPage from "../pages/accountant/persons/workersSalaryPage/WorkersPage";
 import Order from "../pages/manager/main/Order";
 import OrderList from "../pages/manager/main/List/OrderList";
 import OrderStory from "../pages/manager/main/List/OrderStory";
@@ -26,6 +27,7 @@ import ViewOrder from "../pages/director/Main/ViewOrder";
 import Distributor from "../pages/distributor/Distributor";
 import PdfList from "../components/pdf/PdfList";
 import MyDebpts from "../pages/accountant/myDebts/MyDebpts";
+import ReportTable from "../pages/accountant/reports/ReportTable";
 
 export const routes = [
   {
@@ -110,6 +112,12 @@ export const routes = [
   },
   // ==========================================================================================
   {
+    path: "/reportmonthly",
+    element: <ReportTable />,
+    private: true,
+    role: ["accountant", "deputy"],
+  },
+  {
     path: "/persons/add",
     element: <RegisterWorker />,
     private: true,
@@ -166,6 +174,12 @@ export const routes = [
   {
     path: "/myDebts",
     element: <MyDebpts />,
+    private: true,
+    role: ["accountant", "deputy"],
+  },
+  {
+    path: "/salaryCtrl",
+    element: <WorkersPage />,
     private: true,
     role: ["accountant", "deputy"],
   },

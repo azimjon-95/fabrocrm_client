@@ -1,0 +1,589 @@
+.report-table-card {
+    margin: 20px auto;
+    max-width: 800px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+}
+
+.report-table-title {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.report-table-button {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+
+.modal-content {
+    position: absolute;
+    top: 35px;
+    left: 0;
+    z-index: 1000;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    max-width: 90%;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.month-grid .ant-btn-primary {
+    color: #fff !important;
+    background: var(--main-color) !important;
+    box-shadow: 0 2px 0 rgba(5, 145, 255, 0.1);
+}
+
+.month-grid Button:hover {
+    color: var(--main-color) !important;
+    border-color: var(--main-color) !important;
+    box-shadow: 0 2px 0 rgba(5, 145, 255, 0.1);
+}
+
+.month-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    margin-top: 15px;
+}
+
+.month-button {
+    border-radius: 8px;
+    height: 30px;
+}
+
+.close-button {
+    margin-top: 20px;
+}
+
+.select_monthrep {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0 10px 0;
+}
+
+.select_monthrep>Button {
+    background: var(--main-color);
+}
+
+.select_monthrepBtn {
+    position: relative;
+}
+
+.select_monthrepBtn>Button {
+    background: var(--main-color);
+}
+
+.month-grid .ant-btn {
+    font-size: 14px;
+    line-height: 1.5714285714285714;
+    height: 30px;
+    padding: 4px 5px;
+    border-radius: 6px;
+}
+
+.modal-contentbox {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    position: relative;
+}
+
+.year-wheel-container {
+    max-height: 130px;
+    overflow-y: auto;
+    border-right: 1px solid #ddd;
+    border-left: 1px solid #ddd;
+    padding: 46px 3px;
+    position: relative;
+
+}
+
+.modal-contCal {
+    position: relative;
+}
+
+.modal-contCal::before,
+.modal-contCal::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 20px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.modal-contCal::before {
+    top: 0;
+    background: linear-gradient(to bottom, #ffffff, transparent);
+}
+
+.modal-contCal::after {
+    bottom: 0;
+    background: linear-gradient(to top, rgb(255, 255, 255), transparent);
+}
+
+.year-line {
+    position: absolute;
+    top: 44%;
+    left: 0;
+    border-bottom: 1px solid #ddd;
+    border-top: 1px solid #ddd;
+    height: 27px;
+    width: 47px;
+}
+
+.year-wheel-container::-webkit-scrollbar {
+    width: 1px;
+}
+
+.year-wheel-container::-webkit-scrollbar-track {
+    background: #ffffff00;
+    border-radius: 12px;
+}
+
+.year-item {
+    scroll-snap-align: center;
+    text-align: center;
+    padding: 0px 0;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.year-item.selected {
+    color: #1890ff;
+}
+
+
+/* ===================== */
+.do-not-override {
+    width: 100%;
+    height: calc(100vh - 220px);
+    overflow-y: auto;
+}
+
+.do-not-override::-webkit-scrollbar {
+    width: 4px;
+}
+
+.do-not-override::-webkit-scrollbar-thumb {
+    background: var(--main-color);
+    border-radius: 12px;
+}
+
+.do-not-override::-webkit-scrollbar-track {
+    background: #ffffff84;
+    border-radius: 12px;
+}
+
+.do-not-override .ant-card-bordered {
+    border: 1px solid #0a3d3a00 !important;
+}
+
+
+
+.ant-table-tbody>td {
+    padding: 8px !important;
+}
+
+/* Container for monthly data */
+.monthly-data-container {
+    display: flex;
+    flex-direction: column;
+    background-color: #f9f9f9;
+}
+
+/* Individual data item */
+.monthly-data-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    gap: 2px;
+}
+
+.monthly-data-item:hover {
+    background-color: #e6f7ff;
+}
+
+/* Label styling */
+.data-label {
+    font-weight: 500;
+    color: #555;
+    flex: 1;
+    text-wrap: nowrap;
+}
+
+/* Value styling */
+.data-value {
+    font-weight: 600;
+    color: var(--main-color);
+    flex: 1;
+    text-align: right;
+    text-wrap: nowrap;
+}
+
+/* Ensure table cells handle multi-line content */
+.ant-table-cell {
+    white-space: normal !important;
+    line-height: 1.5;
+}
+
+.do-not-box {
+    width: 100%;
+    border-bottom: 1px solid #0000001f;
+    border-top: 1px solid#0000001f;
+    height: 105px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .monthly-data-container {
+        padding: 6px;
+        gap: 6px;
+    }
+
+    .monthly-data-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 6px;
+    }
+
+    .data-label,
+    .data-value {
+        text-align: left;
+        flex: none;
+    }
+
+    .data-value {
+        margin-top: 2px;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ============================= */
+
+
+.headerTitlePrimary_H2X {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 32px;
+}
+
+.cardGridContainer_Z5M {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    height: 105px;
+    position: relative;
+}
+
+@media (min-width: 768px) {
+    .cardGridContainer_Z5M {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.financialSummaryBlock {
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.summary-card {
+    gap: 8px;
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.card-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.card-icon svg {
+    font-size: 20px;
+    height: 70px;
+    width: 70px;
+}
+
+
+.cardIconDisplay_Q9R {
+    font-size: 40px;
+    margin-bottom: 16px;
+}
+
+.incomeIconVisual_J6N {
+    color: #22c55e;
+}
+
+.expenseIconVisual_M7Q {
+    color: #ef4444;
+}
+
+.profitIconVisual_P2Y {
+    color: #3b82f6;
+}
+
+.cardTitleText_T4L {
+    font-size: 18px;
+    font-weight: 600;
+    color: #4b5563;
+    margin-bottom: 8px;
+}
+
+.cardValueOutput_K8P {
+    font-size: 24px;
+    font-weight: bold;
+    color: #111827;
+}
+
+
+.detailsPageWrapper_X3J {
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+.backNavigationLink_A6R {
+    display: inline-block;
+    color: #2563eb;
+    font-size: 16px;
+    margin-bottom: 16px;
+    text-decoration: none;
+}
+
+.backNavigationLink_A6R:hover {
+    text-decoration: underline;
+}
+
+.sectionHeaderSecondary_C9L {
+    font-size: 24px;
+    font-weight: 600;
+    color: #4b5563;
+    margin: 32px 0 16px;
+}
+
+.tableWrapperElement_V7B {
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.transactionTableGrid_X7Z {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.transactionTableGrid_X7Z thead {
+    background-color: #f9fafb;
+}
+
+.transactionTableGrid_X7Z th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280;
+    text-transform: uppercase;
+}
+
+.transactionTableGrid_X7Z td {
+    padding: 16px;
+    font-size: 14px;
+    color: #111827;
+    border-top: 1px solid #e5e7eb;
+}
+
+.transactionTableGrid_X7Z td:nth-child(6) {
+    word-break: break-word;
+}
+
+@media (max-width: 640px) {
+    .transactionTableGrid_X7Z {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .transactionTableGrid_X7Z thead,
+    .transactionTableGrid_X7Z tbody,
+    .transactionTableGrid_X7Z tr,
+    .transactionTableGrid_X7Z th,
+    .transactionTableGrid_X7Z td {
+        display: block;
+    }
+
+    .transactionTableGrid_X7Z thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .transactionTableGrid_X7Z tr {
+        margin-bottom: 16px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .transactionTableGrid_X7Z td {
+        border: none;
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+    }
+
+    .transactionTableGrid_X7Z td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 16px;
+        width: 45%;
+        padding-right: 10px;
+        font-weight: bold;
+        text-align: left;
+    }
+}
+
+
+
+/* Loading animations */
+.summary-card.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.summary-card.loading .card-icon,
+.summary-card.loading .card-title,
+.summary-card.loading .loading-text {
+    opacity: 0.7;
+}
+
+.summary-card.loading.incomeCardStyle_R3V::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(40, 167, 69, 0.3), transparent);
+    animation: pulse 1.5s infinite;
+}
+
+.summary-card.loading.expenseCardStyle_F9W::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(220, 53, 69, 0.3), transparent);
+    animation: fade 1.2s infinite;
+}
+
+.summary-card.loading.profitCardStyle_D8T::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 123, 255, 0.3), transparent);
+    animation: rise 1.8s infinite;
+}
+
+/* Keyframe animations */
+@keyframes pulse {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes fade {
+    0% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+
+    100% {
+        opacity: 0.3;
+    }
+}
+
+@keyframes rise {
+    0% {
+        transform: translateY(100%);
+    }
+
+    100% {
+        transform: translateY(-100%);
+    }
+}
+
+.loading-text {
+    color: #666;
+    font-style: italic;
+}

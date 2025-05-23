@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import "./style.css";
 import dayjs from "dayjs";
 import "moment/locale/uz";
@@ -12,18 +12,18 @@ import { useGetWorkersQuery } from "../../../context/service/worker";
 import { setBoolean } from "../../../context/booleanSlice";
 import {
   useGetDebtorsQuery,
-  useUpdateOrderMutation,
+  useUpdateOrderMutation
 } from "../../../context/service/orderApi";
 import {
   useGetAggregatedOrdersQuery,
   useProcessPaymentMutation,
   useGetReturnedOrdersQuery,
-  useProcessReturnedPayMutation
+  useProcessReturnedPayMutation,
+  useCreateShopSoldoMutation
 } from "../../../context/service/newOredShops";
+
 import {
   useGetDriversQuery,
-  useCreateDriverMutation,
-  useDeleteDriverMutation,
   useDecrementBalanceMutation
 } from "../../../context/service/driverApi";
 import {
@@ -46,13 +46,13 @@ const ExpenseForm = () => {
   const [returnMony, setReturnMony] = useState(0);
   const [selectedType, setSelectedType] = useState("income");
   const [selectedDate, setSelectedDate] = useState(dayjs());
-  const [soldoFrom, setSoldoFrom] = useState(dayjs());
-  const [soldoTo, setSoldoTo] = useState(dayjs());
   const [usdRate, setUsdRate] = useState("");
   const [amountDollar, setAmountDollar] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [soldiformModal, setSoldiformModal] = useState(false);
 
   // API Hooks
+  const [createShopSoldo] = useCreateShopSoldoMutation();
   const [createExpense] = useCreateExpenseMutation();
   const [updateBalance] = useUpdateBalanceMutation();
   const [updateOrder] = useUpdateOrderMutation();
@@ -64,13 +64,13 @@ const ExpenseForm = () => {
   const { data: debtors } = useGetDebtorsQuery();
   const { data: shopsData } = useGetAggregatedOrdersQuery();
   const { data: myDebtsAll, refetch } = useGetmyDebtsQuery();
-  const { data: GetReturned, refetch: GetReturnedRefetch } = useGetReturnedOrdersQuery();
+  const { data: GetReturned } = useGetReturnedOrdersQuery();
   const { data: balance } = useGetBalanceQuery();
   const balancValues = balance?.innerData || {};
   const { data: driversData } = useGetDriversQuery();
   const [decrementBalance] = useDecrementBalanceMutation();
   const drivers = driversData?.innerData || [];
-
+  const [newShop, setNewShop] = useState("");
   // Refs
   const modalRef = useRef(null);
   const inputRef = useRef(null);
@@ -107,10 +107,16 @@ const ExpenseForm = () => {
     deputy: "O'rinbosar",
   };
 
-  const workersLists = workers?.innerData?.map((worker) => ({
-    value: worker._id,
-    label: `${worker.firstName} ${worker.lastName} [${worker.workerType || roleTranslations[worker.role] || worker.role}]`,
-  })) || [];
+  // Process workers data
+  const workersLists = useMemo(() => {
+    return (
+      workers?.innerData?.map((worker) => ({
+        value: worker._id,
+        label: `${worker._doc.firstName} ${worker._doc.lastName} [${worker._doc.workerType || roleTranslations[worker._doc.role] || worker._doc.role
+          }]`,
+      })) || []
+    );
+  }, [workers]);
 
   const debtorLists = debtors?.innerData?.map((debtor) => ({
     value: debtor._id,
@@ -123,6 +129,8 @@ const ExpenseForm = () => {
       value: i.shopName,
       label: `${i.shopName} - ${i.totalPrice.toLocaleString()} so'm`,
     })) || [];
+
+
 
   const kirimDokonlar = shopsData?.innerData
     ?.filter((i) => i.isPaid && !i.shopName.toLowerCase().includes("soldo"))
@@ -227,6 +235,7 @@ const ExpenseForm = () => {
       };
 
       // Balance validation
+
       if (newData.type === "Chiqim") {
         const balanceChecks = {
           dollar: balancValues.dollarBalance,
@@ -239,15 +248,18 @@ const ExpenseForm = () => {
       }
 
       // Core expense and balance update
-      const [expenseResponse, balanceResponse] = await Promise.all([
-        createExpense(newData).unwrap(),
-        updateBalance({
-          amount,
-          type: selectedType === "income" ? "add" : "subtract",
-          payType: expensePaymentType,
-        }).unwrap(),
-      ]);
-      //4454
+      let expenseResponse, balanceResponse;
+
+      if (expenseCategory !== "Soldo") {
+        [expenseResponse, balanceResponse] = await Promise.all([
+          createExpense(newData).unwrap(),
+          updateBalance({
+            amount,
+            type: selectedType === "income" ? "add" : "subtract",
+            payType: expensePaymentType,
+          }).unwrap(),
+        ]);
+      }
 
       // Debt-related operations
       const debtOperations = {
@@ -321,6 +333,25 @@ const ExpenseForm = () => {
         }
       };
 
+      const customerSoldo = async () => {
+        if (expenseCategory === "Soldo") {
+          try {
+            const newOrder = {
+              shopName: newShop,
+              totalPrice: amount
+            };
+
+            await createShopSoldo(newOrder).unwrap();
+
+            inputRef.current?.focus();
+            message.success("Qarz muvaffaqiyatli berildi");
+          } catch (error) {
+            console.error("Qarz berishda xatolik:", error);
+            message.error("Qarz berishda xato yuz berdi");
+          }
+        }
+      };
+
       const customerDiliver = async () => {
         if (expenseCategory === "Yetkazib beruvchilar") {
           // url: `/driver/decrement/${id}`,
@@ -363,6 +394,7 @@ const ExpenseForm = () => {
       await customerDiliver();
       await shopDebtPayment();
       await shopReturnedMoney();
+      await customerSoldo();
 
       // Final success handling
       if (expenseResponse?.state && balanceResponse?.state) {
@@ -385,8 +417,6 @@ const ExpenseForm = () => {
     setSelectedCategory(null);
     setSelectedType("income");
     setSelectedDate(dayjs());
-    setSoldoFrom(dayjs());
-    setSoldoTo(dayjs());
     setUsdRate("");
     setReturnMony(0);
     setAmountDollar(0);
@@ -710,26 +740,45 @@ const ExpenseForm = () => {
         </div>
       )}
 
+
+
       {expenseCategory === "Soldo" && (
-        <div style={{ display: "flex", gap: "10px" }}>
-          <DatePicker
-            value={soldoFrom}
-            onChange={(date) => setSoldoFrom(date ? dayjs(date) : dayjs())}
-            format="YYYY-MM-DD"
-            placeholder="Dan"
-          />
-          <DatePicker
-            value={soldoTo}
-            onChange={(date) => setSoldoTo(date ? dayjs(date) : dayjs())}
-            format="YYYY-MM-DD"
-            placeholder="Gacha"
-          />
-          <Input
-            placeholder="Pul miqdori"
-            value={expenseAmount}
-            onChange={handleChange}
-          />
-        </div>
+        <>
+          <div className="soldiform">
+            <Input
+              placeholder="Do'konlar"
+              value={newShop}
+              onChange={(e) => setNewShop(e.target.value)}
+              onClick={() => setSoldiformModal(!soldiformModal)}
+            />
+            {soldiformModal &&
+              <div className="soldiformModal">
+                {shops.map((shop, index) => (
+                  <p
+                    key={index}
+                    onClick={() => {
+                      setNewShop(shop.value);
+                      setSoldiformModal(false);
+                    }}
+                  >
+                    {shop.value}
+                  </p>
+                ))}
+              </div>
+            }
+          </div>
+
+          <div style={{ display: "flex", gap: "10px" }}>
+
+
+            <Input
+              placeholder="Pul miqdori"
+              value={expenseAmount}
+              onChange={handleChange}
+            />
+
+          </div>
+        </>
       )}
 
       {expenseCategory !== "Soldo" && (

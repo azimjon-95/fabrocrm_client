@@ -1,0 +1,134 @@
+.wp-heading {
+    text-align: center;
+    color: #0A3D3A;
+    margin-bottom: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.wp-workers-table {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.wp-workers-table .ant-table-thead>tr>th {
+    background: #0A3D3A;
+    color: #fff;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+.wp-workers-table .ant-table-tbody>tr:hover>td {
+    background: #e6f7ff;
+    transition: background 0.3s ease;
+}
+
+.wp-salary-input-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wp-add-salary-button {
+    background: #0A3D3A !important;
+    border-color: #0A3D3A !important;
+    color: #fff !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.wp-add-salary-button:disabled {
+    background: #0a3d3a39 !important;
+    border-color: #0a3d3a39 !important;
+    color: #fff !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+
+.wp-salary-history-button {
+    background: #1890ff;
+    border-color: #1890ff;
+    color: #fff;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.wp-salary-history-button:hover {
+    background: #40a9ff;
+    transform: scale(1.05);
+}
+
+.wp-salary-history-modal .ant-modal-content {
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.wp-salary-history-modal .ant-modal-header {
+    background: #0A3D3A;
+    color: #fff;
+    border-radius: 12px 12px 0 0;
+}
+
+.wp-salary-history-modal .ant-modal-title {
+    color: #fff;
+    font-weight: 600;
+    padding: 2px 12px;
+    text-align: center;
+}
+
+.wp-container .ant-input-number {
+    height: 33px !important;
+    border-radius: 8px !important;
+}
+
+.wp-delete-salary-button {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.wp-delete-salary-button:hover {
+    transform: scale(1.05);
+}
+
+.wp-salary-list-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.wp-salary-list-item-title {
+    color: #0A3D3A;
+    font-weight: 500;
+}
+
+.wp-salary-list-item-description {
+    color: #666;
+}
+
+.wp-container-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+    .wp-workers-table .ant-table {
+        font-size: 12px;
+    }
+
+    .wp-salary-input-form {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .wp-add-salary-button,
+    .wp-salary-history-button {
+        width: 100%;
+    }
+}

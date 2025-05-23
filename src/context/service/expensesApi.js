@@ -73,6 +73,11 @@ export const expensesApi = api.injectEndpoints({
         `/expenses-by-salary?year=${year}&month=${month}`,
       providesTags: ["Expenses"],
     }),
+    getExpensesMonthlyReport: builder.query({
+      query: ({ year, month }) =>
+        `/expensesMonthlyReport?year=${year}&month=${month}`,
+      providesTags: ["Expenses"],
+    }),
   }),
 });
 
@@ -86,4 +91,5 @@ export const {
   useGetBalanceReportQuery,
   useGetRelevantExpensesQuery,
   useGetExpensesBySalaryQuery,
+  useGetExpensesMonthlyReportQuery,
 } = expensesApi;

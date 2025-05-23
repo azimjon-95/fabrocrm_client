@@ -15,7 +15,7 @@ import {
   useUpdateAttendanceMutation,
 } from "../../../context/service/attendance";
 import { FileExcelOutlined } from "@ant-design/icons";
-import { useGetWorkersQuery } from "../../../context/service/worker";
+import { useGetWorkersMainQuery } from "../../../context/service/worker";
 import { useGetAllWorkingHoursQuery } from "../../../context/service/workingHours";
 import { useGetOrdersQuery } from "../../../context/service/orderApi";
 import dayjs from "dayjs";
@@ -36,7 +36,6 @@ const Attendance = () => {
   } = useGetMonthlyAttendanceQuery({ year, month });
   const { data: ordersData } = useGetOrdersQuery();
   const activeOrders = ordersData?.innerData?.filter((i) => i.isType);
-  // useGetAllWorkingHoursQuery
   const { data: workingHoursData } = useGetAllWorkingHoursQuery();
 
   const months = [
@@ -67,14 +66,9 @@ const Attendance = () => {
     data: workersData,
     isLoading: workersLoading,
     refetch: workersRefetch,
-  } = useGetWorkersQuery();
+  } = useGetWorkersMainQuery();
   const adminRoles = [
-    // "manager",
-    // "seller",
     "director",
-    // "accountant",
-    // "warehouseman",
-    "deputy_director",
   ];
 
   const Workers = workersData?.innerData.filter(

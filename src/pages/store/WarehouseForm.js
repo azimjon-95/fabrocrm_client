@@ -14,6 +14,7 @@ import {
   message,
   Divider,
   Space,
+  Switch
 } from "antd";
 
 import {
@@ -51,8 +52,7 @@ import {
 } from "../../context/service/driverApi";
 
 import {
-  useGetDebtorsQuery,
-  useUpdateOrderMutation,
+  useGetDebtorsQuery
 } from "../../context/service/orderApi";
 
 const { Option } = Select;
@@ -71,6 +71,7 @@ const unitOptions = ["Dona", "Kg", "Litr", "Metr", "Kvadrat Metr"].map(
   (label) => ({ label, value: label.toLowerCase() })
 );
 
+const { TextArea } = Input;
 const Warehouse = () => {
   const containerRef = useRef(null);
   const inputRef = useRef(null);
@@ -87,7 +88,6 @@ const Warehouse = () => {
   const [openDriverModal, setOpenDriverModal] = useState(false);
 
   const [selectedOrders, setSelectedOrders] = useState([]);
-  const [updateOrder] = useUpdateOrderMutation();
 
   const { data: allStores = [], refetch: refetchAll } = useGetAllStoresQuery();
   const { data: filteredStores = [], refetch: refetchFiltered } =
@@ -99,38 +99,34 @@ const Warehouse = () => {
     useGetAllShopsQuery();
   let shop = allShops?.innerData?.find((i) => i.isType === true) || {};
   const stores = selectedCategory ? filteredStores : allStores;
-  const [editingItem, setEditingItem] = useState(null);
   const { data: shops } = useGetShopsQuery();
   const [addShop] = useAddShopMutation();
   const [name, setName] = useState("");
   const [updateShop, { isLoading: isUpdatingShop }] = useUpdateShopMutation();
   const [createStore, { isLoading: isUpdating }] = useCreateStoreMutation();
   const [updateStore, { isLoading: isCreating }] = useUpdateStoreMutation();
-
+  const [checked, setChecked] = useState(false);
   const { data: driversData } = useGetDriversQuery();
   const [createDriver] = useCreateDriverMutation();
   const drivers = driversData?.innerData || [];
   const driverForSelect = drivers?.map((item) => ({
-    // value: item.name,
+    phone: item.phone,
     value: item._id,
     label: item.name,
   }));
 
   const { data: debtorsData } = useGetDebtorsQuery();
+  const onChange = (checked) => {
+    setChecked(checked);
+  };
 
-  useEffect(() => {
-    if (isEditMode) {
-      form.setFieldValue("quantity", undefined);
-    }
-  }, [form, isEditMode]);
+
   const openModal = (record = null) => {
     if (record) {
       setIsEditMode(true);
-      setEditingItem(record);
       form.setFieldsValue(record);
     } else {
       setIsEditMode(false);
-      setEditingItem(null);
       form.resetFields();
     }
     setIsModalOpen(true);
@@ -149,28 +145,29 @@ const Warehouse = () => {
   };
 
   const onFinish = async (values) => {
-    if (!shop || !Object.keys(shop).length) {
-      message.warning("Iltimos, avval roʻyxat yarating!");
-      return;
+    if (!checked) {
+      if (!shop || !Object.keys(shop).length) {
+        message.warning("Iltimos, avval roʻyxat yarating!");
+        return;
+      }
     }
-    const quantity = filteredData?.find((i) => i._id === selectedProduct?._id);
 
     const updatedMater = {
-      name: quantity?.name,
-      category: quantity?.category,
-      quantity: quantity?.quantity + values.quantity,
-      unit: quantity?.unit,
-      pricePerUnit: values?.pricePerUnit || quantity?.pricePerUnit,
+      name: values?.name,
+      category: values?.category,
+      quantity: values?.quantity,
+      unit: values?.unit,
+      pricePerUnit: values?.pricePerUnit,
     };
     try {
-      if (isEditMode && editingItem) {
+      if (checked) {
         const res = await updateStore({
           id: selectedProduct?._id,
           updatedData: updatedMater,
         });
-        message.success(res?.data?.message);
+        return message.success(res?.data?.message);
       } else {
-        const res = await createStore(values).unwrap();
+        const res = await createStore(updatedMater).unwrap();
         message.success(res?.data?.message);
       }
 
@@ -223,7 +220,6 @@ const Warehouse = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setIsEditMode(false);
-    setEditingItem(null);
     form.resetFields();
   };
 
@@ -348,7 +344,7 @@ const Warehouse = () => {
     try {
       const parsedValue = JSON.parse(value);
 
-      let aa = await updateShop({
+      await updateShop({
         id: shop._id,
         body: { shopsId: parsedValue.id, shopName: parsedValue.value },
       });
@@ -394,16 +390,6 @@ const Warehouse = () => {
       if (shopInfo.value !== "soldo") {
         await newDriver();
       }
-      if (selectedOrders.length) {
-        for (const item of selectedOrders) {
-          let money = driverPrice / selectedOrders.length;
-          let findedOrder = debtorsData?.innerData?.find(
-            (order) => order._id === item
-          );
-          let newPrice = findedOrder?.extraExpenses + money;
-          await updateOrder({ id: item, updates: { extraExpenses: newPrice } });
-        }
-      }
 
       const res = await updateShop({
         id: shop._id,
@@ -439,14 +425,18 @@ const Warehouse = () => {
 
   const newDriver = async () => {
     try {
-      let res = await createDriver({
+      await createDriver({
         driver: selectedDriver,
+        description: selectedDriver.description,
+        state: "olib keldi",
         fare: +driverPrice,
+        selectedOrders
       });
     } catch (e) {
       console.log(e);
     }
   };
+
 
   return (
     <div className="warehouse-container">
@@ -497,22 +487,41 @@ const Warehouse = () => {
         onCancel={closeModal}
         footer={null}
       >
-        {!shop?.isType && (
-          <Button
-            loading={isCreate}
-            ref={closeButtonRef}
-            onClick={() => handleCreateShop()}
-            className="create-shops-btn"
+
+        {
+          isEditMode &&
+          <Form.Item
+            label={checked ? "Qo'shish" : "Tahrirlash"}
           >
-            Roʻyxat yarating!
-          </Button>
+            <Switch
+              checkedChildren="Ha"
+              unCheckedChildren="Yo'q"
+              checked={checked}
+              onChange={onChange} />
+          </Form.Item>
+        }
+
+
+        {!shop?.isType && (
+          <>
+            {
+              !checked &&
+              <Button
+                loading={isCreate}
+                ref={closeButtonRef}
+                onClick={() => handleCreateShop()}
+                className="create-shops-btn"
+              >
+                Roʻyxat yarating!
+              </Button>
+            }
+          </>
         )}
         <Form
           form={form}
           onFinish={onFinish}
           initialValues={{
             category: categoryOptions[0]?.value,
-            quantity: undefined, // Quantity uchun initialValue yo'q
           }}
           layout="vertical"
         >
@@ -549,7 +558,6 @@ const Warehouse = () => {
               <Form.Item
                 label="Miqdor"
                 name="quantity"
-                shouldUpdate={false}
                 rules={[{ required: true, message: "Miqdorni kiriting!" }]}
               >
                 <InputNumber
@@ -683,8 +691,6 @@ const Warehouse = () => {
 
       {/* havdovchi modali */}
 
-      {/* import {Modal, Select, Input, Space, Divider} from "antd"; */}
-
       <Modal
         width={545}
         title="Haydovchi qo‘shish"
@@ -696,43 +702,85 @@ const Warehouse = () => {
         footer={null}
       >
         <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+
           <Select
             style={{ width: "100%" }}
             placeholder="Haydovchi tanlang"
-            options={driverForSelect.map((driver) => ({
-              label: driver.label,
+            options={driverForSelect.map(driver => ({
+              name: driver.label,
+              label: `${driver.label} - ${driver.phone}`,
               value: driver.value,
             }))}
             onChange={(value, option) =>
-              setSelectedDriver({ id: option.value, name: option.label })
+              setSelectedDriver(prev => ({
+                ...prev,
+                id: option.value,
+                name: option.name,
+              }))
             }
           />
 
+          {/* Buyurtmalarni tanlash */}
           <Select
             mode="multiple"
             style={{ width: "100%" }}
             placeholder="Buyurtmalarni tanlang"
-            options={debtorsData?.innerData?.map((order) => ({
+            options={debtorsData?.innerData?.map(order => ({
               label: order.customer.fullName,
               value: order._id,
             }))}
-            onChange={(values) => setSelectedOrders(values)}
+            onChange={setSelectedOrders}
           />
 
           <Divider plain>Yoki yangi haydovchi qo‘shing</Divider>
+          {/* Yangi haydovchi qo‘shish formasi */}
+          <div className="add-driver-box" >
+            <Input
+              placeholder="Yangi haydovchi ismi"
+              value={selectedDriver?.name || ""}
+              onChange={e =>
+                setSelectedDriver(prev => ({
+                  ...prev,
+                  id: null,
+                  name: e.target.value,
+                }))
+              }
+            />
+            <Input
+              addonBefore="+998"
+              placeholder="Telefon raqami"
+              maxLength={9}
+              value={selectedDriver?.phone || ""}
+              onChange={e =>
+                setSelectedDriver(prev => ({
+                  ...prev,
+                  id: null,
+                  phone: e.target.value,
+                }))
+              }
+            />
+          </div>
 
-          <Input
-            type="text"
-            placeholder="Yangi haydovchi ismi"
-            onChange={(e) =>
-              setSelectedDriver({ id: null, name: e.target.value })
-            }
-          />
           <Divider plain>Yetkazib beruvchi haqi</Divider>
+
           <Input
             type="number"
             placeholder="Narxi"
-            onChange={(e) => setDriverPrice(e.target.value)}
+            value={driverPrice}
+            onChange={e => setDriverPrice(e.target.value)}
+          />
+
+          <TextArea
+            rows={3}
+            placeholder="Izoh kiriting (ixtiyoriy)"
+            value={selectedDriver?.description || ""}
+            onChange={e =>
+              setSelectedDriver(prev => ({
+                ...prev,
+                id: null,
+                description: e.target.value,
+              }))
+            }
           />
         </Space>
       </Modal>
