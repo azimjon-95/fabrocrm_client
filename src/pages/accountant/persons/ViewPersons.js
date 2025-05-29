@@ -7,7 +7,6 @@ import {
   Space,
   Button,
   Popconfirm,
-  Tabs,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import {
@@ -34,7 +33,7 @@ const ViewPersons = () => {
   const { data: workersData, isLoading } = useGetWorkersQuery();
   const workers = workersData?.innerData || [];
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab] = useState("all");
 
 
   const handleDelete = async (id) => {
@@ -64,7 +63,7 @@ const ViewPersons = () => {
 
   const filteredWorkers = workers.filter((worker) => {
     const fullName =
-      `${worker.firstName} ${worker.lastName} ${worker.middleName}`.toLowerCase();
+      `${worker?.firstName} ${worker.lastName} ${worker.middleName}`.toLowerCase();
     return (
       fullName.includes(searchTerm.toLowerCase()) ||
       worker.phone.includes(searchTerm) ||
@@ -128,7 +127,7 @@ const ViewPersons = () => {
       title: "FIO",
       key: "fio",
       render: (_, record) =>
-        `${record.firstName} ${record.lastName} ${record.middleName}`,
+        `${record?.firstName} ${record?.lastName} ${record?.middleName}`,
     },
     {
       title: "Telefon",
@@ -167,7 +166,7 @@ const ViewPersons = () => {
     },
     {
       title: "Kasbi",
-      render: (val) => roleMapping[val.role] || val.workerType,
+      render: (val) => roleMapping[val?.role] || val.workerType,
     },
     {
       title: "Amallar",
@@ -194,14 +193,14 @@ const ViewPersons = () => {
 
   const exportToExcel = () => {
     const exportData = filteredWorkers.map((worker) => ({
-      FIO: `${worker.firstName} ${worker.lastName} ${worker.middleName}`,
+      FIO: `${worker?.firstName} ${worker.lastName} ${worker.middleName}`,
       Telefon: formatPhoneNumber(worker.phone),
       Manzil: worker.address || "",
       "Tug'ilgan sana": formatBirthDate(worker.dayOfBirth).formattedDate,
       Yoshi: formatBirthDate(worker.dayOfBirth).adjustedAge.toString(),
       Pasport: "*********", // Yashirin qiymat
       "ID (Hover qiling)": worker.idNumber, // Asl ID ni hover uchun kiritamiz
-      Kasbi: roleMapping[worker.role] || worker.workerType,
+      Kasbi: roleMapping[worker?.role] || worker.workerType,
       "Rasm URL": worker.img || "Rasm yo‘q",
     }));
 

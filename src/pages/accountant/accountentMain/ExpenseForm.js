@@ -112,7 +112,7 @@ const ExpenseForm = () => {
     return (
       workers?.innerData?.map((worker) => ({
         value: worker._id,
-        label: `${worker._doc.firstName} ${worker._doc.lastName} [${worker._doc.workerType || roleTranslations[worker._doc.role] || worker._doc.role
+        label: `${worker._doc?.firstName} ${worker._doc?.lastName} [${worker._doc?.workerType || roleTranslations[worker._doc?.role] || worker._doc?.role
           }]`,
       })) || []
     );
@@ -379,7 +379,7 @@ const ExpenseForm = () => {
       // Returned money from shop
       const shopReturnedMoney = async () => {
         if (expenseCategory === "Do'kondan qaytarilgan mablag") {
-          const res = await processReturnedPay({
+          await processReturnedPay({
             shopIds: selectedCategory.value,
             paymentAmount: amount
           }).unwrap();

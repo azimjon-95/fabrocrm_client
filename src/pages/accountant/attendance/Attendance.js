@@ -116,7 +116,7 @@ const Attendance = () => {
 
     return {
       workerId: worker._id,
-      workerName: worker.firstName + " " + worker.lastName,
+      workerName: worker?.firstName + " " + worker?.lastName,
       dates,
       voxa,
       toshkent,

@@ -50,9 +50,8 @@ function Edit({ data, setEditModal }) {
 
   const workersLists = workers?.innerData.map((worker) => ({
     value: worker._id,
-    label: `${worker.firstName} ${worker.lastName} [${
-      worker.workerType || roleTranslations[worker.role]
-    }]`,
+    label: `${worker?.firstName} ${worker?.lastName} [${worker?.workerType || roleTranslations[worker.role]
+      }]`,
   }));
 
   // QARZDORLAR ROYHATI

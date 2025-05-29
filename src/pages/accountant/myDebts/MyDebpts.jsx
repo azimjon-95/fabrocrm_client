@@ -46,11 +46,11 @@ const MyDebts = () => {
       key: "debtAmount",
       width: "15%",
       render: (_, record) => {
-        const totalDebt = record.debts.reduce(
+        const totalDebt = record.debts?.reduce(
           (acc, curr) => acc + curr.amount,
           0
         );
-        return `${totalDebt.toLocaleString()} so'm`;
+        return `${totalDebt?.toLocaleString()} so'm`;
       },
     },
 
@@ -119,7 +119,7 @@ const MyDebts = () => {
             width={600}
           >
             <div className="modal-content">
-              {debtModal.data.length ? (
+              {debtModal.data?.length ? (
                 debtModal.data.map((debt, index) => (
                   <div className="data-item" key={index}>
                     <span>{moment(debt.date).format("YYYY-MM-DD HH:mm")}</span>
@@ -142,7 +142,7 @@ const MyDebts = () => {
             width={600}
           >
             <div className="modal-content">
-              {paymentModal.data.length ? (
+              {paymentModal.data?.length ? (
                 paymentModal.data.map((payment, index) => (
                   <div className="data-item" key={index}>
                     <span>

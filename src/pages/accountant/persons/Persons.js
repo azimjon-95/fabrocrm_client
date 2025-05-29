@@ -81,17 +81,17 @@ const RegisterWorker = () => {
     try {
       const formData = new FormData();
       const payload = {
-        firstName: String(data.firstName || ""),
-        lastName: String(data.lastName || ""),
-        middleName: String(data.middleName || ""),
-        address: String(data.address || ""),
-        dayOfBirth: String(data.dayOfBirth || ""),
-        phone: String(data.phone || ""),
-        idNumber: String(data.idNumber || ""),
-        password: String(data.password || ""),
-        login: String(data.login || ""),
-        workerType: String(data.workerType || ""),
-        role: String(data.role || "worker"),
+        firstName: String(data?.firstName || ""),
+        lastName: String(data?.lastName || ""),
+        middleName: String(data?.middleName || ""),
+        address: String(data?.address || ""),
+        dayOfBirth: String(data?.dayOfBirth || ""),
+        phone: String(data?.phone || ""),
+        idNumber: String(data?.idNumber || ""),
+        password: String(data?.password || ""),
+        login: String(data?.login || ""),
+        workerType: String(data?.workerType || ""),
+        role: String(data?.role || "worker"),
       };
 
       // Barcha oddiy maydonlarni qo‘shish
@@ -206,7 +206,7 @@ const RegisterWorker = () => {
                   <Input size="large" {...field} placeholder="Ism" />
                 )}
               />
-              {errors.firstName && <p style={{ color: "red" }}>{errors.firstName.message}</p>}
+              {errors?.firstName && <p style={{ color: "red" }}>{errors?.firstName.message}</p>}
             </Form.Item>
           </Col>
           <Col span={4}>
