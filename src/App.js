@@ -35,19 +35,20 @@ const App = () => {
 
   // Server connection check
   const checkServerConnection = async () => {
-    try {
-      const res = await api.get("/ping", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (res.status === 200) {
-        setServerError(false);
-      }
-    } catch (err) {
-      setServerError(true);
-      message.error(`Serverga ulanib bo‘lmadi. Iltimos, internetni yoki serverni tekshiring: ${err.message}.`);
-    }
+    // try {
+    //   const res = await api.get("/ping", {
+    //     headers: {
+    //       Authorization: `Bearer ${token}`,
+    //     },
+    //   });
+    //   if (res.status === 200) {
+    //     setServerError(false);
+    //   }
+    // } catch (err) {
+    //   setServerError(true);
+    //   message.error(`Serverga ulanib bo‘lmadi. Iltimos, internetni yoki serverni tekshiring: ${err.message}.`);
+    // }
+    window.location.reload()
   };
 
   // Monitor internet connection and server status
@@ -57,16 +58,11 @@ const App = () => {
       navigate("/login");
     }
 
-    // Initial server check
-    if (token) {
-      checkServerConnection();
-    }
+
 
     // Periodic server check every 30 seconds
     const interval = setInterval(() => {
-      if (navigator.onLine && token) {
-        checkServerConnection();
-      } else if (!navigator.onLine) {
+      if (!navigator.onLine) {
         setServerError(true);
       }
     }, 30000);
@@ -74,9 +70,7 @@ const App = () => {
     // Listen for online/offline events
     const handleOnline = () => {
       setServerError(false);
-      if (token) {
-        checkServerConnection();
-      }
+
     };
 
     const handleOffline = () => {
