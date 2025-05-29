@@ -35,20 +35,20 @@ const App = () => {
 
   // Server connection check
   const checkServerConnection = async () => {
-    // try {
-    //   const res = await api.get("/ping", {
-    //     headers: {
-    //       Authorization: `Bearer ${token}`,
-    //     },
-    //   });
-    //   if (res.status === 200) {
-    //     setServerError(false);
-    //   }
-    // } catch (err) {
-    //   setServerError(true);
-    //   message.error(`Serverga ulanib bo‘lmadi. Iltimos, internetni yoki serverni tekshiring: ${err.message}.`);
-    // }
-    window.location.reload()
+    try {
+      const res = await api.get("/ping", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (res.status === 200) {
+        setServerError(false);
+      }
+    } catch (err) {
+      setServerError(true);
+      message.error(`Serverga ulanib bo‘lmadi. Iltimos, internetni yoki serverni tekshiring: ${err.message}.`);
+    }
+    // window.location.reload()
   };
 
   // Monitor internet connection and server status
